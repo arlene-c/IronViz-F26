@@ -1,0 +1,4 @@
+pandas>=2.2
+numpy>=1.26
+matplotlib>=3.8
+numba>=0.59   # optional: makes the simulation ~50x faster

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campus AI usage: animated chart options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#fcfcfb;--card:#ffffff;--ink:#0b0b0b;--ink2:#52514e;--muted:#7a7974;--line:#e7e6e1;--axis:#c3c2b7;
+--hi:#eb6834;--ctx:#8f8e89;--fcfs:#2a78d6;--quotas:#e87ba4;--adaptive:#eda100;--routing:#1baf7a;--warn:#a32d2d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.5}
+main{max-width:880px;margin:0 auto;padding:40px 20px 80px}
+h1{font-size:26px;font-weight:500;margin:0 0 6px}
+.lede{color:var(--ink2);margin:0 0 28px;max-width:680px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px 16px;margin:0 0 22px}
+.head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.kind{font-size:12px;color:var(--muted);letter-spacing:.02em;margin:0 0 4px}
+h2{font-size:18px;font-weight:500;margin:0}
+.sub{font-size:14px;color:var(--ink2);margin:4px 0 10px}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;margin-left:6px;vertical-align:2px}
+.real{background:#eaf3de;color:#27500a}.mock{background:#faeeda;color:#633806}
+button{font:inherit;font-size:13px;background:none;border:1px solid var(--axis);border-radius:8px;padding:5px 12px;cursor:pointer;color:var(--ink);white-space:nowrap}
+button:hover{background:#f1f0ec}
+button:focus-visible{outline:2px solid var(--fcfs);outline-offset:2px}
+svg{width:100%;height:auto;display:block;overflow:visible}
+svg text{font-family:Inter,system-ui,sans-serif;paint-order:stroke;stroke:#fff;stroke-width:4px;stroke-linejoin:round}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:13px;color:var(--ink2);margin:8px 0 0}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.foot{font-size:12px;color:var(--muted);margin-top:30px}
+.banner{background:#faeeda;color:#633806;border-radius:10px;padding:10px 14px;font-size:13px;margin:0 0 24px}
+</style>
+</head>
+<body>
+<main>
+<h1>Campus AI usage: animated chart options</h1>
+<p class="lede">Seven animated versions of the 1D and 2D charts for the IronViz board. Charts tagged “real data” come straight from the October 2026 OpenAI and Gemini logs. Charts tagged “simulation” come from the budget-policy experiments run on those logs. Each animation plays when it scrolls into view; use Replay to watch again.</p>
+<div class="banner" id="mockBanner" hidden>Simulation charts on this page use MOCK results. Their numbers are placeholders, not findings.</div>
+
+<section class="card" aria-labelledby="h1a"><div class="head"><div><p class="kind">1D · count-up and waffle</p><h2 id="h1a">Testing teams make a third of the calls but use almost half the tokens<span class="tag real">real data</span></h2><p class="sub">Each square is 1% of the total.</p></div><button data-replay="kpi">Replay</button></div><svg id="kpi" viewBox="0 0 800 330" role="img" aria-label="Headline numbers and two waffle grids comparing the testing teams' share of calls and tokens"></svg></section>
+
+<section class="card" aria-labelledby="h2a"><div class="head"><div><p class="kind">1D · strip plot</p><h2 id="h2a">Testing teams send much bigger prompts<span class="tag real">real data</span></h2><p class="sub">Each dot is one sampled call (150 per team). Black tick is the median. Log scale.</p></div><button data-replay="strip">Replay</button></div><svg id="strip" viewBox="0 0 800 330" role="img" aria-label="Strip plot of prompt sizes per team"></svg></section>
+
+<section class="card" aria-labelledby="h3a"><div class="head"><div><p class="kind">2D · line drawing</p><h2 id="h3a">Each provider had one rate-limit spike, and both hit production<span class="tag real">real data</span></h2><p class="sub">Calls rejected as “too many requests” (HTTP 429) per day.</p></div><button data-replay="rl">Replay</button></div><svg id="rl" viewBox="0 0 800 300" role="img" aria-label="Line chart of daily rate-limited calls for OpenAI and Gemini"></svg></section>
+
+<section class="card" aria-labelledby="h4a"><div class="head"><div><p class="kind">2D · budget race</p><h2 id="h4a">Rationing rules run dry around Oct 20; routing paces spending to month-end<span class="tag mock">mock</span></h2><p class="sub">Budget remaining through October at a 70% budget, actual October traffic.</p></div><button data-replay="drain">Replay</button></div><svg id="drain" viewBox="0 0 800 320" role="img" aria-label="Lines of remaining budget per rule across October"></svg></section>
+
+<section class="card" aria-labelledby="h5a"><div class="head"><div><p class="kind">2D · scatter build-up</p><h2 id="h5a">At a 70% budget, routing serves every request by downgrading about 1 in 5<span class="tag mock">mock</span></h2><p class="sub">Each mark is one simulated month at a 70% budget. Rationing rules refuse requests instead.</p></div><button data-replay="scatter">Replay</button></div><svg id="scatter" viewBox="0 0 800 380" role="img" aria-label="Scatter of cost versus requests served per simulated month"></svg></section>
+
+<section class="card" aria-labelledby="h6a"><div class="head"><div><p class="kind">1D · dots that move between rules</p><h2 id="h6a">Spend-based quotas cut the Gemini teams hardest<span class="tag mock">mock</span></h2><p class="sub" id="teamSub">Median % of each team's requests served at a 70% budget.</p></div><button data-replay="team">Replay</button></div><svg id="team" viewBox="0 0 800 300" role="img" aria-label="Dot plot of requests served per team, moving between three rules"></svg></section>
+
+<section class="card" aria-labelledby="h7a"><div class="head"><div><p class="kind">1D · quantile dotplot rain</p><h2 id="h7a">The ranking holds across all simulated months<span class="tag mock">mock</span></h2><p class="sub">Each dot is a 5% chance: % of requests served at a 70% budget.</p></div><button data-replay="qdp">Replay</button></div><svg id="qdp" viewBox="0 0 800 400" role="img" aria-label="Quantile dotplots of requests served for four rules"></svg></section>
+
+<p class="foot">Sources: CMU Student IronViz Fall 2026 OpenAI and Gemini telemetry (Oct 1–30, 2026). Simulation charts read results.csv in the agreed team format. Colors validated for color-vision deficiency; every series is also direct-labeled or shape-coded. Animations respect the reduced-motion setting.</p>
+</main>
+<script>
+const D=/*__DATA__*/null;
+if(!D.mock)document.querySelectorAll(".tag.mock").forEach(e=>{e.textContent="simulation";e.className="tag real"});
+const NS="http://www.w3.org/2000/svg",C=getComputedStyle(document.documentElement),V=n=>C.getPropertyValue(n).trim();
+const INK=V("--ink"),INK2=V("--ink2"),LINE=V("--line"),AXIS=V("--axis"),HI=V("--hi"),CTX=V("--ctx");
+const POL=["fcfs","quotas","adaptive","routing"],PN={fcfs:"First come, first served",quotas:"Fixed team quotas",adaptive:"Adaptive sharing",routing:"Smart routing"},PC={};POL.forEach(p=>PC[p]=V("--"+p));
+const REDUCE=matchMedia("(prefers-reduced-motion: reduce)").matches;
+if(D.mock)document.getElementById("mockBanner").hidden=false;
+function el(par,tag,a,txt){const e=document.createElementNS(NS,tag);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;par.appendChild(e);return e}
+function t(par,x,y,s,o={}){return el(par,"text",Object.assign({x,y,fill:o.fill||INK,"font-size":o.size||12,"text-anchor":o.anchor||"start","font-weight":o.w||400},o.a||{}),s)}
+const ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),seg=(p,a,b)=>Math.min(1,Math.max(0,(p-a)/(b-a)));
+const charts={};
+function chart(id,dur,build){const svg=document.getElementById(id);let upd=null,raf=null;
+ function play(){svg.innerHTML="";upd=build(svg);if(REDUCE){upd(1);return}cancelAnimationFrame(raf);let s=null;const f=ts=>{if(s===null)s=ts;const p=Math.min(1,(ts-s)/dur);upd(p);if(p<1)raf=requestAnimationFrame(f)};raf=requestAnimationFrame(f)}
+ svg.innerHTML="";build(svg)(0);charts[id]=play;
+ new IntersectionObserver((es,o)=>{es.forEach(e=>{if(e.isIntersecting){play();o.disconnect()}})},{threshold:.35}).observe(svg)}
+document.querySelectorAll("[data-replay]").forEach(b=>b.addEventListener("click",()=>charts[b.dataset.replay]()));
+
+/* A1 KPI + waffle */
+chart("kpi",3200,svg=>{const k=D.kpi;const tiles=[[k.calls,v=>Math.round(v).toLocaleString(),"AI calls in October"],[k.success,v=>v.toFixed(1)+"%","succeeded"],[k.tokensB,v=>v.toFixed(2)+"B","tokens processed"]];
+ const nums=tiles.map(([v,f,l],i)=>{el(svg,"rect",{x:i*200,y:0,width:188,height:86,rx:10,fill:"#f1f0ec"});const n=t(svg,i*200+16,46,"",{size:28,w:500});t(svg,i*200+16,72,l,{fill:INK2,size:13});return[n,v,f]});
+ el(svg,"rect",{x:600,y:0,width:200,height:86,rx:10,fill:"#fdf0ea"});const kt=t(svg,616,46,"",{size:26,w:500,fill:HI});t(svg,616,72,"testing teams: calls → tokens",{fill:INK2,size:12});
+ const cells=[];[["Share of calls",k.callsTest],["Share of tokens",k.tokTest]].forEach(([lab,n],w)=>{const ox=w*400,oy=118;t(svg,ox,oy-8,lab,{w:500,size:13});
+  for(let i=0;i<100;i++){const c=i%10,r=9-Math.floor(i/10);cells.push([el(svg,"rect",{x:ox+c*20,y:oy+r*20,width:17,height:17,rx:3,fill:"#e4e2db"}),i<n,i,w])}
+  const big=t(svg,ox+218,oy+130,"",{size:30,w:500,fill:HI});t(svg,ox+218,oy+152,"testing teams",{fill:INK2,size:13});cells.push([big,n,-1,w])});
+ return p=>{nums.forEach(([n,v,f])=>n.textContent=f(v*ease(seg(p,0,.45))));const q=ease(seg(p,.1,.45));kt.textContent=Math.round(k.callsTest*q)+"% → "+Math.round(k.tokTest*q)+"%";
+  cells.forEach(([e,on,i,w])=>{if(i<0){const s=seg(p,.4+w*.25,.65+w*.25);e.textContent=Math.round(on*ease(s))+"%";return}const s=seg(p,.4+w*.25,.65+w*.25);e.setAttribute("fill",on&&i<s*100?HI:"#e4e2db")})}});
+
+/* A2 strip */
+chart("strip",3500,svg=>{const L=170,R=780,lx=v=>L+(Math.log10(v)-2)/(Math.log10(40000)-2)*(R-L),rows=D.teams;
+ [100,1000,10000].forEach(v=>{el(svg,"line",{x1:lx(v),x2:lx(v),y1:6,y2:292,stroke:LINE});t(svg,lx(v),312,v.toLocaleString(),{anchor:"middle",fill:INK2})});t(svg,(L+R)/2,330,"Prompt (input) tokens per call",{anchor:"middle",fill:INK2});
+ let seed=5;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};const dots=[],meds=[];
+ rows.forEach((tm,i)=>{const y=28+i*50,isT=D.test.includes(tm);t(svg,L-12,y+4,tm,{anchor:"end",fill:isT?HI:INK2,w:isT?500:400});
+  D.strip[tm].pts.forEach((v,j)=>dots.push([el(svg,"circle",{cx:lx(Math.max(100,v)),cy:y+(rnd()-.5)*26,r:2.6,fill:isT?HI:CTX,opacity:0}),i,j]));
+  const m=D.strip[tm].med;meds.push([el(svg,"line",{x1:lx(m),x2:lx(m),y1:y-17,y2:y+17,stroke:INK,"stroke-width":2.5,opacity:0}),t(svg,lx(m)+6,y-10,"median "+m.toLocaleString(),{size:11,a:{opacity:0}}),i])});
+ return p=>{dots.forEach(([e,i,j])=>{const s=ease(seg(p,i*.08+j/150*.25,i*.08+j/150*.25+.12));e.setAttribute("opacity",s*.6)});meds.forEach(([l,lab,i])=>{const s=seg(p,.75+i*.03,.85+i*.03);l.setAttribute("opacity",s);lab.setAttribute("opacity",s)})}});
+
+/* A3 rate limits */
+chart("rl",3500,svg=>{const L=50,R=720,T=20,B=262,n=D.rl.OpenAI.length,mx=Math.max(...D.rl.OpenAI,...D.rl.Gemini)*1.35,X=i=>L+i/(n-1)*(R-L),Y=v=>B-v/mx*(B-T);
+ [0,50,100,150].forEach(v=>{if(v>mx)return;el(svg,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});t(svg,L-8,Y(v)+4,v,{anchor:"end",fill:INK2})});[1,8,15,22,29].forEach(d=>t(svg,X(d-1),B+20,"Oct "+d,{anchor:"middle",fill:INK2}));
+ const lines=[["OpenAI",PC.fcfs],["Gemini",PC.routing]].map(([k,c])=>{const pts=D.rl[k].map((v,i)=>X(i)+","+Y(v)).join(" ");const pl=el(svg,"polyline",{points:pts,fill:"none",stroke:c,"stroke-width":2.5});const len=pl.getTotalLength?pl.getTotalLength():1500;pl.setAttribute("stroke-dasharray",len);
+  const i=D.rl[k].indexOf(Math.max(...D.rl[k]));const lab=t(svg,X(i)+(k=="Gemini"?-10:10),Y(D.rl[k][i])-12,`Oct ${i+1}: ${D.rl[k][i]} calls`,{anchor:k=="Gemini"?"end":"start",size:12,w:500,a:{opacity:0}});
+  const end=t(svg,R+8,Y(D.rl[k][n-1])+4,k,{fill:INK2,a:{opacity:0}});return[pl,len,lab,end,i/(n-1)]});
+ return p=>{const q=seg(p,0,.85);lines.forEach(([pl,len,lab,end,at])=>{pl.setAttribute("stroke-dashoffset",len*(1-q));lab.setAttribute("opacity",q>at+.03?1:0);end.setAttribute("opacity",q>=1?1:0)})}});
+
+/* A4 budget drain */
+chart("drain",6000,svg=>{const L=50,R=640,T=16,B=270,X=d=>L+(d-1)/29*(R-L),Y=v=>B-v/100*(B-T);
+ [0,25,50,75,100].forEach(v=>{el(svg,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});t(svg,L-8,Y(v)+4,v+"%",{anchor:"end",fill:INK2})});[1,8,15,22,29].forEach(d=>t(svg,X(d),B+20,"Oct "+d,{anchor:"middle",fill:INK2}));
+ const day=t(svg,R,T+4,"",{anchor:"end",size:14,w:500});const note=t(svg,L+12,T+16,"",{size:13,w:500,fill:PC.fcfs});
+ const ls=POL.map(p=>{const tr=D.trace[p];const pl=el(svg,"polyline",{fill:"none",stroke:PC[p],"stroke-width":2.5});const dot=el(svg,"circle",{r:5,fill:PC[p]});const lab=t(svg,0,0,PN[p],{size:12});return[p,tr,pl,dot,lab]});
+ return p=>{const d=1+29*seg(p,0,.92);day.textContent="Oct "+Math.floor(d);const ends=[];
+  ls.forEach(([k,tr,pl,dot,lab])=>{const pts=[];for(let i=1;i<=Math.floor(d);i++)pts.push(X(i)+","+Y(tr[i-1]));const v=tr[Math.max(0,Math.floor(d)-1)];pl.setAttribute("points",pts.join(" "));dot.setAttribute("cx",X(Math.floor(d)));dot.setAttribute("cy",Y(v));ends.push([v,lab,X(Math.floor(d))])});
+  ends.sort((a,b)=>a[0]-b[0]);let last=-99;ends.forEach(([v,lab,x])=>{let y=Y(v)+4;if(last>-99&&last-y<15)y=last-15;last=y;lab.setAttribute("x",x+10);lab.setAttribute("y",y)});
+  const z=D.trace.fcfs.findIndex(v=>v<=0);note.textContent=z>=0&&d>=z+1?`First come, first served: budget gone Oct ${z+1}`:""}});
+
+/* A5 scatter */
+chart("scatter",5000,svg=>{const all=POL.flatMap(p=>D.scatter[p]||[]);const xs=all.map(a=>a[0]),ys=all.map(a=>a[1]);
+ const x0=-2,x1=Math.max(25,Math.ceil(Math.max(...xs))+3),y0=Math.floor(Math.min(...ys)/5)*5,y1=101;
+ const L=60,R=780,T=14,B=330,X=v=>L+(v-x0)/(x1-x0)*(R-L),Y=v=>B-(v-y0)/(y1-y0)*(B-T);
+ for(let v=y0;v<=100;v+=5){el(svg,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});t(svg,L-8,Y(v)+4,v+"%",{anchor:"end",fill:INK2})}
+ for(let v=0;v<=x1;v+=5)t(svg,X(v),B+20,v+"%",{anchor:"middle",fill:INK2});t(svg,(L+R)/2,B+40,"Requests downgraded to a cheaper model (%)",{anchor:"middle",fill:INK2});
+ 
+ const shape=(p,x,y,r,a)=>p=="quotas"?el(svg,"rect",Object.assign({x:x-r,y:y-r,width:2*r,height:2*r},a)):p=="adaptive"?el(svg,"path",Object.assign({d:`M${x},${y-r*1.2}L${x+r*1.1},${y+r*.8}L${x-r*1.1},${y+r*.8}Z`},a)):p=="routing"?el(svg,"path",Object.assign({d:`M${x},${y-r*1.3}L${x+r*1.3},${y}L${x},${y+r*1.3}L${x-r*1.3},${y}Z`},a)):el(svg,"circle",Object.assign({cx:x,cy:y,r},a));
+ const pts=[],meds=[];POL.forEach(p=>{const arr=D.scatter[p]||[];arr.forEach((a,i)=>pts.push([shape(p,X(a[0]),Y(a[1]),2.6,{fill:PC[p],opacity:0}),i/arr.length]));
+  const med=k=>{const s=arr.map(a=>a[k]).sort((a,b)=>a-b);return s[Math.floor(s.length/2)]};const mx=med(0),my=med(1);
+  const big=shape(p,X(mx),Y(my),7,{fill:PC[p],stroke:INK,"stroke-width":1,opacity:0});const same=Math.abs(D.qdp.adaptive[10]-D.qdp.quotas[10])<0.05;const right=p!="routing";const lab=t(svg,X(mx)+(right?14:-14),Y(my)+(p=="quotas"?14:p=="adaptive"?-8:4),(same&&p=="adaptive")?"":(same&&p=="quotas")?PN[p]+" = adaptive sharing":PN[p],{anchor:right?"start":"end",w:500,size:13,a:{opacity:0}});meds.push([big,lab])});
+ return p=>{pts.forEach(([e,f])=>e.setAttribute("opacity",seg(p,f*.7,f*.7+.05)*.35));meds.forEach(([b,l])=>{const s=seg(p,.78,.9);b.setAttribute("opacity",s);l.setAttribute("opacity",s)})}});
+
+/* A6 team dots moving between rules */
+chart("team",7500,svg=>{const L=190,R=780,X=v=>L+(v-40)/62*(R-L),seq=["fcfs","quotas","routing"],sub=document.getElementById("teamSub");
+ [40,50,60,70,80,90,100].forEach(v=>{el(svg,"line",{x1:X(v),x2:X(v),y1:8,y2:262,stroke:LINE});t(svg,X(v),282,v+"%",{anchor:"middle",fill:INK2})});
+ const stage=t(svg,R,0,"",{anchor:"end",size:14,w:500});const rows=D.teams.map((tm,i)=>{const y=30+i*42,isT=D.test.includes(tm);t(svg,L-12,y+4,tm,{anchor:"end",fill:isT?HI:INK2,w:isT?500:400});
+  const trail=el(svg,"line",{y1:y,y2:y,stroke:"#d3d1c7","stroke-width":2});const c=el(svg,"circle",{cy:y,r:8,fill:PC.fcfs,stroke:"#fff","stroke-width":2});const v=t(svg,0,y+4,"",{size:11,fill:INK2});return[i,trail,c,v]});
+ return p=>{const k=Math.min(2,p*3),a=Math.floor(Math.min(k,1.999)),f=ease((k-a)<.35?0:((k-a)-.35)/.65),from=seq[a],to=seq[Math.min(2,a+1)],cur=f>.5?to:from;
+  stage.textContent=p>=1?PN.routing:PN[cur];stage.setAttribute("fill",PC[p>=1?"routing":cur]);
+  rows.forEach(([i,trail,c,v])=>{const s=D.team[from][i],e=D.team[to][i],val=p>=1?D.team.routing[i]:s+(e-s)*f;c.setAttribute("cx",X(val));c.setAttribute("fill",PC[p>=1?"routing":cur]);
+   const mn=Math.min(...seq.map(q=>D.team[q][i])),mx=Math.max(...seq.map(q=>D.team[q][i]));trail.setAttribute("x1",X(mn));trail.setAttribute("x2",X(mx));v.setAttribute("x",X(val)+12);v.textContent=Math.round(val)+"%"})}});
+
+/* A7 quantile dotplot rain */
+chart("qdp",5000,svg=>{const all=POL.flatMap(p=>D.qdp[p]);const lo=Math.floor(Math.min(...all)/5)*5,hi=101,L=20,R=780,X=v=>L+(v-lo)/(hi-lo)*(R-L),r=5.5,step=2*r+1;
+ const drops=[];let y=20;POL.forEach((p,k)=>{const cnt={};D.qdp[p].forEach(v=>{const b=Math.round(v*2)/2;cnt[b]=(cnt[b]||0)+1});const ms=Math.max(...Object.values(cnt));
+  t(svg,L,y+12,PN[p],{w:500,size:13});const base=y+22+Math.max(2,ms)*step;el(svg,"line",{x1:L,x2:R,y1:base+r+2,y2:base+r+2,stroke:AXIS});const c2={};
+  D.qdp[p].forEach((v,i)=>{const b=Math.round(v*2)/2;c2[b]=(c2[b]||0)+1;drops.push([el(svg,"circle",{cx:X(b),cy:-10,r,fill:PC[p],stroke:"#fff","stroke-width":1}),base-(c2[b]-1)*step,(i*4+k)/80])});y=base+r+14});
+ for(let v=lo;v<=100;v+=5)t(svg,X(v),y+14,v+"%",{anchor:"middle",fill:INK2});svg.setAttribute("viewBox",`0 0 800 ${y+24}`);
+ return p=>drops.forEach(([e,ty,o])=>{const s=seg(p,o*.8,o*.8+.2);e.setAttribute("cy",-10+(ty+10)*s*s);e.setAttribute("opacity",s>0?1:0)})});
+</script>
+</body>
+</html>

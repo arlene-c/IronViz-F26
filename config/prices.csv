@@ -1,0 +1,6 @@
+model,input_per_million,cached_input_per_million,output_per_million,cheaper_model,source
+gpt-4o,2.50,1.25,10.00,gpt-4o-mini,https://developers.openai.com/api/docs/pricing
+gpt-4o-mini,0.15,0.075,0.60,,https://developers.openai.com/api/docs/pricing
+o1-preview,15.00,7.50,60.00,gpt-4o,https://developers.openai.com/api/docs/models/o1-preview
+gemini-1.5-pro,1.25,0.3125,5.00,gemini-1.5-flash,https://ai.google.dev/gemini-api/docs/pricing (prompts <=128k)
+gemini-1.5-flash,0.075,0.01875,0.30,,https://ai.google.dev/gemini-api/docs/pricing (prompts <=128k)

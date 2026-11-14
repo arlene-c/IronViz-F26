@@ -1,0 +1,85 @@
+{
+  "rows_total": 202650,
+  "rows_used": 192847,
+  "excluded": {
+    "failed call (HTTP 400): no usage, not billed": 5672,
+    "failed call (HTTP 429): no usage, not billed": 4124,
+    "negative reasoning_tokens (invalid record)": 7
+  },
+  "baseline_october_cost_usd": 5710.44,
+  "budgets_pct": [
+    100,
+    85,
+    70,
+    50
+  ],
+  "policies": [
+    "fcfs",
+    "quotas",
+    "adaptive",
+    "routing"
+  ],
+  "bootstrap_months": 200,
+  "block_hours": 12,
+  "window_days": 3,
+  "seed": 7,
+  "quota_split": "spend",
+  "quota_shares": {
+    "org-engineering-dev": 0.3228,
+    "org-marketing-ai": 0.2353,
+    "org-prod-core": 0.2218,
+    "prj-ai-enterprise-prod": 0.0561,
+    "prj-ai-r-and-d": 0.0566,
+    "prj-ai-sandbox-testing": 0.1074
+  },
+  "estimate": "online",
+  "prices": [
+    {
+      "model": "gpt-4o",
+      "input_per_million": 2.5,
+      "cached_input_per_million": 1.25,
+      "output_per_million": 10.0,
+      "cheaper_model": "gpt-4o-mini",
+      "source": "https://developers.openai.com/api/docs/pricing"
+    },
+    {
+      "model": "gpt-4o-mini",
+      "input_per_million": 0.15,
+      "cached_input_per_million": 0.075,
+      "output_per_million": 0.6,
+      "cheaper_model": "",
+      "source": "https://developers.openai.com/api/docs/pricing"
+    },
+    {
+      "model": "o1-preview",
+      "input_per_million": 15.0,
+      "cached_input_per_million": 7.5,
+      "output_per_million": 60.0,
+      "cheaper_model": "gpt-4o",
+      "source": "https://developers.openai.com/api/docs/models/o1-preview"
+    },
+    {
+      "model": "gemini-1.5-pro",
+      "input_per_million": 1.25,
+      "cached_input_per_million": 0.3125,
+      "output_per_million": 5.0,
+      "cheaper_model": "gemini-1.5-flash",
+      "source": "https://ai.google.dev/gemini-api/docs/pricing (prompts <=128k)"
+    },
+    {
+      "model": "gemini-1.5-flash",
+      "input_per_million": 0.075,
+      "cached_input_per_million": 0.01875,
+      "output_per_million": 0.3,
+      "cheaper_model": "",
+      "source": "https://ai.google.dev/gemini-api/docs/pricing (prompts <=128k)"
+    }
+  ],
+  "shock": {
+    "tenant": "org-engineering-dev",
+    "from": "2026-10-12",
+    "to": "2026-10-15",
+    "multiplier": 3,
+    "budget_pct": 85
+  }
+}

@@ -1,0 +1,16 @@
+tenant,model,requests,median_output
+org-engineering-dev,gpt-4o,19591,1305.0
+org-engineering-dev,gpt-4o-mini,10406,800.0
+org-engineering-dev,o1-preview,3291,2498.0
+org-marketing-ai,gpt-4o,15050,1295.0
+org-marketing-ai,gpt-4o-mini,16388,804.0
+org-marketing-ai,o1-preview,3633,2493.0
+org-prod-core,gpt-4o,14995,1296.0
+org-prod-core,gpt-4o-mini,16496,804.0
+org-prod-core,o1-preview,3354,2498.0
+prj-ai-enterprise-prod,gemini-1.5-flash,15932,600.0
+prj-ai-enterprise-prod,gemini-1.5-pro,14342,1798.0
+prj-ai-r-and-d,gemini-1.5-flash,15987,598.0
+prj-ai-r-and-d,gemini-1.5-pro,14498,1802.0
+prj-ai-sandbox-testing,gemini-1.5-flash,10171,598.0
+prj-ai-sandbox-testing,gemini-1.5-pro,18713,1798.0

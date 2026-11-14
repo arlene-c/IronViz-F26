@@ -1,0 +1,25 @@
+tenant,week,cache,prem
+org-engineering-dev,Oct 1–7,4.7,69.2
+org-engineering-dev,Oct 8–14,5.1,68.7
+org-engineering-dev,Oct 15–21,5.4,69.0
+org-engineering-dev,Oct 22–30,5.2,68.2
+org-marketing-ai,Oct 1–7,17.6,73.3
+org-marketing-ai,Oct 8–14,34.0,68.8
+org-marketing-ai,Oct 15–21,50.0,43.9
+org-marketing-ai,Oct 22–30,67.8,33.2
+org-prod-core,Oct 1–7,18.4,72.6
+org-prod-core,Oct 8–14,34.2,66.8
+org-prod-core,Oct 15–21,50.0,43.7
+org-prod-core,Oct 22–30,68.8,32.8
+prj-ai-enterprise-prod,Oct 1–7,16.4,69.8
+prj-ai-enterprise-prod,Oct 8–14,30.0,64.3
+prj-ai-enterprise-prod,Oct 15–21,42.4,36.9
+prj-ai-enterprise-prod,Oct 22–30,55.2,24.9
+prj-ai-r-and-d,Oct 1–7,16.7,69.5
+prj-ai-r-and-d,Oct 8–14,31.2,64.0
+prj-ai-r-and-d,Oct 15–21,42.1,37.0
+prj-ai-r-and-d,Oct 22–30,56.1,26.1
+prj-ai-sandbox-testing,Oct 1–7,4.9,65.4
+prj-ai-sandbox-testing,Oct 8–14,4.6,64.9
+prj-ai-sandbox-testing,Oct 15–21,4.6,65.2
+prj-ai-sandbox-testing,Oct 22–30,4.6,64.0
