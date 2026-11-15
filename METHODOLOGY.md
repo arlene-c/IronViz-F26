@@ -79,3 +79,7 @@ used 16 synthetic requests (3 training, 13 evaluation); no full-data experiment 
 CI repeats the safe checks; a hosted CI outcome is not claimed here. Curated byte
 hashes are protected by .gitattributes across platforms. Legacy source, pricing,
 analysis tables and visual assets remain unchanged.
+
+Follow-up local correctness and small Monte Carlo validation are documented in
+[documentation/VALIDATION.md](documentation/VALIDATION.md). Those exploratory
+synthetic results do not replace or validate the curated historical results.

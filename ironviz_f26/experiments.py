@@ -514,9 +514,9 @@ class ExperimentRunner:
         if any(name in config.policies for name in ('Adaptive', 'Pacing', 'Adaptive+Routing')) and not (config.horizon_start and config.horizon_end):
             raise ValueError("Adaptive/Pacing require explicit horizon_start and horizon_end")
         training_costs = [modeled_request_cost(row, self.catalog) for row in training]
-        training_outputs_by_model: dict[str, list[int]] = defaultdict(list)
+        training_outputs_by_model: dict[tuple[str, str], list[int]] = defaultdict(list)
         for row in training:
-            training_outputs_by_model[str(row["model"])].append(int(row["output_tokens"]))
+            training_outputs_by_model[(str(row['provider']), str(row['model']))].append(int(row["output_tokens"]))
         all_training_outputs = [int(row["output_tokens"]) for row in training]
         global_output_mean = float(np.mean(all_training_outputs))
         global_output_quantile = float(np.quantile(all_training_outputs, self.config.reservation_quantile))
@@ -528,12 +528,12 @@ class ExperimentRunner:
             for model, observations in training_outputs_by_model.items()
         }
 
-        def estimated_output_tokens(model: str) -> float:
+        def estimated_output_tokens(provider: str, model: str) -> float:
             if config.reservation_mode == "cap":
                 return float(config.model_output_caps.get(model, config.output_cap))
             if config.reservation_mode == "quantile":
-                return model_output_quantiles.get(model, global_output_quantile)
-            return model_output_means.get(model, global_output_mean)
+                return model_output_quantiles.get((provider, model), global_output_quantile)
+            return model_output_means.get((provider, model), global_output_mean)
 
         def reservation(row, selected_provider, selected_model, noise=1.0, multiplier=1.0, route_factor=1.0):
             record = self.catalog.lookup(selected_provider, selected_model)
@@ -541,7 +541,7 @@ class ExperimentRunner:
             if config.reservation_mode == 'cap':
                 tokens = cap  # The selected target's full cap; no output-length/noise scaling.
             else:
-                prediction = estimated_output_tokens(str(row['model']))
+                prediction = estimated_output_tokens(str(row['provider']), str(row['model']))
                 tokens = min(cap, max(0, math.ceil(prediction * noise * multiplier * route_factor)))
             cached = int(row.get('cached_input_tokens', 0))
             input_cost = Money.cost_for_tokens(int(row['input_tokens']) - cached, record.input_price)
@@ -608,7 +608,7 @@ class ExperimentRunner:
                 cost_rng = np.random.default_rng(np.random.SeedSequence(cost_seed, spawn_key=(1,)))
                 cost_draws = cost_rng.lognormal(-0.5 * noise * noise, noise, len(sampled))
                 compatibility_map = self._compatibility_map()
-                estimated_costs: dict[tuple[str, str], int] = {}
+                estimated_costs: dict[tuple[str, str, str], int] = {}
                 for request_index, row in enumerate(sampled):
                     provider = str(row["provider"])
                     original_model = str(row["model"])
@@ -619,7 +619,7 @@ class ExperimentRunner:
                     for selected_provider, selected_model in pairs:
                         route_length_factor = output_multiplier if (selected_provider, selected_model) != (provider, original_model) else 1.0
                         estimate, _ = reservation(row, selected_provider, selected_model, float(cost_draws[request_index]), reservation_multiplier, route_length_factor)
-                        estimated_costs[(str(row["request_id"]), selected_model)] = estimate
+                        estimated_costs[(str(row["request_id"]), selected_provider, selected_model)] = estimate
                 training_reservations, training_settlements, training_completions = [], [], []
                 training_rng = np.random.default_rng(np.random.SeedSequence(config.seed, spawn_key=(5,)))
                 training_noise = training_rng.lognormal(-0.5 * noise * noise, noise, len(training))

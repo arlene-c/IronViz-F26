@@ -174,8 +174,10 @@ def test_summary_spending_win_direction_and_replay_separation():
     assert summary.loc['day_block_bootstrap', 'win_rate_paired_realized_cost_micro_usd_difference'] == 1
 
 
-def test_single_policy_smoke_writes_versioned_contract(tmp_path):
+def test_single_policy_smoke_writes_versioned_contract(tmp_path, monkeypatch):
     from ironviz_f26.outputs import write_outputs, TRACE_COLUMNS
+    # This test verifies tables; figure regeneration is deliberately out of scope.
+    monkeypatch.setattr('ironviz_f26.outputs.write_diagnostics', lambda *args: [])
     rows = [row(f'r{i}', output=y, timestamp=f'2026-01-01T00:00:0{i}Z') for i, y in enumerate([10,30,40,50])]
     config = ExperimentConfig(budget_fractions=(.7,), replicates=1, bootstrap=False,
         demand_imbalance=(1.,), routing_eligibility=(0.,), policies=('Threshold',), training_fraction=.5)

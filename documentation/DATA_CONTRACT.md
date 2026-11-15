@@ -253,3 +253,12 @@ Schema 2 regime maps also retain workload_kind, routing_eligibility,
 reservation_multiplier, reservation_mode, reservation_quantile, output_cap,
 model_output_caps and routed_output_length_multiplier; they do not silently pool
 those settings. Comparison exports retain these configuration fields as well.
+
+## Local validation branch: reservation lookup keys
+
+Engine `estimated_costs` overrides are keyed by `(request_id, provider, model)`.
+Legacy `(request_id, model)` keys are accepted only for models with a unique
+catalog provider; ambiguous keys raise an error. Training distributions are also
+conditioned on provider/model. Per-model output-cap overrides still share a cap
+across providers with the same model identifier; distinct provider-specific caps
+are not supported by the current model-keyed cap configuration.

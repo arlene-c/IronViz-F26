@@ -312,7 +312,9 @@ class CostThreshold(BasePolicy):
         if candidate_count < 2:
             raise ValueError("candidate_count must be at least two")
 
-        unique_costs = sorted(set(costs))
+        # Rejecting every positive-cost request is a valid candidate, especially
+        # when all admitted training executions would truncate.
+        unique_costs = sorted({0, *costs})
         if len(unique_costs) > candidate_count:
             positions = {
                 round(index * (len(unique_costs) - 1) / (candidate_count - 1))

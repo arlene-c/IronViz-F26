@@ -147,7 +147,7 @@ class SimulationEngine:
         requests: Sequence[Mapping[str, object] | object],
         *,
         cost_multipliers: Sequence[float] | None = None,
-        estimated_costs: Mapping[tuple[str, str], int] | None = None,
+        estimated_costs: Mapping[tuple[str, ...], int] | None = None,
     ) -> list[TraceEvent]:
         self.ledger = Ledger(self.budget)
         self._events = []
@@ -172,6 +172,19 @@ class SimulationEngine:
                 raise ValueError("cost multipliers must be finite and non-negative")
         if estimated_costs is not None and any(int(value) < 0 for value in estimated_costs.values()):
             raise ValueError("estimated costs must be non-negative integer micro-USD values")
+        def estimate_for(view):
+            if estimated_costs is None:
+                return None
+            qualified = (view.request_id, view.provider, view.model)
+            if qualified in estimated_costs:
+                return estimated_costs[qualified]
+            legacy = (view.request_id, view.model)
+            if legacy in estimated_costs:
+                providers = {provider for provider, model in self.catalog._rows if model == view.model}
+                if len(providers) > 1:
+                    raise ValueError("ambiguous model-only reservation key; use (request_id, provider, model)")
+                return estimated_costs[legacy]
+            return None
         policy_cfg = {
             "budget": self.budget,
             "tenants": self.tenant_roster,
@@ -188,7 +201,7 @@ class SimulationEngine:
             cost_multiplier = ordered_cost_multipliers[request_index]
             original_view = self._pre_admission_view(row, estimate_multiplier=cost_multiplier)
             if estimated_costs is not None:
-                original_estimate = estimated_costs.get((original_view.request_id, original_view.model))
+                original_estimate = estimate_for(original_view)
                 if original_estimate is not None:
                     original_view = replace(original_view, estimated_cost=int(original_estimate))
             state = self._observable_state()
@@ -206,7 +219,7 @@ class SimulationEngine:
                 else original_view
             )
             if route is not None and estimated_costs is not None:
-                routed_estimate = estimated_costs.get((view.request_id, view.model))
+                routed_estimate = estimate_for(view)
                 if routed_estimate is not None:
                     view = replace(view, estimated_cost=int(routed_estimate))
             original_output_tokens = int(row.get("output_tokens", 0))
