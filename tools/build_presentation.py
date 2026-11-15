@@ -147,7 +147,7 @@ def pilot_tables(raw=None, published=None):
 
 def build():
     canonical=ROOT/'results/canonical'
-    protected={str(p.relative_to(ROOT)):digest(p) for p in canonical.rglob('*') if p.is_file()}
+    protected={p.relative_to(ROOT).as_posix():digest(p) for p in canonical.rglob('*') if p.is_file()}
     snapshots={}
     def read(relative):
         path=ROOT/relative; snapshots[relative]=digest(path)

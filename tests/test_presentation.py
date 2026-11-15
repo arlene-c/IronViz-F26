@@ -73,6 +73,7 @@ def test_pilot_summary_uses_29_paired_resamples_only():
 def test_dictionary_and_landing_links_resolve():
     dictionary=(DATA/'data_dictionary.md').read_text(encoding='utf-8')
     provenance=json.loads((DATA/'provenance.json').read_text())
+    assert all('\\' not in path for path in provenance['canonical_sha256'])
     for path in DATA.glob('*.csv'):
         frame=pd.read_csv(path)
         assert path.stat().st_size<150_000
