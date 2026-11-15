@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cost of Scarcity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f7f5;--card:#fff;--ink:#1c1917;--ink2:#44403c;--soft:#78716c;--line:#e7e5e4;--line2:#d6d3d1;
+--test:#c2410c;--other:#2563eb;--note:#0f4c81;
+--FCFS:#1d4ed8;--Quotas:#0ea5e9;--TrainingQuotas:#7c3aed;--Adaptive:#0d9488;--Pacing:#65a30d;--Threshold:#db2777;
+--p-prod:#1c1917;--p-learn:#a8a29e;--p-exp:#c2410c}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.5;font-feature-settings:"tnum" 1}
+.app{height:100vh;min-height:760px;max-width:1440px;margin:0 auto;padding:14px 32px 20px;display:grid;grid-template-rows:auto 1fr;gap:16px}
+.bar{display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:24px;border-bottom:1px solid var(--line)}
+.brand{font-weight:700;font-size:16px;white-space:nowrap}
+.brand span{font-weight:400;color:var(--soft);margin-left:10px}
+.tabs{grid-column:1/3;display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 0 -10px}
+.tabs button{border:0;background:none;font:inherit;font-size:14.5px;color:var(--soft);padding:8px 10px 11px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tabs button:hover{color:var(--ink)}
+.tabs button.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+.tabs button .no{color:var(--line2);margin-right:6px;font-weight:500}
+.tabs button.on .no{color:var(--soft)}
+.nav{display:flex;gap:6px}
+.nav button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);background:#fff;cursor:pointer;font-size:15px;color:var(--ink)}
+.nav button:disabled{opacity:.35;cursor:default}
+button:focus-visible,input:focus-visible{outline:2px solid var(--other);outline-offset:2px}
+.ch{display:grid;grid-template-rows:auto 1fr;gap:14px;min-height:0}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:40px}
+h2{font-size:27px;line-height:1.2;font-weight:700;letter-spacing:-.015em;margin:0;max-width:1100px}
+.dek{font-size:16.5px;line-height:1.55;color:var(--ink2);margin:8px 0 0;max-width:960px}
+/* slider */
+.sl{display:flex;flex-direction:column;gap:2px;width:260px;flex:none}
+.sl .top{display:flex;justify-content:space-between;align-items:baseline}
+.sl label{font-size:14px;font-weight:600;color:var(--ink2)}
+.sl .val{font-size:24px;font-weight:700;letter-spacing:-.01em}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;background:var(--line);outline:none;margin:10px 0 4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--ink);cursor:pointer}
+.ticks{display:flex;justify-content:space-between;font-size:12.5px;color:var(--soft);padding:0 2px}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 26px;min-height:0;display:grid;gap:18px;grid-template-rows:1fr auto;position:relative;overflow:auto}
+.body{display:grid;gap:36px;min-height:0}
+.take{display:flex;gap:14px;align-items:baseline;padding:13px 18px;border-radius:10px;background:#fafaf9;border:1px solid var(--line);font-size:16px;line-height:1.5;color:var(--ink)}
+.take b{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);flex:none}
+.chart{display:flex;flex-direction:column;min-height:0;min-width:0}
+.ct{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chart>svg{flex:1;min-height:0;margin-top:8px}
+svg{display:block;width:100%;height:100%;overflow:visible}
+svg text{font-family:Inter,sans-serif}
+svg .ann{font-family:Caveat,cursive;font-weight:700}
+svg.ic{width:14px;height:14px;flex:none;display:inline-block;margin:0}
+.tag{font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.tag.log{background:#f5f5f4;color:#44403c;border:1px solid #e7e5e4}
+.tag.sim{background:#eff6ff;color:#1e40af;border:1px solid #dbeafe}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--ink2);margin-top:6px}
+.legend span{display:flex;align-items:center;gap:6px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px}
+/* overview */
+.ov h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);margin:0 0 6px;font-weight:600}
+.ov p{font-size:16px;line-height:1.62;margin:0 0 20px;color:var(--ink2)}
+.ov p b{color:var(--ink);font-weight:600}
+.src{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:baseline;font-size:15px;color:var(--ink2);margin-top:22px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
+.k{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.k .n{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.k .l{font-size:15.5px;font-weight:600;margin-top:6px}
+.k .c{font-size:14.5px;color:var(--ink2);margin-top:4px;line-height:1.45}
+.k.hl{border-color:#fed7aa;background:#fff7ed}.k.hl .n{color:var(--test)}
+/* simulation */
+.mini{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:12px;min-height:0;flex:1;margin-top:10px}
+.mc{border:1px solid var(--line);border-radius:12px;padding:10px 16px 6px;display:flex;flex-direction:column;min-height:0}
+.mc .h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.mc .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:7px}
+.mc .num{font-size:26px;font-weight:700;letter-spacing:-.02em}
+.mc .num small{font-size:13.5px;font-weight:500;color:var(--ink2);margin-left:3px}
+.mc .def{font-size:14px;color:var(--ink2)}
+.mc svg{flex:1;min-height:0;margin-top:2px}
+.rules{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.rc{border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:#fff;text-align:left;font:inherit;display:flex;flex-direction:column;gap:2px}
+.rc:hover{border-color:var(--line2)}
+.rc.on{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink)}
+.rc .nm{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.rc .num{font-size:28px;font-weight:700;letter-spacing:-.02em;line-height:1.2}
+.rc .delta{font-size:14px;font-weight:600}
+.subtabs{display:flex;gap:4px;border:1px solid var(--line2);border-radius:9px;padding:3px;width:max-content;background:#fafaf9}
+.subtabs button{border:0;background:none;font:inherit;font-size:14.5px;padding:6px 14px;border-radius:7px;cursor:pointer;color:var(--ink2)}
+.subtabs button[aria-pressed=true]{background:#fff;color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.empty{border:1.5px dashed var(--line2);border-radius:12px;display:grid;place-items:center;color:var(--soft);font-size:15.5px;min-height:240px}
+.guides{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:16px}
+.guides li{display:grid;grid-template-columns:30px 1fr;gap:10px}
+.guides .n{font-size:20px;font-weight:700;color:var(--soft)}
+.guides b{font-size:16.5px;display:block;margin-bottom:2px}
+.guides span{font-size:15px;color:var(--ink2);line-height:1.5}
+.caveat{margin-top:18px;font-size:14.5px;color:var(--ink2);line-height:1.5}
+#tip{position:fixed;pointer-events:none;background:#1c1917;color:#fff;font-size:13.5px;padding:8px 11px;border-radius:8px;max-width:280px;opacity:0;z-index:20;line-height:1.45}
+.fade{animation:fd .35s ease both}@keyframes fd{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.fade{animation:none}}
+@media (max-width:1100px){.app{height:auto}.head{flex-direction:column;align-items:flex-start}.body,.mini{grid-template-columns:1fr!important}.rules{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="bar"><div class="brand">The Cost of Scarcity<span>AI budgets at CMU · October 2026</span></div>
+    <div class="nav"><button id="prev" aria-label="Previous">←</button><button id="next" aria-label="Next">→</button></div>
+    <div class="tabs" id="tabs" role="tablist"></div></div>
+  <section class="ch" id="ch" aria-live="polite"></section>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+const D=/*__DATA__*/null;
+const NS="http://www.w3.org/2000/svg",cv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const INK=cv("--ink"),INK2=cv("--ink2"),SOFT=cv("--soft"),LINE=cv("--line"),TEST=cv("--test"),OTHER=cv("--other"),NOTE=cv("--note");
+const RED="#b91c1c",GREEN="#15803d";
+const POL=["FCFS","Quotas","TrainingQuotas","Adaptive","Pacing","Threshold"];
+const PN={FCFS:"First come, first served",Quotas:"Equal quotas",TrainingQuotas:"Training-week quotas",Adaptive:"Adaptive sharing",Pacing:"Spend pacing",Threshold:"Cost threshold"};
+const DEF={FCFS:"Approves every request until the money runs out.",Quotas:"Gives each of the six teams an equal share.",TrainingQuotas:"Shares money by each team's first-week spending.",
+ Adaptive:"Team shares, but teams can borrow unused money.",Pacing:"Approves requests only while spending is on pace.",Threshold:"Refuses any single request above a cost limit."};
+const PC={};POL.forEach(p=>PC[p]=cv("--"+p));
+const SHAPE={FCFS:"circle",Quotas:"square",TrainingQuotas:"tdown",Adaptive:"triangle",Pacing:"diamond",Threshold:"plus"};
+const GRP={prod:{n:"Production",c:cv("--p-prod")},learn:{n:"Marketing and research",c:cv("--p-learn")},exp:{n:"Testing",c:cv("--p-exp")}};
+const pc=i=>GRP[D.persona[i]].c,isExp=i=>D.persona[i]==="exp";
+const REDUCE=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const rd=v=>Math.round(v);
+const f0=v=>Math.round(v).toLocaleString(),usd=v=>"$"+Math.round(v).toLocaleString();
+const shortT=t=>t.replace("prj-ai-","").replace("org-","");
+const pctOf=(a,n)=>100*a/n;
+function el(p,t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;p.appendChild(e);return e}
+function tx(p,x,y,s,o={}){return el(p,"text",Object.assign({x,y,fill:o.fill||INK,"font-size":o.size||13,"text-anchor":o.a||"start","font-weight":o.w||500},o.x||{}),s)}
+function svgIn(par){const s=el(par,"svg",{});const r=s.getBoundingClientRect();const w=Math.max(220,r.width),h=Math.max(110,r.height);s.setAttribute("viewBox",`0 0 ${w} ${h}`);return{s,w,h}}
+function shapeD(k,x,y,r){return{circle:`M${x-r},${y}a${r},${r} 0 1,0 ${2*r},0a${r},${r} 0 1,0 ${-2*r},0`,square:`M${x-r*.9},${y-r*.9}h${1.8*r}v${1.8*r}h${-1.8*r}z`,
+ triangle:`M${x},${y-r*1.15}L${x+r*1.1},${y+r*.8}L${x-r*1.1},${y+r*.8}z`,tdown:`M${x},${y+r*1.15}L${x+r*1.1},${y-r*.8}L${x-r*1.1},${y-r*.8}z`,
+ diamond:`M${x},${y-r*1.2}L${x+r*1.2},${y}L${x},${y+r*1.2}L${x-r*1.2},${y}z`,
+ plus:`M${x-r*.4},${y-r*1.1}h${r*.8}v${r*.7}h${r*.7}v${r*.8}h${-r*.7}v${r*.7}h${-r*.8}v${-r*.7}h${-r*.7}v${-r*.8}h${r*.7}z`}[k]}
+const icon=(k,c)=>`<svg class="ic" viewBox="0 0 14 14" aria-hidden="true"><path d="${shapeD(k,7,7,5)}" fill="${c}"/></svg>`;
+/* Hand-drawn note: handwritten text at (x,y), with a curved arrow drawn from the edge of the text box to (x2,y2) so it never crosses the words. */
+function note(s,x,y,x2,y2,text,o={}){const col=o.c||NOTE,size=o.size||23,g=el(s,"g",{});
+ const t=el(g,"text",{x,y,fill:col,"font-size":size,"text-anchor":o.a||"middle",class:"ann"});
+ String(text).split("\n").forEach((ln,i)=>el(t,"tspan",{x,dy:i?size*.98:0},ln));
+ const bb=t.getBBox(),pad=7;g.insertBefore(el(g,"rect",{x:bb.x-5,y:bb.y-2,width:bb.width+10,height:bb.height+4,rx:6,fill:"#fff","fill-opacity":.85}),t);
+ let x1,y1;const cx=Math.max(bb.x+8,Math.min(bb.x+bb.width-8,x2));
+ if(y2>bb.y+bb.height+pad){x1=cx;y1=bb.y+bb.height+pad}else if(y2<bb.y-pad){x1=cx;y1=bb.y-pad}else{x1=x2<bb.x?bb.x-pad:bb.x+bb.width+pad;y1=bb.y+bb.height/2}
+ const bend=o.bend??.22,mx=(x1+x2)/2+(y2-y1)*bend,my=(y1+y2)/2-(x2-x1)*bend;
+ const aid="ah"+col.replace("#","");if(!s.querySelector("#"+aid)){const df=el(s,"defs",{});const m=el(df,"marker",{id:aid,viewBox:"0 0 10 10",refX:8,refY:5,markerWidth:7,markerHeight:7,orient:"auto-start-reverse"});el(m,"path",{d:"M0,0L10,5L0,10z",fill:col})}
+ const p=el(g,"path",{d:`M${x1},${y1}Q${mx},${my} ${x2},${y2}`,fill:"none",stroke:col,"stroke-width":1.9,"stroke-linecap":"round","marker-end":`url(#${aid})`});
+ if(!REDUCE){const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;p.style.transition="stroke-dashoffset .7s ease .35s";t.style.opacity=0;t.style.transition="opacity .4s ease .15s";
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{p.style.strokeDashoffset=0;t.style.opacity=1}))}
+ return g}
+const tip=document.getElementById("tip");
+function hover(e,html){e.addEventListener("mousemove",ev=>{tip.innerHTML=typeof html==="function"?html():html;tip.style.opacity=1;tip.style.left=Math.min(innerWidth-290,ev.clientX+14)+"px";tip.style.top=(ev.clientY+14)+"px"});e.addEventListener("mouseleave",()=>tip.style.opacity=0)}
+let GEN=0;function animate(dur,f){if(REDUCE){f(1);return}const my=GEN;let s=null;const g=t=>{if(my!==GEN)return;if(s===null)s=t;const p=Math.min(1,(t-s)/dur);f(p);if(p<1)requestAnimationFrame(g)};requestAnimationFrame(g)}
+const ease=x=>1-Math.pow(1-Math.max(0,Math.min(1,x)),3),seg=(p,a,b)=>Math.max(0,Math.min(1,(p-a)/(b-a)));
+function chart(par,title,kind,legend){const d=document.createElement("div");d.className="chart";
+ d.innerHTML=`<p class="ct">${title}${kind?`<span class="tag ${kind}">${kind==="log"?"From the logs":"Simulated"}</span>`:""}</p>${legend?`<div class="legend">${legend}</div>`:""}`;par.appendChild(d);return d}
+function body(v,cols){const b=document.createElement("div");b.className="body";if(cols)b.style.gridTemplateColumns=cols;v.appendChild(b);return b}
+function takeaway(v,html){const d=document.createElement("div");d.className="take";d.innerHTML=`<b>Takeaway</b><span>${html}</span>`;v.appendChild(d)}
+const sw=(c,lab)=>`<span><i class="sw" style="background:${c}"></i>${lab}</span>`;
+
+/* data helpers */
+const BUDS=[50,70,85,100],SIM={bi:1,rule:"Adaptive",adv:"rules"};
+const bud=()=>BUDS[SIM.bi],cell=(p,b=bud())=>D.cells[p+"_"+b];
+const OUTC={done:"#1c1917",trunc:"#d6d3d1",rej:"#ea580c"};
+const budSlider=()=>`<div class="sl"><div class="top"><label for="bud">Budget available</label><span class="val" id="budV">${bud()}%</span></div>
+ <input type="range" id="bud" min="0" max="3" step="1" value="${SIM.bi}" aria-valuetext="${bud()}% of full cost"><div class="ticks">${BUDS.map(b=>`<span>${b}%</span>`).join("")}</div></div>`;
+const avgOf=(ix,f)=>ix.reduce((a,i)=>a+f(i),0)/ix.length;
+const IDX={prod:[0,1],learn:[2,3],exp:[4,5]},OTH=[0,1,2,3];
+const o1=()=>D.models.find(m=>m[0]==="o1-preview");
+const testCost=()=>avgOf(IDX.exp,i=>D.stats[D.teams[i]].cost)*2;
+const promptRatio=()=>avgOf(IDX.exp,i=>D.stats[D.teams[i]].prompt)/avgOf(OTH,i=>D.stats[D.teams[i]].prompt);
+function habits(){const W=D.weekly,ot=OTH.map(i=>D.teams[i]),ex=IDX.exp.map(i=>D.teams[i]),n=W[ot[0]].cache.length,last=(t,k)=>W[t][k][n-1];
+ return{c0:rd(avgOf(ot,t=>W[t].cache[0])),p0:rd(avgOf(ot,t=>W[t].prem[0])),cLo:rd(Math.min(...ot.map(t=>last(t,"cache")))),cHi:rd(Math.max(...ot.map(t=>last(t,"cache")))),
+  pLo:rd(Math.min(...ot.map(t=>last(t,"prem")))),pHi:rd(Math.max(...ot.map(t=>last(t,"prem")))),eC:rd(avgOf(ex,t=>last(t,"cache"))),eP:rd(avgOf(ex,t=>last(t,"prem")))}}
+
+function monteCarlo(v){
+ const M=D.mc,COMPARE=POL.filter(p=>p!=="FCFS");v.style.gridTemplateRows="1fr auto";
+ const b=body(v,"1.13fr 1fr");b.style.gap="32px";
+ const effect=chart(b,`Paired completion change versus first come, first served · ${M.resamples} resamples`,"sim",`<span><i class="sw" style="background:${INK}"></i>resample</span><span><i class="sw" style="background:${SOFT}"></i>interquartile range</span><span>◇ median · △ replay</span>`);
+ const A=svgIn(effect),s=A.s,w=A.w,h=A.h,L=156,R=w-20,T=28,B=h-38,lo=-2,hi=14,X=x=>L+(x-lo)/(hi-lo)*(R-L),Y=i=>T+i*(B-T)/(COMPARE.length-1);
+ for(let t=0;t<=14;t+=2){el(s,"line",{x1:X(t),x2:X(t),y1:T-12,y2:B+5,stroke:t===0?INK:LINE,"stroke-width":t===0?1.6:1});tx(s,X(t),h-8,(t>0?"+":"")+t,{a:"middle",fill:SOFT,size:12})}
+ tx(s,X(0),T-17,"same completion rate as FCFS",{a:"middle",fill:SOFT,size:11.5});
+ COMPARE.forEach((p,i)=>{const y=Y(i),e=M.effects[p],pts=M.points[p];tx(s,L-12,y+4,PN[p],{a:"end",fill:INK,w:600,size:13.5});
+   pts.forEach((q,j)=>{const yy=y+(((j*17)%19)-9)*.72,mark=el(s,"path",{d:shapeD(SHAPE[p],X(q[0]),yy,3.2),fill:PC[p],opacity:.56});hover(mark,`<b>${PN[p]}</b><br>${q[0]>=0?"+":""}${q[0].toFixed(2)} percentage points versus first come, first served<br>${q[1].toFixed(1)}% completed · ${q[2].toFixed(1)}% lowest-tenant completion`)})
+   el(s,"line",{x1:X(e.q25),x2:X(e.q75),y1:y,y2:y,stroke:PC[p],"stroke-width":7,"stroke-linecap":"round"});
+   el(s,"path",{d:shapeD("diamond",X(e.median),y,6),fill:INK,stroke:"#fff","stroke-width":1.4});
+   el(s,"path",{d:shapeD("triangle",X(M.replay[p][0]),y,6),fill:"#fff",stroke:PC[p],"stroke-width":2});
+   tx(s,R,y+4,`${e.wins}/${M.resamples} above FCFS`,{a:"end",fill:SOFT,size:11.5})
+ });
+ const access=chart(b,"Completion and the lowest operational-team rate","sim",`<span>Each mark is one resampled workload; larger marks are medians.</span>`);
+ const Q=svgIn(access),s2=Q.s,w2=Q.w,h2=Q.h,L2=54,R2=w2-12,T2=16,B2=h2-34,xlo=32,xhi=50,ylo=14,yhi=50,X2=x=>L2+(x-xlo)/(xhi-xlo)*(R2-L2),Y2=y=>B2-(y-ylo)/(yhi-ylo)*(B2-T2);
+ [35,40,45,50].forEach(t=>{el(s2,"line",{x1:X2(t),x2:X2(t),y1:T2,y2:B2,stroke:LINE});tx(s2,X2(t),h2-7,t+"%",{a:"middle",fill:SOFT,size:11})});
+ [20,30,40,50].forEach(t=>{el(s2,"line",{x1:L2,x2:R2,y1:Y2(t),y2:Y2(t),stroke:LINE});tx(s2,L2-7,Y2(t)+4,t+"%",{a:"end",fill:SOFT,size:11})});
+ tx(s2,(L2+R2)/2,h2+1,"fully completed",{a:"middle",fill:SOFT,size:11});tx(s2,5,(T2+B2)/2,"lowest team",{a:"middle",fill:SOFT,size:11,x:{transform:`rotate(-90 5 ${(T2+B2)/2})`}});
+ const labels={FCFS:[6,-8],Quotas:[6,15],TrainingQuotas:[6,-8],Adaptive:[6,15],Pacing:[6,-8],Threshold:[6,15]};
+ POL.forEach(p=>{const pts=M.points[p];pts.forEach(q=>{const mark=el(s2,"path",{d:shapeD(SHAPE[p],X2(q[1]),Y2(q[2]),3.1),fill:PC[p],opacity:.48});hover(mark,`<b>${PN[p]}</b><br>${q[1].toFixed(1)}% fully completed<br>${q[2].toFixed(1)}% lowest operational-team rate`) });const o=M.outcomes[p],dx=labels[p][0],dy=labels[p][1];el(s2,"path",{d:shapeD("diamond",X2(o.completed),Y2(o.floor),5.3),fill:PC[p],stroke:"#fff","stroke-width":1.2});tx(s2,X2(o.completed)+dx,Y2(o.floor)+dy,PN[p],{fill:INK,size:11.5,w:600})});
+ const q=M.effects.Quotas,ad=M.effects.Adaptive,th=M.effects.Threshold;
+ takeaway(v,`This corrected synthetic study runs all six rules over ${M.resamples} paired local-block resamples plus one replay (${M.runs} policy runs). Cost threshold has a median ${th.median.toFixed(1)}-point completion gain over first come, first served; Adaptive gains ${ad.median.toFixed(1)} points but lowers the median minimum tenant rate. Equal quotas has the least stable aggregate effect: it is above first come, first served in ${q.wins} of ${M.resamples} resamples. These are descriptive conditional outcomes, not confidence intervals or policy-quality evidence.`)
+}
+
+/* ===================== tabs ===================== */
+const CH=[
+{label:"Overview",title:()=>`How should CMU share an AI budget that is smaller than demand?`,
+ draw:v=>{v.style.gridTemplateRows="1fr";v.classList.add("ov");const b=body(v,"1.2fr 1fr");b.style.gap="48px";const k=D.kpi;
+  const L=document.createElement("div");L.innerHTML=`
+   <h3>The problem</h3>
+   <p>Six teams at CMU share AI services from OpenAI and Google, and every request is billed by the number of tokens it uses. Spending is uneven: one model and two teams account for a large part of the bill. If CMU set an AI budget below what teams actually use, some requests would have to be refused. <b>We ask which rule for sharing a limited budget completes the most requests, and which teams pay the price under each rule.</b></p>
+   <h3>Our approach</h3>
+   <p>We started from one month of usage logs, which record the team, model and token counts of every request. We priced each request at the providers' list prices to estimate what October cost. We then built a simulation that replays the requests from October 7 to 30 in the order they arrived. Before each request is answered, a budget rule decides whether to approve it, based on its estimated cost and the money left. We ran <b>six rules at four budget levels</b>, from 50% to 100% of the cost of serving everyone, and counted how many requests each rule completed in full and how each team fared. The first week of October was held back to set up the rules, such as each team's share, so that no rule could see the future.</p>
+   <h3>Why a simulation</h3>
+   <p>A budget rule can't be tried out on live traffic without refusing real work. Replaying the same month under every rule means each one faces exactly the same requests, so any difference in the results comes from the rule itself.</p>`;b.appendChild(L);
+  const R=document.createElement("div");R.innerHTML=`<div class="kgrid">
+   <div class="k"><div class="n" data-c>0</div><div class="l">API calls in October</div><div class="c">They came from six teams and went to OpenAI and Google Gemini models between October 1 and 30.</div></div>
+   <div class="k"><div class="n">${k.success}%</div><div class="l">of calls succeeded</div><div class="c">The other ${f0(k.n400+k.n429)} were malformed (${f0(k.n400)}) or hit a rate limit (${f0(k.n429)}). Failed calls are not billed.</div></div>
+   <div class="k"><div class="n">${usd(k.cost)}</div><div class="l">estimated October cost</div><div class="c">We multiplied token counts by list prices, because the logs do not record the actual bill.</div></div>
+   <div class="k hl"><div class="n">${k.testCalls}% → ${k.testTokens}%</div><div class="l">testing teams' share of calls → tokens</div><div class="c">The two testing teams send ${k.testCalls}% of calls but use ${k.testTokens}% of all tokens, because their prompts are ${promptRatio().toFixed(1)} times larger.</div></div></div>
+   <div class="src"><span class="tag log">From the logs</span><span>These numbers are measured directly from the October usage logs, which are synthetic data provided by the CMU IronViz competition.</span>
+    <span class="tag sim">Simulated</span><span>These numbers come from our simulation of a budget rule. They are provisional and may change as we refine the model.</span></div>`;b.appendChild(R);
+  const n=R.querySelector("[data-c]");animate(1200,p=>n.textContent=f0(k.calls*ease(p)))}},
+
+{label:"Where the money goes",title:()=>`A small share of requests drives most of the cost`,
+ dek:()=>`Before deciding how to ration a budget, it helps to know where the money goes. Requests are not equally expensive: the price depends on the model and on the size of the prompt. Each chart compares a share of calls (gray) with the matching share of the estimated cost (dark), first by model and then by team.`,
+ draw:v=>{const b=body(v,"1fr 1fr");
+  /* by model */
+  const c=chart(b,"By model","log",sw("#d6d3d1","Share of calls")+sw(INK,"Share of cost"));const{s,w,h}=svgIn(c);
+  const ms=D.models,X0=140,X1=w-150,rh=(h-24)/ms.length,X=x=>X0+x/60*(X1-X0),bars=[],pos={};
+  [0,20,40,60].forEach(x=>{el(s,"line",{x1:X(x),x2:X(x),y1:0,y2:h-20,stroke:LINE});tx(s,X(x),h-3,x+"%",{a:"middle",fill:SOFT,size:13})});
+  ms.forEach(([m,c2,co],i)=>{const bh=Math.min(18,rh*.3),y=i*rh+rh/2-bh-2,hot=m==="o1-preview";tx(s,X0-12,y+bh+6,m,{a:"end",w:hot?700:500,size:14.5});
+   const r1=el(s,"rect",{x:X0,y,height:bh,rx:3,fill:"#d6d3d1",width:0}),r2=el(s,"rect",{x:X0,y:y+bh+3,height:bh,rx:3,fill:hot?TEST:INK,width:0});
+   const t1=tx(s,0,y+bh-4,c2.toFixed(0)+"%",{size:13,fill:INK2}),t2=tx(s,0,y+2*bh-1,co.toFixed(0)+"%",{size:13.5,w:700,fill:hot?TEST:INK});
+   bars.push([r1,X(c2),t1],[r2,X(co),t2]);[r1,r2].forEach(r=>hover(r,`<b>${m}</b><br>${c2}% of calls · ${co}% of estimated cost`));pos[m]={y:y+bh*1.5+3,x:X(co),xc:X(c2)}});
+  const o=pos["o1-preview"];note(s,X1+70,o.y+70,o.x+40,o.y+4,"5% of calls,\nhalf the bill",{c:TEST,bend:-.25});
+  const mm=pos["gpt-4o-mini"];if(mm)note(s,X1+60,mm.y+16,mm.xc+44,mm.y-14,"cheap models:\nalmost free",{bend:.25});
+  /* by team */
+  const c3=chart(b,"By team","log",sw("#d6d3d1","Share of calls")+sw(INK,"Share of cost"));const S3=svgIn(c3),s3=S3.s,w3=S3.w,h3=S3.h;
+  const T0=190,T1=w3-150,rh3=(h3-24)/6,XT=x=>T0+x/40*(T1-T0);let eng=null;
+  [0,10,20,30,40].forEach(x=>{el(s3,"line",{x1:XT(x),x2:XT(x),y1:0,y2:h3-20,stroke:LINE});tx(s3,XT(x),h3-3,x+"%",{a:"middle",fill:SOFT,size:13})});
+  D.teams.forEach((t,i)=>{const st=D.stats[t],e=isExp(i),bh=Math.min(16,rh3*.3),y=i*rh3+rh3/2-bh-2;tx(s3,T0-12,y+bh+6,t,{a:"end",w:e?700:500,fill:e?TEST:INK,size:14});
+   const r1=el(s3,"rect",{x:T0,y,height:bh,rx:3,fill:"#d6d3d1",width:0}),r2=el(s3,"rect",{x:T0,y:y+bh+3,height:bh,rx:3,fill:e?TEST:INK,width:0});
+   const t1=tx(s3,0,y+bh-3,st.calls.toFixed(0)+"%",{size:13,fill:INK2}),t2=tx(s3,0,y+2*bh,st.cost.toFixed(0)+"%",{size:13.5,w:700,fill:e?TEST:INK});
+   bars.push([r1,XT(st.calls),t1,T0],[r2,XT(st.cost),t2,T0]);[r1,r2].forEach(r=>hover(r,`<b>${t}</b><br>${st.calls}% of calls · ${st.cost}% of estimated cost<br>Typical prompt: ${f0(st.prompt)} tokens · ${rd(st.prem)}% premium models · ${rd(st.cache)}% cached`));
+   if(t==="org-engineering-dev")eng={x:XT(st.cost),y:y+bh*1.5+3}});
+  if(eng)note(s3,XT(36),eng.y-rh3*1.05,eng.x+34,eng.y-8,"big prompts, pricey\nmodels, little caching",{c:TEST,bend:-.3});
+  animate(1000,p=>{const e=ease(p);bars.forEach(([r,x,t,x0=X0])=>{r.setAttribute("width",Math.max(2,(x-x0)*e));t.setAttribute("x",x0+(x-x0)*e+7)})});
+  takeaway(v,`o1-preview handles ${rd(o1()[1])}% of calls but accounts for ${rd(o1()[2])}% of the cost, and the two testing teams send ${D.kpi.testCalls}% of calls but account for ${rd(testCost())}% of the cost. A rule that treats every request the same will spend much of its money on a few teams and one model.`)}},
+
+{label:"Changing habits",title:()=>`Four teams changed their AI habits in October; the testing teams did not`,
+ dek:()=>`Cost is not fixed; it depends on habits. Reusing a cached prompt makes the repeated part of a request much cheaper, and premium models cost far more per token than small ones. These charts follow both habits week by week, with one line per team.`,
+ draw:v=>{const b=body(v,"1fr 1fr"),H=habits();
+  [["cache","Calls that reuse a cached prompt"],["prem","Calls sent to a premium model"]].forEach(([key,title])=>{const c=chart(b,title,"log",sw(TEST,"Testing teams")+sw(OTHER,"Other four teams"));const{s,w,h}=svgIn(c);
+   const nW=D.weeks.length,L=44,R=w-20,T=10,B=h-28,X=i=>L+i/(nW-1)*(R-L),Y=y=>B-y/80*(B-T);
+   [0,20,40,60,80].forEach(y=>{el(s,"line",{x1:L,x2:R,y1:Y(y),y2:Y(y),stroke:LINE});tx(s,L-10,Y(y)+4,y+"%",{a:"end",fill:SOFT,size:13})});
+   ["Oct 1–7","Oct 8–14","Oct 15–21","Oct 22–30"].slice(0,nW).forEach((d,i)=>tx(s,X(i),h-4,d,{a:i===0?"start":i===nW-1?"end":"middle",fill:SOFT,size:13}));
+   const lines=[];D.teams.map((_,i)=>i).sort((a,b)=>isExp(a)-isExp(b)).forEach(i=>{const t=D.teams[i],y=D.weekly[t][key],e=isExp(i);
+    const pl=el(s,"polyline",{points:y.map((q,j)=>X(j)+","+Y(q)).join(" "),fill:"none",stroke:e?TEST:OTHER,"stroke-opacity":e?1:.6,"stroke-width":e?3.5:2.2,"stroke-linecap":"round","stroke-linejoin":"round"});
+    const len=pl.getTotalLength();pl.setAttribute("stroke-dasharray",len);pl.setAttribute("stroke-dashoffset",len);lines.push([pl,len]);
+    y.forEach((q,j)=>hover(el(s,"circle",{cx:X(j),cy:Y(q),r:e?4.5:3.5,fill:e?TEST:OTHER,"fill-opacity":e?1:.8}),`<b>${t}</b><br>${D.weeks[j]}: ${q.toFixed(0)}% ${key==="cache"?"reuse a cached prompt":"go to a premium model"}`))});
+   animate(1200,p=>lines.forEach(([pl,len])=>pl.setAttribute("stroke-dashoffset",len*(1-ease(p)))));
+   if(key==="cache"){note(s,X(.9),Y(70),X(2.2),Y(46),`4 teams: ${H.c0}% → ${H.cLo}–${H.cHi}%`,{bend:-.2});note(s,X(1.6),Y(26),X(2),Y(H.eC)-6,`testing teams: stuck at ${H.eC}%`,{c:TEST,bend:.25})}
+   else{note(s,X(.85),Y(22),X(2.05),Y(40),`4 teams: ${H.p0}% → ${H.pLo}–${H.pHi}%`,{bend:.2});note(s,X(2.3),Y(80),X(2.8),Y(H.eP)-6,"testing teams: no change",{c:TEST,bend:-.2})}});
+  takeaway(v,`By the last week, the other four teams reused a cached prompt in ${H.cLo}–${H.cHi}% of calls, up from ${H.c0}%, and sent ${H.pLo}–${H.pHi}% of calls to premium models, down from ${H.p0}%. The testing teams stayed near ${H.eC}% and ${H.eP}%. Habits like these change how far a fixed budget goes before any rule has to refuse a request.`)}},
+
+{label:"Budget cuts",title:()=>`The rule decides when the money runs out and how much goes unused`,
+ dek:()=>`Each panel shows how one rule spends the budget between October 7 and 30, and the large number is the share of requests it completes in full. A line that reaches zero early means late requests are refused. A line that ends above zero means money was left unused. Move the slider to change the budget.`,
+ controls:()=>budSlider(),
+ draw:v=>{const b=body(v,"1fr");const c=chart(b,`Budget left over time, at ${bud()}% of the full cost`,"sim");
+  const g=document.createElement("div");g.className="mini";c.appendChild(g);
+  const best=POL.reduce((a,p)=>cell(p).rate>cell(a).rate?p:a,POL[0]),worst=POL.reduce((a,p)=>cell(p).rate<cell(a).rate?p:a,POL[0]),most=POL.reduce((a,p)=>cell(p).left>cell(a).left?p:a,POL[0]);
+  POL.forEach(p=>{const r=cell(p),m=document.createElement("div");m.className="mc";
+   m.innerHTML=`<div class="h"><span class="nm">${icon(SHAPE[p],PC[p])}${PN[p]}</span><span class="num" style="${p===best?`color:${GREEN}`:""}">${r.rate.toFixed(1)}%<small>completed</small></span></div><div class="def">${DEF[p]}</div>`;g.appendChild(m);
+   requestAnimationFrame(()=>{const{s,w,h}=svgIn(m);const L=40,Rx=w-8,T=8,B=h-20,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(Rx-L),Y=y=>B-y/100*(B-T),tr=r.trace;
+    [0,50,100].forEach(y=>{el(s,"line",{x1:L,x2:Rx,y1:Y(y),y2:Y(y),stroke:LINE});tx(s,L-6,Y(y)+4,y+"%",{a:"end",fill:SOFT,size:12})});[7,14,21,28].forEach(d=>tx(s,X(d),h-3,"Oct "+d,{a:"middle",fill:SOFT,size:12}));
+    const area=el(s,"path",{fill:PC[p],"fill-opacity":.1}),line=el(s,"polyline",{fill:"none",stroke:PC[p],"stroke-width":2.5,"stroke-linecap":"round","stroke-linejoin":"round"});
+    animate(1100,pp=>{const n=Math.max(2,Math.floor(tr.length*ease(pp))),pts=tr.slice(0,n).map(([d,y])=>[X(d),Y(y)]);line.setAttribute("points",pts.map(q=>q.join(",")).join(" "));area.setAttribute("d",`M${pts.map(q=>q.join(",")).join("L")}L${pts[pts.length-1][0]},${B}L${pts[0][0]},${B}Z`)});
+    const end=tr[tr.length-1];
+    if(p===most&&r.left>=5)note(s,X(22),Y(Math.min(90,end[1]+50)),X(end[0])-3,Y(end[1])-7,`${usd(r.leftUsd)} never spent`,{c:RED,bend:-.2,size:22})})});
+  const lb=cell(best),lw=cell(worst),lm=cell(most);
+  takeaway(v,`At a ${bud()}% budget, ${PN[best].toLowerCase()} completes the most requests (${lb.rate.toFixed(1)}%) and ${PN[worst].toLowerCase()} the fewest (${lw.rate.toFixed(1)}%).`+
+   (lm.left>=5?` ${PN[most]} leaves ${usd(lm.leftUsd)} unspent${most==="Quotas"||most==="TrainingQuotas"?", because money set aside for one team can't be used by another":""}.`:" Every rule spends nearly the whole budget."))}},
+
+{label:"Who loses out",title:()=>`The choice of rule decides which teams lose out`,
+ dek:()=>`A rule can complete more requests overall and still treat one team badly. Each row is a team, and each shape shows the share of that team's requests a rule completes in full. The wider the gray band in a row, the more that team's outcome depends on which rule CMU picks.`,
+ controls:()=>budSlider(),
+ draw:v=>{const b=body(v,"1fr");const c=chart(b,`Requests completed in full, by team and rule, at a ${bud()}% budget`,"sim",POL.map(p=>`<span>${icon(SHAPE[p],PC[p])}${PN[p]}</span>`).join(""));
+  const{s,w,h}=svgIn(c);const all=POL.flatMap(p=>cell(p).teams),lo=Math.max(0,Math.floor(Math.min(...all)/5)*5-5),hi=Math.ceil(Math.max(...all)/5)*5+5;
+  const L=230,Rx=w-190,T=8,rh=(h-T-28)/6,X=x=>L+(x-lo)/(hi-lo)*(Rx-L);
+  for(let x=lo;x<=hi;x+=5){el(s,"line",{x1:X(x),x2:X(x),y1:T,y2:h-24,stroke:LINE});tx(s,X(x),h-5,x+"%",{a:"middle",fill:SOFT,size:13})}
+  const marks=[];let worst={v:101};D.teams.forEach((t,i)=>{const y=T+i*rh+rh/2;el(s,"circle",{cx:6,cy:y,r:5,fill:pc(i)});tx(s,18,y+5,t,{fill:isExp(i)?TEST:INK,w:isExp(i)?700:500,size:15});
+   const vals=POL.map(p=>cell(p).teams[i]);el(s,"line",{x1:X(Math.min(...vals)),x2:X(Math.max(...vals)),y1:y,y2:y,stroke:"#e7e5e4","stroke-width":9,"stroke-linecap":"round"});
+   POL.forEach((p,k)=>{const off=(k-2.5)*Math.min(4,rh*.07),val=cell(p).teams[i];const m=el(s,"path",{d:shapeD(SHAPE[p],X(lo),y+off,7.5),fill:PC[p],stroke:"#fff","stroke-width":1.5});marks.push([m,p,val,y+off]);
+    hover(m,`<b>${t}</b><br>${PN[p]}: ${val.toFixed(1)}% completed in full<br>${f0(cell(p).teamsDone[i])} requests`);if(val<worst.v)worst={v:val,x:X(val),y:y+off,t,p,i}})});
+  tx(s,Rx+30,T+12,"Team group",{fill:SOFT,size:13,w:600});["prod","learn","exp"].forEach((k,j)=>{el(s,"circle",{cx:Rx+36,cy:T+34+j*22,r:5,fill:GRP[k].c});tx(s,Rx+48,T+39+j*22,GRP[k].n,{size:13.5,fill:INK2})});
+  animate(1200,pp=>marks.forEach(([m,p,val,y],k)=>{const e=ease(seg(pp,(k%6)*.06,(k%6)*.06+.6));m.setAttribute("d",shapeD(SHAPE[p],X(lo+(val-lo)*e),y,7.5))}));
+  const up=worst.i>=3;note(s,worst.x+120,worst.y+(up?-rh*1.3:rh*1.05),worst.x+4,worst.y+(up?-9:9),`${PN[worst.p].toLowerCase()} leaves\n${shortT(worst.t)} at ${rd(worst.v)}%`,{c:RED,bend:up?.25:-.25});
+  const eng=D.teams.indexOf("org-engineering-dev"),ad=cell("Adaptive"),fc=cell("FCFS"),dAll=ad.done-fc.done,dEng=ad.teamsDone[eng]-fc.teamsDone[eng];
+  takeaway(v,`At this budget, ${PN[worst.p].toLowerCase()} completes only ${rd(worst.v)}% of ${worst.t}'s requests, the lowest of any team under any rule.`+
+   (dAll>0&&dEng<0?` Adaptive sharing completes ${f0(dAll)} more requests overall than first come, first served, but engineering-dev completes ${f0(-dEng)} fewer, so a better total can hide a loser.`:""))}},
+
+{label:"What works",title:()=>`Pacing spending and capping costly requests hold up best as budgets shrink`,
+ dek:()=>`This grid summarizes every simulation we ran. Each cell is the share of requests completed in full for one rule at one budget, and darker means more. Reading across a row shows how well a rule holds up as the money shrinks from 100% to 50%.`,
+ draw:v=>{v.style.gridTemplateRows="1fr";const b=body(v,"1.1fr 1fr");b.style.gap="48px";const c=chart(b,"Requests completed in full, every rule at every budget","sim");const{s,w,h}=svgIn(c);
+  const BUD=[100,85,70,50],L=180,T=28,cw=(w-L)/4,ch=(h-T-40)/POL.length,RAMP=["#eff6ff","#dbeafe","#bfdbfe","#93c5fd","#60a5fa","#3b82f6","#2563eb","#1d4ed8","#1e40af"],
+   ci=x=>Math.max(0,Math.min(8,Math.round((x-17)/(31.5-17)*8)));
+  tx(s,L-12,17,"Budget",{a:"end",fill:SOFT,size:13,w:600});BUD.forEach((bb,j)=>tx(s,L+j*cw+cw/2,17,bb+"%",{a:"middle",fill:INK,size:15,w:700}));const cells=[];
+  POL.forEach((p,i)=>{const y=T+i*ch;tx(s,L-12,y+ch/2+5,PN[p],{a:"end",fill:INK,w:500,size:15});
+   BUD.forEach((bb,j)=>{const q=D.cells[p+"_"+bb],val=q.rate,k=ci(val),r=el(s,"rect",{x:L+j*cw+2,y:y+2,width:cw-4,height:ch-4,rx:6,fill:RAMP[k],opacity:0});
+    const t=tx(s,L+j*cw+cw/2,y+ch/2+7,val.toFixed(1)+"%",{a:"middle",fill:k>=5?"#fff":"#1e3a8a",w:700,size:18,x:{opacity:0}});cells.push([r,t,i*4+j]);
+    hover(r,`<b>${PN[p]}</b> at ${bb}% budget<br>${f0(q.done)} completed in full (${val.toFixed(1)}%)<br>${f0(q.trunc)} cut short · ${f0(q.rej)} refused`)})});
+  animate(900,p=>cells.forEach(([r,t,k])=>{const o=seg(p,k/24*.6,k/24*.6+.4);r.setAttribute("opacity",o);t.setAttribute("opacity",o)}));
+  setTimeout(()=>note(s,L+cw*2,h-4,L+cw*3.45,T+ch*6+2,"these two barely drop",{c:GREEN,bend:.3,size:24}),REDUCE?0:700);
+  const C=D.cells,eng=D.teams.indexOf("org-engineering-dev"),full=C.FCFS_100;
+  const g=document.createElement("div");g.className="chart";g.innerHTML=`<p class="ct">What we would recommend</p><ol class="guides">
+   <li><span class="n">1</span><div><b>Pace spending across the month.</b><span>At half the budget, spend pacing completes ${rd(C.Pacing_50.rate)}% of requests and a cost threshold completes ${rd(C.Threshold_50.rate)}%, while first come, first served completes only ${rd(C.FCFS_50.rate)}% because it runs out of money early.</span></div></li>
+   <li><span class="n">2</span><div><b>Don't lock money into equal team shares.</b><span>At a 70% budget, equal quotas complete the fewest requests and leave ${usd(C.Quotas_70.leftUsd)} unspent, because money set aside for a quiet team can't be used by a busy one.</span></div></li>
+   <li><span class="n">3</span><div><b>When teams share money, check who pays.</b><span>Adaptive sharing completes ${f0(C.Adaptive_70.done-C.FCFS_70.done)} more requests than first come, first served at 70%, but engineering-dev completes ${f0(C.FCFS_70.teamsDone[eng]-C.Adaptive_70.teamsDone[eng])} fewer.</span></div></li>
+   <li><span class="n">4</span><div><b>Look at the output limit before the budget.</b><span>Even with the full budget, ${rd(pctOf(full.trunc,full.n))}% of requests are cut short by the 1,024-token output limit, which matters more than any budget rule.</span></div></li></ol>
+   <p class="caveat"><b style="color:${INK}">These results are provisional.</b> Each setting was simulated once on synthetic data, so we can't yet say how much the numbers would vary. We also did not test sending requests to cheaper models. The 100% budget is ${usd(D.sim.refUsd)}, the modeled cost of serving every request from October 7 to 30.</p>`;b.appendChild(g)}},
+
+{label:"Advanced simulation",title:()=>`A closer look at the simulation`,
+ dek:()=>SIM.adv==="rules"?`This view is for readers who want more detail. Pick a rule to compare it with first come, first served team by team, and see how every request ends: completed in full, cut short by the 1,024-token output limit, or refused for lack of money.`:`A separate corrected, synthetic workload-resampling study at a 70% modeled budget. All policies receive the same sampled workload in each replicate.`,
+ controls:()=>`<div style="display:flex;gap:28px;align-items:flex-end"><div class="subtabs" role="group" aria-label="View"><button data-adv="rules" aria-pressed="${SIM.adv==="rules"}">Rule by rule</button><button data-adv="mc" aria-pressed="${SIM.adv==="mc"}">Monte Carlo</button></div>${SIM.adv==="rules"?budSlider():""}</div>`,
+ draw:v=>{if(SIM.adv==="mc")return monteCarlo(v)
+  v.style.gridTemplateRows="auto 1fr auto";const fc=cell("FCFS");
+  const rc=document.createElement("div");rc.className="rules";v.appendChild(rc);
+  POL.forEach(p=>{const r=cell(p),d=r.done-fc.done,bt=document.createElement("button");bt.className="rc"+(p===SIM.rule?" on":"");bt.setAttribute("aria-pressed",p===SIM.rule);
+   bt.innerHTML=`<div class="nm">${icon(SHAPE[p],PC[p])}${PN[p]}</div><div class="num">${r.rate.toFixed(1)}%</div>${p==="FCFS"?`<div class="delta" style="color:${SOFT}">baseline</div>`:`<div class="delta" style="color:${d>0?GREEN:d<0?RED:SOFT}">${d>0?"+":d<0?"−":""}${f0(Math.abs(d))} requests</div>`}`;
+   bt.onclick=()=>{SIM.rule=p;go(cur)};rc.appendChild(bt)});
+  const b=body(v,"1.3fr 1fr");const r=cell(SIM.rule);
+  const c=chart(b,`Each team under ${PN[SIM.rule].toLowerCase()}`,"sim",SIM.rule==="FCFS"?"":`<span><i style="display:inline-block;width:2.5px;height:14px;background:${INK}"></i>First come, first served</span>`);const{s,w,h}=svgIn(c);
+  const XM=Math.ceil(Math.max(...r.teams,...fc.teams)/10)*10+10,L=220,Rx=w-90,rh=(h-26)/6,X=x=>L+x/XM*(Rx-L);
+  for(let x=0;x<=XM;x+=10){el(s,"line",{x1:X(x),x2:X(x),y1:0,y2:h-22,stroke:LINE});tx(s,X(x),h-4,x+"%",{a:"middle",fill:SOFT,size:13})}
+  const bars=[];D.teams.forEach((t,i)=>{const y=i*rh+rh*.2,bh=rh*.6,dd=r.teamsDone[i]-fc.teamsDone[i];el(s,"circle",{cx:6,cy:y+bh/2,r:5,fill:pc(i)});tx(s,18,y+bh/2+5,t,{fill:isExp(i)?TEST:INK,w:isExp(i)?700:500,size:15});
+   const bb=el(s,"rect",{x:L,y,height:bh,rx:4,fill:PC[SIM.rule],width:0}),lab=tx(s,L,y+bh/2+5,"",{size:14,w:700});bars.push([bb,lab,r.teams[i],i]);
+   if(SIM.rule!=="FCFS"){el(s,"line",{x1:X(fc.teams[i]),x2:X(fc.teams[i]),y1:y-4,y2:y+bh+4,stroke:INK,"stroke-width":2.5});
+    if(dd!==0)tx(s,w,y+bh/2+5,`${dd>0?"+":"−"}${f0(Math.abs(dd))}`,{a:"end",size:14,w:700,fill:dd>0?GREEN:RED})}
+   hover(bb,`<b>${t}</b><br>${r.teams[i].toFixed(1)}% completed in full (${f0(r.teamsDone[i])})<br>First come, first served: ${fc.teams[i].toFixed(1)}%`)});
+  if(SIM.rule!=="FCFS")tx(s,w,-4,"Change",{a:"end",size:13,fill:SOFT,w:600});
+  animate(800,pp=>bars.forEach(([bb,l,val,i])=>{const e=ease(pp);bb.setAttribute("width",Math.max(2,(X(val)-L)*e));l.setAttribute("x",Math.max(L+(X(val)-L)*e,SIM.rule!=="FCFS"?X(fc.teams[i]):0)+8);l.textContent=rd(val*e)+"%"}));
+  const c2=chart(b,"How every request ends","sim",[["done","Completed in full"],["trunc","Cut short"],["rej","Refused"]].map(([k,n])=>sw(OUTC[k],n)).join(""));
+  const S2=svgIn(c2),s2=S2.s,w2=S2.w,h2=S2.h,L2=160,R2=w2-2,rh2=(h2-24)/POL.length,X2=x=>L2+x/100*(R2-L2),segs=[];
+  [0,50,100].forEach(x=>tx(s2,X2(x),h2-4,x+"%",{a:x===0?"start":x===100?"end":"middle",fill:SOFT,size:13}));
+  POL.forEach((p,i)=>{const q=cell(p),y=i*rh2+rh2*.15,bh=rh2*.7,on=p===SIM.rule;tx(s2,L2-12,y+bh/2+5,PN[p],{a:"end",fill:INK,w:on?700:500,size:14});
+   let x0=0;[["done",q.done,"completed in full"],["trunc",q.trunc,"cut short"],["rej",q.rej,"refused"]].forEach(([k,n,lab])=>{const pv=pctOf(n,q.n),rr=el(s2,"rect",{x:X2(x0),y,height:bh,width:0,fill:OUTC[k],opacity:on?1:.45});segs.push([rr,X2(x0+pv)-X2(x0)]);
+    if(pv>=9)tx(s2,X2(x0+pv/2),y+bh/2+5,Math.round(pv)+"%",{a:"middle",size:13.5,w:700,fill:k==="trunc"?INK:"#fff",x:{"pointer-events":"none",opacity:on?1:.7}});
+    hover(rr,`<b>${PN[p]}</b>, ${bud()}% budget<br>${f0(n)} ${lab} (${pv.toFixed(1)}%)`);rr.onclick=()=>{SIM.rule=p;go(cur)};rr.style.cursor="pointer";x0+=pv})});
+  animate(800,pp=>segs.forEach(([rr,wd])=>rr.setAttribute("width",Math.max(0,wd*ease(pp)))));
+  const tr=cell(SIM.rule);takeaway(v,`Under ${PN[SIM.rule].toLowerCase()} at a ${bud()}% budget, ${rd(pctOf(tr.done,tr.n))}% of requests are completed in full, ${rd(pctOf(tr.trunc,tr.n))}% are cut short and ${rd(pctOf(tr.rej,tr.n))}% are refused. Most of the shortfall comes from the output limit, not from the budget rule.`)}}
+];
+
+/* shell */
+let cur=0;const host=document.getElementById("ch"),tabs=document.getElementById("tabs");
+CH.forEach((c,k)=>{const b=document.createElement("button");b.innerHTML=`<span class="no">${k+1}</span>${c.label}`;b.setAttribute("role","tab");b.onclick=()=>go(k);tabs.appendChild(b)});
+let deb=null;
+function go(i){cur=Math.max(0,Math.min(CH.length-1,i));const c=CH[cur];tip.style.opacity=0;GEN++;const dek=c.dek?c.dek():"";
+ host.innerHTML=`<div class="head"><div><h2>${c.title()}</h2>${dek?`<p class="dek">${dek}</p>`:""}</div>${c.controls?c.controls():""}</div><div class="stage" id="stage"></div>`;
+ tabs.querySelectorAll("button").forEach((b,k)=>{b.classList.toggle("on",k===cur);b.setAttribute("aria-selected",k===cur)});
+ document.getElementById("prev").disabled=cur===0;document.getElementById("next").disabled=cur===CH.length-1;
+ const sl=document.getElementById("bud");if(sl)sl.addEventListener("input",()=>{SIM.bi=+sl.value;document.getElementById("budV").textContent=bud()+"%";clearTimeout(deb);deb=setTimeout(()=>{go(cur);const n=document.getElementById("bud");if(n)n.focus()},120)});
+ host.querySelectorAll("[data-adv]").forEach(b=>b.onclick=()=>{SIM.adv=b.dataset.adv;go(cur)});
+ const st=document.getElementById("stage");host.classList.remove("fade");void host.offsetWidth;host.classList.add("fade");
+ requestAnimationFrame(()=>c.draw(st))}
+document.getElementById("prev").onclick=()=>go(cur-1);document.getElementById("next").onclick=()=>go(cur+1);
+document.addEventListener("keydown",e=>{if(e.target.tagName==="INPUT")return;if(e.key==="ArrowRight")go(cur+1);if(e.key==="ArrowLeft")go(cur-1)});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),150)});
+go(0);
+</script>
+</body>
+</html>

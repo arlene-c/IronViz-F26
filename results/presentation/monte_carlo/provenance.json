@@ -1,0 +1,191 @@
+{
+  "study_plan": {
+    "seed": 20261115,
+    "training_requests": 1250,
+    "evaluation_requests": 5000,
+    "original_training_requests": 38569,
+    "original_evaluation_requests": 154278,
+    "source_sha256": "9a016ebdf3475f52ee5ce1163de91e146c9abca8e8cda11ccc669124e0df65c2",
+    "catalog_sha256": "69351b9f6cb858dd175e9f59a6545a538f442c271b94ebc5ce64eb67d57e1b9e",
+    "source_revision": "828bb02e39d34592025394449d275e7ec33a0772",
+    "caps": {
+      "gpt-4o": 8192,
+      "gpt-4o-mini": 8192,
+      "o1-preview": 8192,
+      "gemini-1.5-pro": 8192,
+      "gemini-1.5-flash": 8192
+    },
+    "horizon": [
+      "2026-10-07T00:00:00Z",
+      "2026-10-31T00:00:00Z"
+    ],
+    "tenants": [
+      "org-engineering-dev",
+      "org-marketing-ai",
+      "org-prod-core",
+      "prj-ai-enterprise-prod",
+      "prj-ai-r-and-d",
+      "prj-ai-sandbox-testing"
+    ],
+    "max_events_per_run": 8000,
+    "max_replicates": 50,
+    "worker_memory_limit_mib": 512,
+    "worker_time_limit_seconds": 300,
+    "target_main_seconds": 180,
+    "protected_hashes": {
+      "results/canonical/manifest.json": "fbf12d72039876cf539898b569465437a1243c4abc8f99cb7e1e05710c7e195a",
+      "results/canonical/configuration/adaptation_report.json": "6c92734d396c9dbf2de0b5e64d17f9729e27ea779cb2415eabaad539ed6abafe",
+      "results/canonical/configuration/price_catalog_micro_usd.json": "69351b9f6cb858dd175e9f59a6545a538f442c271b94ebc5ce64eb67d57e1b9e",
+      "results/canonical/configuration/price_sources.csv": "eb710510b83e49c294c21a4ee68ca4b63d618b4240cda2c925d6db1f1620951b",
+      "results/canonical/configuration/routing_compatibility.json": "cb6fc5e70a531da27b83850894968c6723d54c3beeb58587935a47ef0d9c0b32",
+      "results/canonical/day_bootstrap/policy_comparisons.csv": "9710cb526f898d5bdc04ca84e7bff692c15b749488bde9aa4c25e4b2c0faad11",
+      "results/canonical/day_bootstrap/run_metrics.csv": "266b1bb74aa956f82a317aab30c273456390d170b62adfa4ec7dceaed7376e87",
+      "results/canonical/day_bootstrap/scenario_metadata.json": "f1f99dd464258f1158e0746f29a2c9773cf5f813f291feba69198c0eb31d86a5",
+      "results/canonical/day_bootstrap/tenant_metrics.csv": "29132db452dc098a7356ee861ed7834a4dc7c81144f8c0ecd2a60849e9da2c60",
+      "results/canonical/local_bootstrap/policy_comparisons.csv": "2a0e24688e3004481af0d464a8613e627808cc60ac32a1c73a497da0bffa9d74",
+      "results/canonical/local_bootstrap/run_metrics.csv": "8cd788dd63573215fac4cc836f6fe024ea7c06f6a90ac47b6ff2cb989464570e",
+      "results/canonical/local_bootstrap/scenario_metadata.json": "1fa2199e51596998f8d339985491186b0b70de74b59b0c2b264ce5a94ce38ff8",
+      "results/canonical/local_bootstrap/tenant_metrics.csv": "09cd30949b0a7b1575df5440b7d04137b4c6dee0e4ad99cce0592b68b86e9d24",
+      "results/canonical/policies/budget_trajectories.csv": "c5779233c7d65ce7c878e2a533e1e576e906f8e69ccba2762eaa422aeab1e3c9",
+      "results/canonical/policies/experiment_summary.csv": "c1a396ecc67c4d84f578d422b25d57b0df941c74676c8bb18b07aa0e3c5dd287",
+      "results/canonical/policies/findings.md": "f3acf0596484737796eb290cd2e6b6e32779be44ce152e6c97c45b98260b828a",
+      "results/canonical/policies/policy_comparisons.csv": "86a2cf8dc8f7a1c889248ba331cd2e532afef2b5c82a99b44d04f7bae83e6f1a",
+      "results/canonical/policies/regime_map.csv": "56ddddc5d583e4fe8faf850184a008f31ba1c954296d702f978beee80cf93797",
+      "results/canonical/policies/run_metrics.csv": "2a663ac92889a44d022d6317242e4b0a8c42596610b421b07badd0c11f51e8a4",
+      "results/canonical/policies/scenario_metadata.json": "6255f22c105d94e29ddf17a4629decc11c20cd57f6364af4c70d29967930ded5",
+      "results/canonical/policies/tenant_metrics.csv": "6dd792ded73951b2612cc654d0a42c183807f73ae295f5fae2793b9f27f38f03",
+      "results/presentation/bootstrap_methods_70pct.csv": "c14439d9196eed3dc52c14b70f1bc2638c6a45858974705f7bd507116b90901a",
+      "results/presentation/data_dictionary.md": "9327f5e2a68c60b905a4fbba43df39a49be6e898c90e66404cf4f373ac19d986",
+      "results/presentation/monte_carlo_pilot_replicates.csv": "3d56788077d6a8749f5af568492f39cdcf9f5c0c5a38fe12b2393d22ef336295",
+      "results/presentation/monte_carlo_pilot_summary.csv": "f64da53c3d591c900a69ed9b3b0c1e310044fa508db8b2a262ea981e605ff4c8",
+      "results/presentation/policy_budget_summary.csv": "01454b6b19cb10578d4986a3398a3775bc67ddf1cabbbe137dac7e508bea2c98",
+      "results/presentation/provenance.json": "4cf340a3f1553350a42a61fc857a03256b989bd77787113221795a4d1167d598",
+      "results/presentation/tenant_tradeoffs_70pct.csv": "bcfc988e1080eb616054bd92a940d4e4718730986d61782ac2874104243f4bca",
+      "figures/animated/animated_charts.html": "9593187d0d1c5e6ce5a4bbac6e63a89fff81ef149bdf66572ca78f21759f7105",
+      "figures/static/01_hero_numbers_1D.png": "36f4fabb9b3aff553572309beee2ef31a4d2d9a1c7945e1e3317016caa3e2ebc",
+      "figures/static/01_hero_numbers_1D.svg": "37173f057d12416c0ec08736942423f25f9c4a0778d178564c427b966bb3eef7",
+      "figures/static/02_waffle_calls_vs_tokens_1D.png": "02f8c69d4e23993b40e295a98e521de44b85960aa74a9cf365b6d22b01fcc833",
+      "figures/static/02_waffle_calls_vs_tokens_1D.svg": "573dfa8e0f3f45f938ec19c4d615271cfb64d88d5dc1adddfba7fdd94b07f3bf",
+      "figures/static/03_prompt_size_distribution_1D.png": "19c7830ac5bac013a1fc72010f180a41fc1fbdbdcc57366d8ce94931be87e657",
+      "figures/static/03_prompt_size_distribution_1D.svg": "dcf34465e26eadf768f00757e13bdc6e81b55167338fbb291caea41f0ce0e6f6",
+      "figures/static/04_fingerprints_data.csv": "8c174ff91a56055cf981997e8ab0f1294ff51f92b072cdb024e66b7dedd605f0",
+      "figures/static/04_team_fingerprints_2D.png": "53b4ec9d82d50cff1cc6d1e6b93951b78f60786b494a983eb703c708d7cdc95a",
+      "figures/static/04_team_fingerprints_2D.svg": "f17f19b593049be11d6d8422872c4acf3ffd82bda29f57ef1ea5201a360e3102",
+      "figures/static/05_rate_limits_daily_2D.png": "cab8615c59a101d7e73968dcab59e50e92cc94ffd8518ae6d8397797d928eb07",
+      "figures/static/05_rate_limits_daily_2D.svg": "07c48a6b9ff5066bf57044d790249f048300cd7d0f460ba8bcd6bfd4bb2c984f",
+      "figures/static/06_cost_vs_access_2D.png": "d647a8948220cad506034b5b16eb4a406d48b56d537f3f98a567807528c883c0",
+      "figures/static/06_cost_vs_access_2D.svg": "50ec551fd6532371e5d1b85a64377a930d4b96ffe69d7ebae9cef4132e1228b3",
+      "figures/static/07_team_access_dotplot_1D.png": "662e2891b16174fde63d4c6338634ced5a5f24fea31a93728838953b16cfd3b9",
+      "figures/static/07_team_access_dotplot_1D.svg": "0631f454d5686269573ea142c1195303a6e25ccce8538f2ee5bc2c33f9889873",
+      "figures/static/08_quantile_dotplot_1D.png": "5b8cdfa08cdee382fbb3f7635936346c8d1d148f630ed42b45d808ff642ee44a",
+      "figures/static/08_quantile_dotplot_1D.svg": "e25cc891d8b366e979ae464609abbe48ef75efc11a64dd61a8c18b23fc2c3a7d",
+      "figures/static/09_budget_drain_2D.png": "90a89ee82875a91cd683caae4d3ce615f4ad26bf06747c27107be1addcf497df",
+      "figures/static/09_budget_drain_2D.svg": "27a22d3439a36dbb8de7145cefce0d7259d3c729e0db2862e738d0c63284cd95",
+      "figures/static/10_policy_heatmap_2D.png": "6eb4f47cb70b702525c9860005de37d68a92d4b7d65d03196847959c8b8ba9cd",
+      "figures/static/10_policy_heatmap_2D.svg": "9a25449cf48c59df034025d9aa90c72f2e657a913827f20f9a0df63e4812651b",
+      "figures/static/11_weekly_learning_trend_2D.png": "3f4ba6b05bdca1edf218de49c93ed821ae144932efaf4a2a473ef458220c6a66",
+      "figures/static/11_weekly_learning_trend_2D.svg": "5cf2916a237d05256e910defa3b132a9964dbb986654eb6e45f8566fbd0854ea",
+      "figures/static/11_weekly_trend_data.csv": "bbb5f4bfd60568b59855b3b0364903af7275573008e78761ee841a8609c84195",
+      "figures/static/ALT_TEXT.txt": "3e25d536a2b751d3e7fd0df3a2c99a697715d278a9a0670637cb8a6b15127cb3",
+      "outputs/authoritative_policies/run_metrics.csv": "2a663ac92889a44d022d6317242e4b0a8c42596610b421b07badd0c11f51e8a4"
+    },
+    "sampling": "largest-remainder proportional strata: 12h block x tenant x provider/model x cache-used; seeded random rows within strata",
+    "original_train_window": [
+      "2026-10-01T00:00:00.124906Z",
+      "2026-10-07T00:00:00.521311Z"
+    ],
+    "sample_train_window": [
+      "2026-10-01T00:03:59.595545Z",
+      "2026-10-06T23:49:54.698681Z"
+    ],
+    "original_eval_window": [
+      "2026-10-07T00:00:24.335263Z",
+      "2026-10-30T23:59:36.290668Z"
+    ],
+    "sample_eval_window": [
+      "2026-10-07T00:15:35.847982Z",
+      "2026-10-30T23:58:01.138873Z"
+    ],
+    "cap_interpretation": "8192 is a generous modeled ceiling, not a verified historical provider limit; cap chosen to avoid censoring observed output, estimates fit to training only"
+  },
+  "runtime": {
+    "stage": "main",
+    "replicates": 50,
+    "policy_runs": 300,
+    "runtime_seconds": 164.13974670041353,
+    "peak_worker_mib": 152.35546875,
+    "output_bytes": 1733759,
+    "request_count_min": 4975,
+    "request_count_max": 5022,
+    "completed": true,
+    "parent_wall_seconds": 166.16095740022138,
+    "parent_observed_peak_worker_mib": 152.35546875
+  },
+  "verification": {
+    "label": "MODELED OCTOBER SUBSET; synthetic competition telemetry",
+    "replay_separate": true,
+    "resamples": 49,
+    "policy_runs": 300,
+    "source_requests": 5000,
+    "min_resampled_requests": 4975,
+    "max_resampled_requests": 5022,
+    "pairing_hashes_verified": true,
+    "distinct_workload_hashes": true,
+    "budget_conservation": true,
+    "outcome_conservation": true,
+    "protected_files_unchanged": 55,
+    "training_window": [
+      "2026-10-01T00:03:59.595545Z",
+      "2026-10-06T23:49:54.698681Z"
+    ],
+    "evaluation_window": [
+      "2026-10-07T00:15:35.847982Z",
+      "2026-10-30T23:58:01.138873Z"
+    ],
+    "data_files": {
+      "policy_summary.csv": {
+        "rows": 6,
+        "sha256": "0afdb0ef8da00b2b37f81f00990bfcbed45870963f33ef706a14040a52ea620e"
+      },
+      "paired_effects.csv": {
+        "rows": 6,
+        "sha256": "08ab7263b2335df3e1fd6685c92ff9eb901a2c17f034541232801aaba710b2db"
+      },
+      "tenant_outcomes.csv": {
+        "rows": 36,
+        "sha256": "42254a4f75f1942389296eab6a2abdc2e09ecc14b9c50e211634b6bc09a3ef1a"
+      },
+      "replicate_results.csv": {
+        "rows": 300,
+        "sha256": "3f7dcd96fc063670d24b861bdc9eac12195b201d786e41c883add94e352c01a1"
+      },
+      "sampling_audit.csv": {
+        "rows": 139,
+        "sha256": "d5ee3f07e4cbeb21d670adbf8dcef07c5ecd9ae445fac967fddb060bdfd0f807"
+      },
+      "ranking_stability.csv": {
+        "rows": 15,
+        "sha256": "640ab139bc9eac0a5a7b1419a58a5c54a84a952221bd0eabe44b910414f946d2"
+      },
+      "reservation_sensitivity.csv": {
+        "rows": 3,
+        "sha256": "d94ef48df8be089446671d67747fd0b7748c9b6cfcaf11e97c79fdca230a3c40"
+      }
+    },
+    "runtime": {
+      "stage": "main",
+      "replicates": 50,
+      "policy_runs": 300,
+      "runtime_seconds": 164.13974670041353,
+      "peak_worker_mib": 152.35546875,
+      "output_bytes": 1733759,
+      "request_count_min": 4975,
+      "request_count_max": 5022,
+      "completed": true,
+      "parent_wall_seconds": 166.16095740022138,
+      "parent_observed_peak_worker_mib": 152.35546875
+    },
+    "interpretation": "Medians, IQR and 5th-95th percentiles describe conditional resampled outcomes, not real-world confidence intervals."
+  }
+}
+

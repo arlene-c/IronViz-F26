@@ -1,0 +1,5 @@
+policy,resamples,mean_reservation_median_completion_pct,quantile_reservation_median_completion_pct,mean_reservation_median_truncation_pct,quantile_reservation_median_truncation_pct,mean_reservation_median_rejection_pct,quantile_reservation_median_rejection_pct,mean_reservation_paired_median_pp,quantile_reservation_paired_median_pp,quantile_reservation_paired_p05_pp,quantile_reservation_paired_p95_pp,paired_sign_changes
+Adaptive,10,40.1738371626,70.4513036278,42.2663889935,7.90470433088,18.0616319696,21.7226219025,4.82591607518,9.14084102724,8.27544338552,10.6178135269,0
+FCFS,10,35.3677631372,61.226056606,37.1447841516,6.87246383059,27.2854222813,31.8933930095,0,0,0,0,0
+Pacing,10,45.3863854306,83.4549643742,47.7968867227,9.66645845001,6.849990274,6.92236403019,10.1218626636,22.2688434362,21.8323640747,23.5289895454,0
+

@@ -1,0 +1,8 @@
+12_monte_carlo_effect_distribution_2D
+A five-row dot-and-interval plot of 49 paired resample effects versus first come, first served. Median completion-rate changes are +0.26 percentage points for equal quotas, +3.93 for training-week quotas, +4.87 for adaptive sharing, +10.16 for spend pacing, and +12.30 for the cost threshold. Equal quotas is above FCFS in 31 of 49 resamples; all other non-FCFS policies are above FCFS in all 49.
+
+13_monte_carlo_replay_vs_resamples_2D
+A six-row dot-and-interval plot of completion rates over 49 resamples. The policies retain the same broad ordering in the replay and resample distributions: equal quotas and FCFS are near 35%, training-week quotas near 39%, adaptive sharing near 40%, spend pacing near 45%, and the cost threshold near 48%.
+
+14_monte_carlo_access_floor_2D
+Scatter plot of overall completion against the lowest operational-tenant completion rate. Cost threshold and spend pacing appear in the upper right. Adaptive sharing has higher overall completion than FCFS but a lower median access floor. Equal quotas has the lowest access floor despite an overall completion rate similar to FCFS.
