@@ -66,7 +66,17 @@ quality-equivalent service. Existing figures and hard-coded reference findings
 describe the data team's legacy outputs, not the modular engine's results.
 
 The backend accepts cleaned request CSV/Parquet files and a versioned price
-catalog. The integration adapter maps `cached_tokens` to
+catalog. Adapt the committed data-team outputs without modifying them:
+
+```bash
+python tools/adapt_reference.py \
+  --clean results/clean_requests.csv \
+  --simulation results/requests_sim.csv \
+  --prices config/prices.csv \
+  --output-dir outputs/canonical_reference
+```
+
+The integration adapter maps `cached_tokens` to
 `cached_input_tokens` and converts the price CSV's USD-per-million values to
 integer micro-USD-per-million. It does not parse raw provider JSON. The
 authoritative input and output contracts are documented in
@@ -75,10 +85,36 @@ authoritative input and output contracts are documented in
 Run the modular backend after installing `requirements.txt`:
 
 ```bash
-python -m ironviz_f26 validate-data --input results/requests_sim.csv --error-report outputs/row_errors.csv
-python -m ironviz_f26 run-experiments --input outputs/canonical_requests.csv --price-catalog outputs/catalog_micro_usd.json --output-dir outputs/modular --budget-fractions 0.5,0.7,0.85,1.0
+python -m ironviz_f26 validate-data \
+  --input outputs/canonical_reference/canonical_requests.csv \
+  --error-report outputs/canonical_reference/row_errors.csv
+python -m ironviz_f26 run-experiments \
+  --input outputs/canonical_reference/canonical_requests.csv \
+  --price-catalog outputs/canonical_reference/price_catalog_micro_usd.json \
+  --output-dir outputs/modular \
+  --budget-fractions 0.5,0.7,0.85,1.0 \
+  --reservation-mode mean
+python -m ironviz_f26 run-experiments \
+  --input outputs/canonical_reference/canonical_requests.csv \
+  --price-catalog outputs/canonical_reference/price_catalog_micro_usd.json \
+  --routing-compatibility outputs/canonical_reference/routing_compatibility.json \
+  --output-dir outputs/routing-counterfactual \
+  --budget-fractions 0.5,0.7,0.85,1.0 \
+  --policies FCFS+Routing,Adaptive+Routing \
+  --routing-eligibility 0.2,0.5,1.0 \
+  --routed-output-multipliers 0.5,0.7,1.0
 ```
 
+For the data team's 12-hour local-block bootstrap within a ±3-day window, add
+`--bootstrap-method local_12h --bootstrap-block-hours 12 --bootstrap-window-days 3`.
+`day_block` remains available for methodological sensitivity. For a strict
+all-row FCFS replay with an expanding model-level historical estimate, use
+`python tools/run_online_fcfs.py`. It starts each unseen provider/model with a
+zero-output prior, so it avoids using the first row's realized output to price
+its own reservation.
+
 The original `bash run_all.sh` continues to regenerate the legacy reference
-outputs. Do not use the reference results as validated modular results; compare
-them using the separate integration reports and explicit cost/budget semantics.
+outputs. Do not use those soft-budget outputs as validated modular results;
+compare them using `RECONCILIATION_REPORT.md` and the explicit cost/budget
+semantics. Routed completions remain counterfactual and are never represented
+as quality-equivalent service.

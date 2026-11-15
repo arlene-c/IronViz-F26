@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import asdict
+from datetime import datetime
 import json
 import math
 from pathlib import Path
@@ -85,6 +86,21 @@ def main() -> None:
         admitted = sum(event.decision == "ADMITTED" for event in events)
         rejected = sum(event.outcome == "REJECTED" for event in events)
         truncated = sum(event.outcome.startswith("TRUNCATED") for event in events)
+        first_refusal = next(
+            (
+                event for event in events
+                if event.outcome == "REJECTED" and event.estimated_cost > event.global_remaining
+            ),
+            None,
+        )
+        time_to_exhaustion = (
+            (
+                datetime.fromisoformat(first_refusal.timestamp.replace("Z", "+00:00"))
+                - datetime.fromisoformat(requests[0].timestamp.replace("Z", "+00:00"))
+            ).total_seconds()
+            if first_refusal
+            else None
+        )
         run_id = f"online-fcfs-{fraction:.2f}"
         run_metrics.append(
             {
@@ -104,7 +120,7 @@ def main() -> None:
                 "unused_budget_micro_usd": engine.ledger.global_remaining,
                 "overrun_micro_usd": sum(event.overrun for event in events),
                 "cost_per_original_completion_micro_usd": spend / completed if completed else None,
-                "time_to_budget_exhaustion_seconds": None,
+                "time_to_budget_exhaustion_seconds": time_to_exhaustion,
                 "runtime_seconds": runtime,
                 "estimator": "expanding per-provider/model mean of prior observed outputs; first-request prior=0",
                 "output_cap": args.output_cap,

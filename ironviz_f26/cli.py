@@ -168,6 +168,7 @@ def build_parser() -> argparse.ArgumentParser:
     experiments.add_argument("--routing-sigma", type=float, default=0.0)
     experiments.add_argument("--policies", type=_policy_list, default=DEFAULT_POLICIES)
     experiments.add_argument("--no-bootstrap", action="store_true")
+    experiments.add_argument("--no-traces", action="store_true")
     experiments.add_argument("--data-label", default="USER-PROVIDED CLEANED INPUT")
     experiments.add_argument("--reservation-mode", choices=("mean", "quantile", "cap"), default="mean")
     experiments.add_argument("--reservation-quantile", type=float, default=0.9)
@@ -213,6 +214,7 @@ def _config_from_args(args: argparse.Namespace, *, policies: tuple[str, ...] | N
         output_cap=args.output_cap,
         model_output_caps=args.model_output_caps,
         trace_policies=getattr(args, "trace_policies", None),
+        trace_replicates=() if getattr(args, "no_traces", False) else (0, 1),
         timeseries_stride=args.timeseries_stride,
         bootstrap_method=getattr(args, "bootstrap_method", "day_block"),
         bootstrap_window_days=getattr(args, "bootstrap_window_days", 3.0),
