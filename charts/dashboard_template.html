@@ -48,7 +48,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid #2563eb;outline-
 .plot{flex:1;min-height:0}
 svg{display:block;width:100%;height:100%;overflow:visible}
 svg text{font-family:inherit}
-.row2 .plot{height:250px}.row3 .plot{height:250px}
+.row2 .plot{height:280px}.row3 .plot{height:290px}
 .recs{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px}
 .recs li{display:grid;grid-template-columns:26px 1fr;gap:8px}
 .recs .n{font-weight:700;font-size:18px;color:var(--muted)}
@@ -103,14 +103,14 @@ footer{font-size:13.5px;color:var(--muted);display:flex;justify-content:space-be
 </section>
 
 <section class="grid row2">
-  <div class="card"><div class="step">1 · The problem <span class="tag r">From the logs</span></div><h2 id="tModel">–</h2><p class="q">Share of calls (gray) vs. share of estimated cost (dark), by model</p><div class="plot"><svg id="cModel" role="img"></svg></div></div>
-  <div class="card"><div class="step">2 · The people <span class="tag r">From the logs</span></div><h2>Four teams moved to caching and cheaper models; the two testing teams did not</h2><p class="q">Weekly % of each team's calls · <b style="color:var(--test)">testing teams</b> vs <b style="color:var(--other)">other four teams</b></p><div class="plot"><svg id="cWeek" role="img"></svg></div></div>
+  <div class="card"><div class="step">1 · The problem <span class="tag r">From the logs</span></div><h2 id="tModel">–</h2><p class="q"><b style="color:#a8a29e">■</b> calls &nbsp; <b style="color:#44403c">■</b> cost</p><div class="plot"><svg id="cModel" role="img"></svg></div></div>
+  <div class="card"><div class="step">2 · The people <span class="tag r">From the logs</span></div><h2>Four teams moved to caching and cheaper models; the two testing teams did not</h2><p class="q"><b style="color:var(--test)">Testing teams</b> vs <b style="color:var(--other)">other four</b>, by week</p><div class="plot"><svg id="cWeek" role="img"></svg></div></div>
   <div class="card"><div class="step">3 · The test <span class="tag s">Simulated</span></div><h2 id="tDrain">–</h2><p class="q" id="qDrain">Budget left from Oct 7 to Oct 30</p><div class="plot"><svg id="cDrain" role="img"></svg></div></div>
 </section>
 
 <section class="grid row3">
   <div class="card"><div class="step">4 · Who loses <span class="tag s">Simulated</span></div><h2 id="tTeams">–</h2><p class="q" id="qTeams">–</p><div class="plot"><svg id="cTeams" role="img"></svg></div></div>
-  <div class="card"><div class="step">5 · The answer <span class="tag s">Simulated</span></div><h2>Cost threshold and spend pacing hold up best as the budget shrinks</h2><p class="q">% of requests fully completed · click a cell to select it</p><div class="plot"><svg id="cHeat" role="img"></svg></div></div>
+  <div class="card"><div class="step">5 · The answer <span class="tag s">Simulated</span></div><h2>Cost threshold and spend pacing hold up best as the budget shrinks</h2><p class="q">% fully completed · <b style="color:#047857">green outline</b> = clear winner when the budget is cut</p><div class="plot"><svg id="cHeat" role="img"></svg></div></div>
   <div class="card"><div class="step">6 · What CMU should do</div><h2>Recommendations</h2>
     <ol class="recs" id="recs"></ol></div>
 </section>
@@ -208,19 +208,18 @@ POL.forEach(p=>{const x=document.createElement("button");x.className="chip";x.da
 
 function kpis(){const c=cell(),f=cell("FCFS"),m=D.mc.pol[S.rule];
  document.getElementById("kDone").textContent=p1(c.doneRate);
- document.getElementById("kDoneD").textContent=`${f0(c.done)} of ${f0(c.n)} requests · full October replay`;
+ document.getElementById("kDoneD").textContent=`${f0(c.done)} of ${f0(c.n)} requests`;
  document.getElementById("kServed").textContent=p1(pct(c.done+c.trunc,c.n));
- document.getElementById("kServedD").textContent=`${p1(pct(c.trunc,c.n))} were served but cut short by the 1,024-token limit`;
- if(S.rule==="FCFS"){document.getElementById("kVs").textContent="Baseline";document.getElementById("kVsD").textContent="Every other rule is compared with this one"}
- else if(S.budget===70){document.getElementById("kVs").textContent=pts(m.dmed);document.getElementById("kVsD").textContent=`${pts(m.dlo)} to ${pts(m.dhi)} in 90% of ${D.mc.months} simulated months; better in ${m.wins} of ${D.mc.months}`}
- else{const d=c.doneRate-f.doneRate;document.getElementById("kVs").textContent=pts(d);document.getElementById("kVsD").textContent="Single replay; ranges were simulated at 70% only"}
+ document.getElementById("kServedD").textContent=`incl. ${p1(pct(c.trunc,c.n))} cut short by the token limit`;
+ if(S.rule==="FCFS"){document.getElementById("kVs").textContent="Baseline";document.getElementById("kVsD").textContent="The rule others are compared with"}
+ else if(S.budget===70){document.getElementById("kVs").textContent=pts(m.dmed);document.getElementById("kVsD").textContent=`better in ${m.wins} of ${D.mc.months} simulated months (${pts(m.dlo)} to ${pts(m.dhi)})`}
+ else{const d=c.doneRate-f.doneRate;document.getElementById("kVs").textContent=pts(d);document.getElementById("kVsD").textContent="One replay (ranges at 70% only)"}
  document.getElementById("kLeft").textContent=p1(c.left);
- document.getElementById("kLeftD").textContent=`${usd(c.leftUsd)} of ${usd(D.refUsd*S.budget/100)} never spent`;
+ document.getElementById("kLeftD").textContent=`${usd(c.leftUsd)} never spent`;
  document.getElementById("kTest").textContent=`${D.kpi.testCalls}% → ${D.kpi.testTokens}%`;
- let msg=`At a ${S.budget}% budget, ${PN[S.rule].toLowerCase()} fully completes ${p1(c.doneRate)} of requests in the October replay`;
+ let msg=`${PN[S.rule]} at a ${S.budget}% budget: ${p1(c.doneRate)} of requests fully completed`;
  if(S.rule!=="FCFS"){const d=c.done-f.done;msg+=d===0?", the same as first come, first served.":`, ${d>0?f0(d)+" more":f0(-d)+" fewer"} than first come, first served.`}else msg+=".";
- if(S.budget===70)msg+=` Across ${D.mc.months} simulated months it completes ${m.lo}–${m.hi}%.`;
- if(c.left>=5)msg+=` It leaves ${usd(c.leftUsd)} unspent.`;
+ if(c.left>=5)msg+=` ${usd(c.leftUsd)} left unspent.`;
  document.getElementById("insight").textContent=msg;}
 
 function models(){const{s,w,h}=box("cModel");const ms=D.models.slice().sort((a,b)=>b[2]-a[2]);const L=118,R=w-58,T=2,rh=(h-T-22)/ms.length,X=v=>L+v/60*(R-L);
@@ -247,7 +246,7 @@ function week(){const{s,w,h}=box("cWeek");const gap=20,pw=(w-gap)/2,T=22,B=h-22,
 
 function drain(){const{s,w,h}=box("cDrain");const L=40,R=w-104,T=8,B=h-22,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(R-L),Y=v=>B-v/100*(B-T),c=cell();
  document.getElementById("tDrain").textContent=c.left>=5?`${PN[S.rule]} leaves ${usd(c.leftUsd)} unspent at a ${S.budget}% budget`:S.rule==="FCFS"&&S.budget<100?`First come, first served spends everything, so late requests are refused`:`${PN[S.rule]} uses the whole ${S.budget}% budget by Oct 30`;
- document.getElementById("qDrain").textContent=`Budget left from Oct 7 to Oct 30 · ${PN[S.rule]} highlighted, other rules in gray`;
+ document.getElementById("qDrain").textContent=`Budget left, Oct 7–30 · other rules in gray`;
  [0,50,100].forEach(v=>{el(s,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});tx(s,L-6,Y(v)+4,v+"%",{a:"end",fill:MUT,size:13})});
  [7,14,21,28].forEach(d=>tx(s,X(d),h-4,"Oct "+d,{a:"middle",fill:MUT,size:13}));
  const ends=[];POL.filter(p=>p!==S.rule).concat([S.rule]).forEach(p=>{const tr=cell(p).trace,on=p===S.rule;
@@ -267,7 +266,7 @@ function teams(){const{s,w,h}=box("cTeams");const c=cell(),f=cell("FCFS");const 
  const lowest=c.teams.indexOf(Math.min(...c.teams));
  document.getElementById("tTeams").textContent=S.rule==="FCFS"?`Under first come, first served, ${D.teams[lowest]} completes the fewest requests (${rd(c.teams[lowest])}%)`:
   worst>=0&&wd<=-1?`${PN[S.rule]} ${c.done>f.done?"helps most teams but drops":"drops"} ${D.teams[worst]} to ${rd(c.teams[worst])}%`:`${PN[S.rule]} helps every team compared with first come, first served`;
- document.getElementById("qTeams").textContent=`% of each team's requests fully completed at ${S.budget}%`+(S.rule==="FCFS"?"":" · black tick = first come, first served");
+ document.getElementById("qTeams").textContent=`% fully completed at ${S.budget}%`+(S.rule==="FCFS"?"":" · tick = first come, first served");
  [0,10,20,30,40,50].forEach(v=>{el(s,"line",{x1:X(v),x2:X(v),y1:top,y2:h-20,stroke:LINE});tx(s,X(v),h-4,v+"%",{a:"middle",fill:MUT,size:13})});
  D.teams.forEach((t,i)=>{const y=top+i*rh+rh*0.16,bh=rh*0.66,v=c.teams[i],test=D.testing[i],bad=i===worst&&wd<=-1&&S.rule!=="FCFS";
   tx(s,L-8,y+bh/2+5,t,{a:"end",fill:test?TEST:INK,w:test?700:400,size:13.5});
@@ -284,6 +283,7 @@ function heat(){const{s,w,h}=box("cHeat");const L=150,T=22,cw=(w-L-4)/4,ch=(h-T-
   BUD.forEach((b,j)=>{const q=cell(p,b),v=q.doneRate,on=p===S.rule&&b===S.budget,k=ci(v);
    const r=el(s,"rect",{x:L+j*cw+2,y:T+i*ch+2,width:cw-4,height:ch-4,rx:4,fill:heatC(v),stroke:on?INK:"none","stroke-width":on?3:0,tabindex:0,role:"button","aria-label":`${PN[p]} at ${b}% budget: ${v.toFixed(1)}% fully completed`,style:"cursor:pointer"});
    tx(s,L+j*cw+cw/2,T+i*ch+ch/2+5,v.toFixed(1)+"%",{a:"middle",fill:heatT(v)>.45?"#fff":"#1e3a8a",w:700,size:14,x:{"pointer-events":"none"}});
+   if(POL.every(o=>o===p||cell(o,b).doneRate<v))el(s,"rect",{x:L+j*cw+3.5,y:T+i*ch+3.5,width:cw-7,height:ch-7,rx:3,fill:"none",stroke:"#22c55e","stroke-width":3,"pointer-events":"none"});
    const go=()=>{S.rule=p;S.budget=b;render()};r.addEventListener("click",go);r.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}});
    hover(r,`<b>${PN[p]}</b>, ${b}% budget<br>${f0(q.done)} fully completed (${p1(v)})<br>${f0(q.trunc)} cut short · ${f0(q.rej)} refused`+(b===70?`<br>Simulated months: ${D.mc.pol[p].lo}–${D.mc.pol[p].hi}%`:""))})});
  s.setAttribute("aria-label","Heatmap of requests fully completed for each rule and budget. "+POL.map(p=>PN[p]+": "+BUD.map(b=>cell(p,b).doneRate.toFixed(1)+"%").join(", ")).join("; "));}
@@ -297,22 +297,20 @@ function staticText(){const M=D.mc.pol,mo=D.mc.months,q70=cell("Quotas",70),W=D.
   <li><span class="n">4</span><div><b>Lower the cost per request first.</b><span>o1-preview is ${rd(o1[1])}% of calls but ${rd(o1[2])}% of cost; four teams raised caching to ${cLo}–${cHi}% of calls.</span></div></li>`;
  const R=D.rows;
  document.getElementById("how").innerHTML=`
-  <li><b>${f0(R.total)} API calls → ${f0(R.used)} used.</b> We dropped ${f0(R.n400)} malformed requests (HTTP 400) and ${f0(R.n429)} rate-limit errors (HTTP 429), which were not billed, and ${R.bad} rows with negative token counts.</li>
-  <li><b>Cost</b> = tokens × OpenAI and Google list prices, about ${usd(D.cost)} for October.</li>
-  <li><b>Simulation:</b> we replay requests from Oct 7–30 in arrival order, and a budget rule approves or refuses each one based on its estimated cost and the money left. Oct 1–6 is used to set up the rules.</li>
-  <li><b>Budget comparison:</b> the full replay (${f0(D.evalN)} requests), one run per rule and budget. It caps answers at 1,024 tokens, which cuts off about 69% of requests even with a full budget, so we also show "served at all."</li>
-  <li><b>Two token limits:</b> the October replay uses a 1,024-token limit; the ${D.mc.months} simulated months use 8,192, so their completion rates are higher.</li>
-  <li><b>Ranges:</b> ${mo} simulated months at 70%, each about ${f0(Math.round(D.mc.n/100)*100)} requests resampled from October, run with the updated simulator.</li>`;
+  <li><b>${f0(R.total)} calls → ${f0(R.used)} used.</b> Dropped ${f0(R.n400)} malformed (HTTP 400), ${f0(R.n429)} rate-limited (HTTP 429) and ${R.bad} invalid rows.</li>
+  <li><b>Cost</b> = tokens × list prices (${usd(D.cost)} for October).</li>
+  <li><b>Simulation:</b> replay Oct 7–30 in arrival order; a rule approves or refuses each request. Oct 1–6 sets up the rules.</li>
+  <li><b>Two result sets:</b> the full replay (${f0(D.evalN)} requests, 1,024-token limit) and ${D.mc.months} simulated months at 70% (about ${f0(Math.round(D.mc.n/100)*100)} requests each, 8,192-token limit, so higher completion rates).</li>`;
  document.getElementById("wrong").innerHTML=`
-  <li><b>The data is synthetic.</b> It comes from the competition, not real CMU usage.</li>
-  <li><b>Prices are assumptions.</b> We used published list prices; the logs don't record the actual bill.</li>
-  <li><b>We count completed requests, not answer quality.</b> A cut-short answer may still be useful, and a completed one may not be.</li>
-  <li><b>Team groups are our reading of team names.</b> The logs have no individual users.</li>`;
- document.getElementById("edge").innerHTML=`<b style="color:${INK}">Edge case:</b> equal quotas look harmless on average (${pts(M.Quotas.dmed)} in the simulated months), but engineering-dev loses ${Math.abs(M.Quotas.teams[ENG]).toFixed(1)} points, the biggest drop for any team under any rule.`;
+  <li><b>Synthetic data,</b> not real CMU usage.</li>
+  <li><b>Assumed prices:</b> list prices, not the actual bill.</li>
+  <li><b>No quality measure:</b> we count completed requests, not useful answers.</li>
+  <li><b>Team groups are our reading</b> of team names; no individual users.</li>`;
+ document.getElementById("edge").innerHTML=`<b style="color:${INK}">Edge case:</b> equal quotas look even overall (${pts(M.Quotas.dmed)}) but cut engineering-dev by ${Math.abs(M.Quotas.teams[ENG]).toFixed(1)} points.`;
  document.getElementById("impact").innerHTML=`
-  <li><b>Energy:</b> roughly ${rd(R.used*0.24/1000)}–${rd(R.used*0.42/1000)} kWh for October's ${f0(R.used)} calls, using published estimates of 0.24–0.42 Wh per prompt. These prompts are long, so the true figure is likely higher.</li>
-  <li><b>Fairness:</b> every rule picks who gets cut off. The OECD AI Principles call for fair treatment, so the rule should protect production work and not quietly drop one team.</li>
-  <li><b>Transparency:</b> report each team's cost and refused requests every month, so the rule can be checked.</li>`;
+  <li><b>Energy:</b> about ${rd(R.used*0.24/1000)}–${rd(R.used*0.42/1000)} kWh for October (0.24–0.42 Wh per prompt; likely higher for long prompts).</li>
+  <li><b>Fairness (OECD AI Principles):</b> a rule should not quietly drop one team.</li>
+  <li><b>Transparency:</b> report each team's cost and refusals monthly.</li>`;
  document.getElementById("fData").textContent=`Data: CMU Student IronViz Fall 2026 telemetry (synthetic), Oct 1–30, 2026. Costs use OpenAI and Google list prices. 100% budget = ${usd(D.refUsd)}, the modeled cost of serving every request from Oct 7 to Oct 30.`;
  document.getElementById("gRef").textContent=Math.round(D.refUsd).toLocaleString();}
 

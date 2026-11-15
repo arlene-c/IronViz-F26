@@ -66,6 +66,20 @@ svg.ic{width:14px;height:14px;flex:none;display:inline-block;margin:0}
 .ov p{font-size:16px;line-height:1.62;margin:0 0 20px;color:var(--ink2)}
 .ov p b{color:var(--ink);font-weight:600}
 .src{display:grid;grid-template-columns:auto 1fr;gap:10px 14px;align-items:baseline;font-size:15px;color:var(--ink2);margin-top:22px}
+.answer{border-left:4px solid #047857;background:#f0fdf4;border-radius:0 12px 12px 0;padding:16px 20px}
+.answer .big{font-size:26px;font-weight:700;letter-spacing:-.015em;color:#065f46;margin:2px 0 6px}
+.answer p{margin:0;font-size:16.5px;line-height:1.55;color:var(--ink2)}
+.lab{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);font-weight:600;margin-bottom:8px}
+.answer .lab{color:#047857;margin-bottom:0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.st{border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;position:relative}
+.st .sn{width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;font-weight:700;display:grid;place-items:center;margin-bottom:6px}
+.st b{font-size:17px}.st span:last-child{font-size:14px;color:var(--ink2)}
+.ov .src{margin-top:0;font-size:14px}
+.more summary{cursor:pointer;font-weight:600;font-size:15px;color:var(--ink)}
+.more p{font-size:15px;line-height:1.6;margin:10px 0 0;color:var(--ink2)}
+.next{margin:18px 0 0;font-size:16px;color:var(--ink2)}.next b{color:var(--ink)}
+.ov .k .n{font-size:40px}
 .kgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-content:start}
 .k{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
 .k .n{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.05}
@@ -180,23 +194,29 @@ function habits(){const W=D.weekly,ot=OTH.map(i=>D.teams[i]),ex=IDX.exp.map(i=>D
 
 /* ===================== tabs ===================== */
 const CH=[
-{label:"Overview",title:()=>`How should CMU share an AI budget that is smaller than demand?`,
- draw:v=>{v.style.gridTemplateRows="1fr";v.classList.add("ov");const b=body(v,"1.2fr 1fr");b.style.gap="48px";const k=D.kpi;
-  const L=document.createElement("div");L.innerHTML=`
-   <h3>The problem</h3>
-   <p>Six teams at CMU share AI services from OpenAI and Google, and every request is billed by the number of tokens it uses. Spending is uneven: one model and two teams account for a large part of the bill. If CMU set an AI budget below what teams actually use, some requests would have to be refused. <b>We ask which rule for sharing a limited budget completes the most requests, and which teams pay the price under each rule.</b></p>
-   <h3>Our approach</h3>
-   <p>We started from one month of usage logs, which record the team, model and token counts of every request. We priced each request at the providers' list prices to estimate what October cost. We then built a simulation that replays the requests from October 7 to 30 in the order they arrived. Before each request is answered, a budget rule decides whether to approve it, based on its estimated cost and the money left. We ran <b>six rules at four budget levels</b>, from 50% to 100% of the cost of serving everyone, and counted how many requests each rule completed in full and how each team fared. The first week of October was held back to set up the rules, such as each team's share, so that no rule could see the future. Finally, to check whether a ranking would hold up in a slightly different month, we ran a <b>Monte Carlo study</b>: 49 simulated months at a 70% budget, each built by resampling 12-hour blocks of October's requests.</p>
-   <h3>Why a simulation</h3>
-   <p>A budget rule can't be tried out on live traffic without refusing real work. Replaying the same month under every rule means each one faces exactly the same requests, so any difference in the results comes from the rule itself.</p>`;b.appendChild(L);
+{label:"Overview",title:()=>`Who should get AI when CMU's budget can't cover every request?`,
+ dek:()=>`AI costs keep growing while budgets stay fixed, so a rule has to decide which requests get cut off. We tested six rules on a month of usage from six campus teams.`,
+ draw:v=>{v.style.gridTemplateRows="1fr";v.style.alignSelf="start";v.classList.add("ov");const b=body(v,"1.15fr 1fr");b.style.gap="40px";const k=D.kpi,T=D.mc.pol.Threshold,c70=D.cells.Threshold_70,f70=D.cells.FCFS_70;
+  const L=document.createElement("div");L.style.cssText="display:flex;flex-direction:column;gap:22px";L.innerHTML=`
+   <div class="answer"><div class="lab">Our answer</div><div class="big">Cap the cost of single requests</div>
+    <p>A <b>cost threshold</b> rule completed the most requests: ${f0(c70.done-f70.done)} more than first come, first served at a 70% budget, and <b>${T.med>0?"+":""}${T.med.toFixed(1)} points</b> more in <b>${T.wins} of ${D.mc.resamples}</b> simulated months.</p></div>
+   <div><div class="lab">How we tested it</div><div class="steps">
+    <div class="st"><span class="sn">1</span><b>${f0(D.rows?D.rows.used:192847)} requests</b><span>October logs, priced at list rates</span></div>
+    <div class="st"><span class="sn">2</span><b>6 rules × 4 budgets</b><span>Replayed Oct 7–30 in arrival order</span></div>
+    <div class="st"><span class="sn">3</span><b>${D.mc.resamples} simulated months</b><span>Checked the ranking holds</span></div></div></div>
+   <div class="src"><span class="tag log">From the logs</span><span>Measured from the October usage logs (synthetic competition data).</span>
+    <span class="tag sim">Simulated</span><span>Replaying October under a budget rule.</span>
+    <span class="tag pilot">Simulated months</span><span>49 resampled versions of October, to show how much results vary.</span></div>
+   <details class="more"><summary>Read the full method</summary>
+    <p>We started from one month of usage logs, which record the team, model and token counts of every request, and priced each request at the providers' list prices. A simulation then replays the requests from October 7 to 30 in the order they arrived. Before each request is answered, a budget rule decides whether to approve it, based on its estimated cost and the money left. The first week of October was held back to set up the rules, so no rule could see the future.</p>
+    <p>A budget rule can't be tried on live traffic without refusing real work. Replaying the same month under every rule means each faces exactly the same requests, so any difference comes from the rule itself. To check the ranking would hold in a slightly different month, we built 49 simulated months by resampling 12-hour blocks of October's requests.</p></details>`;b.appendChild(L);
   const R=document.createElement("div");R.innerHTML=`<div class="kgrid">
-   <div class="k"><div class="n" data-c>0</div><div class="l">API calls in October</div><div class="c">They came from six teams and went to OpenAI and Google Gemini models between October 1 and 30.</div></div>
-   <div class="k"><div class="n">${k.success}%</div><div class="l">of calls succeeded</div><div class="c">The other ${f0(k.n400+k.n429)} were malformed (${f0(k.n400)}) or hit a rate limit (${f0(k.n429)}). Failed calls are not billed.</div></div>
-   <div class="k"><div class="n">${usd(k.cost)}</div><div class="l">estimated October cost</div><div class="c">We multiplied token counts by list prices, because the logs do not record the actual bill.</div></div>
-   <div class="k hl"><div class="n">${k.testCalls}% → ${k.testTokens}%</div><div class="l">testing teams' share of calls → tokens</div><div class="c">The two testing teams send ${k.testCalls}% of calls but use ${k.testTokens}% of all tokens, because their prompts are ${promptRatio().toFixed(1)} times larger.</div></div></div>
-   <div class="src"><span class="tag log">From the logs</span><span>These numbers are measured directly from the October usage logs, which are synthetic data provided by the CMU IronViz competition.</span>
-    <span class="tag sim">Simulated</span><span>These numbers come from replaying October under a budget rule.</span>
-    <span class="tag pilot">Simulated months</span><span>These numbers come from 49 resampled versions of October (5,000 requests each) and show how much the results vary.</span></div>`;b.appendChild(R);
+   <div class="k"><div class="n" data-c>0</div><div class="l">API calls in October</div><div class="c">Six teams, OpenAI and Gemini models.</div></div>
+   <div class="k"><div class="n">${usd(k.cost)}</div><div class="l">estimated cost</div><div class="c">Tokens × list prices.</div></div>
+   <div class="k hl"><div class="n">${rd(o1()[1])}% → ${rd(o1()[2])}%</div><div class="l">o1-preview: calls → cost</div><div class="c">One model is half the bill.</div></div>
+   <div class="k hl"><div class="n">${k.testCalls}% → ${k.testTokens}%</div><div class="l">testing teams: calls → tokens</div><div class="c">Their prompts are ${promptRatio().toFixed(1)}× larger.</div></div></div>
+   <p class="next">Start with <b>Where the money goes →</b></p>`;b.appendChild(R);
+  R.querySelector(".next").style.cursor="pointer";R.querySelector(".next").onclick=()=>go(1);
   const n=R.querySelector("[data-c]");animate(1200,p=>n.textContent=f0(k.calls*ease(p)))}},
 
 {label:"Where the money goes",title:()=>`A small share of requests drives most of the cost`,

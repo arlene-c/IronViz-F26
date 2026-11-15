@@ -81,5 +81,6 @@ D["mc"] = {"resamples": int(pe.resamples.max()), "n": int(res.request_count.medi
                        "wins": int(pe.loc[p, "wins"]), "ties": int(pe.loc[p, "ties"]), "losses": int(pe.loc[p, "losses"]),
                        "medRate": round(float(ps.loc[p, "median_completion_pct"]), 2), "medTrunc": round(float(ps.loc[p, "median_truncation_pct"]), 2)}
                    for p in POL}}
+D["rows"] = {"total": s["rows_total"], "used": s["rows_used"]}
 open(OUT, "w").write(open(TPL).read().replace("/*__DATA__*/null", json.dumps(D)))
 print("ok", OUT)
