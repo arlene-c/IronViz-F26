@@ -9,4 +9,7 @@ python src/ironviz_experiments.py \
 python charts/make_static.py results/clean_requests.csv results/results.csv results/trace.csv figures/static
 python charts/make_animated.py results/clean_requests.csv results/results.csv results/trace.csv \
   charts/anim_template.html figures/animated/animated_charts.html
-echo "Done. Results in results/, figures in figures/."
+# Final dashboard and story, built from the saved results in results/presentation
+python charts/make_dashboard.py results charts/dashboard_template.html figures/dashboard.html
+python charts/make_story.py results charts/story_template.html figures/story.html
+echo "Done. Results in results/, figures in figures/ (dashboard.html and story.html are the final visuals)."

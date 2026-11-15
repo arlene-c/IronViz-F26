@@ -53,7 +53,7 @@ for why count gains do not establish useful output or institutional superiority.
 
 ## Chart conventions
 
-- `_pct` columns are already 0?100 percentages; do not multiply again.
+- `_pct` columns are already 0–100 percentages; do not multiply again.
 - `_pp` columns are percentage-point differences, not relative percent changes.
 - USD columns are already dollars; no further micro-unit conversion is needed.
 - Use `completed_requests` for full completion; never label admissions fully served.

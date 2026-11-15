@@ -117,6 +117,8 @@ const D=/*__DATA__*/null;
 const NS="http://www.w3.org/2000/svg",cv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const INK=cv("--ink"),INK2=cv("--ink2"),SOFT=cv("--soft"),LINE=cv("--line"),TEST=cv("--test"),OTHER=cv("--other"),NOTE=cv("--note");
 const RED="#b91c1c",GREEN="#15803d";
+const heatT=v=>Math.pow(Math.max(0,Math.min(1,(v-17)/(31.5-17))),1.6),heatC=v=>{const t=heatT(v),a=[239,246,255],b=[30,58,138];return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(",")})`};
+
 const POL=["FCFS","Quotas","TrainingQuotas","Adaptive","Pacing","Threshold"];
 const PN={FCFS:"First come, first served",Quotas:"Equal quotas",TrainingQuotas:"Training-week quotas",Adaptive:"Adaptive sharing",Pacing:"Spend pacing",Threshold:"Cost threshold"};
 const DEF={FCFS:"Approves every request until the money runs out.",Quotas:"Gives each of the six teams an equal share.",TrainingQuotas:"Shares money by each team's first-week spending.",
@@ -193,7 +195,7 @@ const CH=[
    <div class="k"><div class="n">${usd(k.cost)}</div><div class="l">estimated October cost</div><div class="c">We multiplied token counts by list prices, because the logs do not record the actual bill.</div></div>
    <div class="k hl"><div class="n">${k.testCalls}% → ${k.testTokens}%</div><div class="l">testing teams' share of calls → tokens</div><div class="c">The two testing teams send ${k.testCalls}% of calls but use ${k.testTokens}% of all tokens, because their prompts are ${promptRatio().toFixed(1)} times larger.</div></div></div>
    <div class="src"><span class="tag log">From the logs</span><span>These numbers are measured directly from the October usage logs, which are synthetic data provided by the CMU IronViz competition.</span>
-    <span class="tag sim">Simulated</span><span>These numbers come from replaying October under a budget rule. They are provisional and may change as we refine the model.</span>
+    <span class="tag sim">Simulated</span><span>These numbers come from replaying October under a budget rule.</span>
     <span class="tag pilot">Simulated months</span><span>These numbers come from 49 resampled versions of October (5,000 requests each) and show how much the results vary.</span></div>`;b.appendChild(R);
   const n=R.querySelector("[data-c]");animate(1200,p=>n.textContent=f0(k.calls*ease(p)))}},
 
@@ -282,8 +284,8 @@ const CH=[
    ci=x=>Math.max(0,Math.min(8,Math.round((x-17)/(31.5-17)*8)));
   tx(s,L-12,17,"Budget",{a:"end",fill:SOFT,size:13,w:600});BUD.forEach((bb,j)=>tx(s,L+j*cw+cw/2,17,bb+"%",{a:"middle",fill:INK,size:15,w:700}));const cells=[];
   POL.forEach((p,i)=>{const y=T+i*ch;tx(s,L-12,y+ch/2+5,PN[p],{a:"end",fill:INK,w:500,size:15});
-   BUD.forEach((bb,j)=>{const q=D.cells[p+"_"+bb],val=q.rate,k=ci(val),r=el(s,"rect",{x:L+j*cw+2,y:y+2,width:cw-4,height:ch-4,rx:6,fill:RAMP[k],opacity:0});
-    const t=tx(s,L+j*cw+cw/2,y+ch/2+7,val.toFixed(1)+"%",{a:"middle",fill:k>=5?"#fff":"#1e3a8a",w:700,size:18,x:{opacity:0}});cells.push([r,t,i*4+j]);
+   BUD.forEach((bb,j)=>{const q=D.cells[p+"_"+bb],val=q.rate,k=ci(val),r=el(s,"rect",{x:L+j*cw+2,y:y+2,width:cw-4,height:ch-4,rx:6,fill:heatC(val),opacity:0});
+    const t=tx(s,L+j*cw+cw/2,y+ch/2+7,val.toFixed(1)+"%",{a:"middle",fill:heatT(val)>.45?"#fff":"#1e3a8a",w:700,size:18,x:{opacity:0}});cells.push([r,t,i*4+j]);
     hover(r,`<b>${PN[p]}</b> at ${bb}% budget<br>${f0(q.done)} completed in full (${val.toFixed(1)}%)<br>${f0(q.trunc)} cut short · ${f0(q.rej)} refused`)})});
   animate(900,p=>cells.forEach(([r,t,k])=>{const o=seg(p,k/24*.6,k/24*.6+.4);r.setAttribute("opacity",o);t.setAttribute("opacity",o)}));
   setTimeout(()=>note(s,L+cw*2,h-4,L+cw*3.45,T+ch*6+2,"these two barely drop",{c:GREEN,bend:.3,size:24}),REDUCE?0:700);
@@ -293,7 +295,7 @@ const CH=[
    <li><span class="n">2</span><div><b>Don't lock money into equal team shares.</b><span>At a 70% budget, equal quotas complete the fewest requests and leave ${usd(C.Quotas_70.leftUsd)} unspent, because money set aside for a quiet team can't be used by a busy one.</span></div></li>
    <li><span class="n">3</span><div><b>When teams share money, check who pays.</b><span>Adaptive sharing completes ${f0(C.Adaptive_70.done-C.FCFS_70.done)} more requests than first come, first served at 70%, but engineering-dev completes ${f0(C.FCFS_70.teamsDone[eng]-C.Adaptive_70.teamsDone[eng])} fewer.</span></div></li>
    <li><span class="n">4</span><div><b>Look at the output limit before the budget.</b><span>Even with the full budget, ${rd(pctOf(full.trunc,full.n))}% of requests are cut short by the 1,024-token output limit, which matters more than any budget rule.</span></div></li></ol>
-   <p class="caveat"><b style="color:${INK}">These results are provisional.</b> Each October setting was simulated once on synthetic data. Across 49 simulated months (see Advanced simulation), cost threshold, spend pacing and adaptive sharing beat first come, first served every time. We also did not test sending requests to cheaper models. The 100% budget is ${usd(D.sim.refUsd)}, the modeled cost of serving every request from October 7 to 30.</p>`;b.appendChild(g)}},
+   <p class="caveat">Each October setting was simulated once on synthetic data. Across 49 simulated months (see Advanced simulation), cost threshold, spend pacing and adaptive sharing beat first come, first served every time. We also did not test sending requests to cheaper models. The 100% budget is ${usd(D.sim.refUsd)}, the modeled cost of serving every request from October 7 to 30.</p>`;b.appendChild(g)}},
 
 {label:"Advanced simulation",title:()=>`A closer look at the simulation`,
  dek:()=>SIM.adv==="rules"?`This view is for readers who want more detail. Pick a rule to compare it with first come, first served team by team, and see how every request ends: completed in full, cut short by the 1,024-token output limit, or refused for lack of money.`:`One replay of October gives one ranking, but a slightly different month might rank the rules differently. To test this, we built ${D.mc.resamples} simulated months, each about ${f0(Math.round(D.mc.n/100)*100)} requests resampled in 12-hour blocks from October, and compared every rule with first come, first served on the same requests at a ${D.mc.budget}% budget.`,

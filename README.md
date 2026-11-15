@@ -8,7 +8,7 @@
 Fall 2026 project examines that question through synthetic OpenAI and Gemini
 telemetry, modeled inference costs, and six allocation policies. It connects
 usage analysis with an auditable simulator to show how a policy can increase
-completed requests while shifting access between teams?or leave money unused
+completed requests while shifting access between teams—or leave money unused
 while requests are denied.
 
 ## The problem
@@ -23,7 +23,7 @@ operational teams, and budget utilization**.
 
 | Scope | Records |
 |---|---:|
-| Synthetic API telemetry, October 1?30, 2026 | 202,650 |
+| Synthetic API telemetry, October 1–30, 2026 | 202,650 |
 | Eligible successful requests | 192,847 |
 | Operational tenants | 6 |
 | Historical comparison: training requests | 38,569 |
@@ -40,12 +40,13 @@ modeled reference expenditure is **$5,710.576193**; the evaluation reference is
    adaptive sharing, pacing, and a cost threshold.
 3. **Account explicitly:** reserve before execution, settle modeled costs, and
    distinguish completed, truncated, and rejected requests.
-4. **Explore sensitivity:** compare policies on identical resampled workloads
-   in a small, separately labeled synthetic Monte Carlo pilot.
+4. **Test stability:** run all six policies on 49 simulated months, each about
+   5,000 October requests resampled in 12-hour blocks, at a 70% budget.
 
-## What the historical replay shows
+## What the October replay shows
 
-At a modeled **70% evaluation budget ($3,079.115819)**:
+We replayed all **154,278 evaluation requests** (October 7–30) under six rules at
+50%, 70%, 85% and 100% budgets. At a modeled **70% budget ($3,079.12)**:
 
 | Policy | Fully completed requests | Unused modeled budget |
 |---|---:|---:|
@@ -63,10 +64,17 @@ At a modeled **70% evaluation budget ($3,079.115819)**:
 - **A small request class dominates modeled cost.** Across the eligible month,
   o1-preview accounts for 5.33% of calls and 50.73% of estimated expenditure.
 
-The policy table preserves **pre-correction, provisional experiment results**.
-Mean reservations and a 1,024-token output cap cause substantial truncation even
-at a 100% reference budget. These numbers describe modeled trade-offs; they do
-not establish greater answer utility or the best policy for CMU.
+The policy table shows **results from the October replay**. The replay uses a
+1,024-token output limit and reserves an average answer length, so many admitted
+requests are cut short even at a 100% budget. The 49 simulated months use an
+8,192-token limit, so their completion rates are higher.
+
+**The answer holds across 49 simulated months.** Cost threshold completes a median
+**+12.3 percentage points** more requests than first come, first served (+11.7 to
++12.7 in 90% of months) and spend pacing **+10.2 points**; both do better in all 49
+months. Adaptive sharing gains +4.9 points but lowers engineering-dev by 6.4 points
+in every month. Equal quotas is close to first come, first served overall (+0.3
+points, better in 31 of 49) while cutting engineering-dev by 15.6 points.
 
 ## Why it matters
 
@@ -83,11 +91,13 @@ chart suggestions, joins, and caveats.
 
 | Chart-ready dataset | What it supports |
 |---|---|
-| [Policy ? budget](results/presentation/policy_budget_summary.csv) | All 24 historical runs: outcomes, spending, unused money, FCFS differences |
+| [Policy × budget](results/presentation/policy_budget_summary.csv) | All 24 historical runs: outcomes, spending, unused money, FCFS differences |
 | [Tenant trade-offs at 70%](results/presentation/tenant_tradeoffs_70pct.csv) | Winners and losers across six tenants and policies |
 | [Bootstrap methods at 70%](results/presentation/bootstrap_methods_70pct.csv) | Separate replay and single-resample probes by method |
-| [Monte Carlo summary](results/presentation/monte_carlo_pilot_summary.csv) | Paired medians, dispersion, wins/ties/losses, ranking reversals |
-| [Monte Carlo replicates](results/presentation/monte_carlo_pilot_replicates.csv) | All 90 pilot runs: replay plus 29 resamples for three policies |
+| [Monte Carlo policy summary](results/presentation/monte_carlo/policy_summary.csv) | Six policies over 49 simulated months: completion, rejection, truncation |
+| [Monte Carlo paired effects](results/presentation/monte_carlo/paired_effects.csv) | Each policy minus first come, first served: median, ranges, wins |
+| [Monte Carlo team outcomes](results/presentation/monte_carlo/tenant_outcomes.csv) | Each team's change under each policy across the 49 months |
+| [Monte Carlo runs](results/presentation/monte_carlo/replicate_results.csv) | All 300 runs: replay plus 49 resamples for six policies |
 
 See the [data dictionary](results/presentation/data_dictionary.md) and
 [source provenance](results/presentation/provenance.json). Original historical
@@ -100,16 +110,19 @@ modular results. A descriptive preview:
 
 ![Six teams differ in prompt size, premium-model use and caching.](figures/static/04_team_fingerprints_2D.png)
 
-## Monte Carlo: a separate synthetic exploration
+## Monte Carlo: 49 simulated months
 
-The completed pilot compares FCFS, Adaptive and Pacing on **29 paired workload
-resamples plus a separate replay**, using 2,000 fictional source requests.
-Pacing's median completion advantage is **+11.75 percentage points** over FCFS;
-Adaptive's is **?0.125 points**, reversing its positive replay ordering in 16 of
-29 draws. These are conditional synthetic outcomes, not full-data confidence
-intervals or evidence of institutional policy superiority.
+To check whether the replay's ranking holds in a slightly different month, we
+built **49 simulated months**. Each one samples about 5,000 October requests in
+proportion to teams, models and dates, resamples them in 12-hour blocks, and runs
+all six policies on the same requests at a 70% budget with the updated simulator.
+Cost threshold > spend pacing > adaptive sharing held in all 49 months, and all
+three beat first come, first served every time. Equal quotas beat it in 31 months
+and lost in 18. Ranges describe how much results move between months; they are
+not formal confidence intervals. Details are in the
+[study README](results/presentation/monte_carlo/README.md).
 
-The [Monte Carlo findings](documentation/MONTE_CARLO.md) explain the design.
+An earlier [fictional pilot](documentation/MONTE_CARLO.md) (29 draws, three policies) tested the method.
 A [small mechanism investigation](documentation/PACING_INVESTIGATION.md) shows
 that Pacing also selects among request costs: it drops requests exceeding the
 current allowance rather than queuing them. More completions do not imply
@@ -138,16 +151,22 @@ python -m pytest -q
 python -m ironviz_f26 --help
 ```
 
-Rebuild presentation aggregates from saved tables only:
+Tests need `pyarrow`, which `requirements.txt` and `pyproject.toml` already list
+(`python -m pip install -r requirements.txt`).
 
-```bash
-python tools/build_presentation.py
-```
+### Which command makes which result
 
-That command executes **no simulation policies**. From a fresh checkout it uses
-the published pilot replicate table to rebuild the pilot summary. Expensive
-sweeps and the legacy `run_all.sh` are not part of the handoff workflow.
-Scenario-sweep tests remain excluded by default.
+| Result | Command |
+|---|---|
+| Cleaned requests and usage summaries (`results/clean_requests.csv`, `results/analysis_*.csv`, `results/settings.json`) and the original static/animated figures | `bash run_all.sh` (needs the two raw CSVs in `data/raw/`; this is the original four-rule pipeline) |
+| Simulator input built from the cleaned requests | `python tools/adapt_reference.py` (writes `outputs/canonical_reference/`) |
+| October replay: six rules × four budgets (`results/canonical/policies/`) | `python -m ironviz_f26 run-experiments --input outputs/canonical_reference/canonical_requests.csv --price-catalog outputs/canonical_reference/price_catalog_micro_usd.json --output-dir outputs/authoritative_policies --budget-fractions 0.5,0.7,0.85,1.0 --replicates 1 --seed 731 --demand-imbalance 1.0 --routing-eligibility 0.0`, then `python tools/curate_results.py` (settings from `results/canonical/policies/scenario_metadata.json`; the original command line was not saved) |
+| 49 simulated months (`results/presentation/monte_carlo/`) | `python tools/run_october_monte_carlo.py prepare`, then `python tools/run_october_monte_carlo.py run --stage main --replicates 50` (replay plus 49), then `python tools/summarize_october_monte_carlo.py` |
+| Chart-ready tables (`results/presentation/*.csv`) | `python tools/build_presentation.py` (reads saved tables only; runs no simulation) |
+| Dashboard and story (`figures/dashboard.html`, `figures/story.html`) | `python charts/make_dashboard.py results charts/dashboard_template.html figures/dashboard.html` and `python charts/make_story.py results charts/story_template.html figures/story.html` |
+
+The full replay and Monte Carlo runs are slow; the saved results are already in
+the repository, so the last two rows are all you need to rebuild the visuals.
 
 ## Methodology and limitations
 

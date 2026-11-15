@@ -178,7 +178,9 @@ const PC={};POL.forEach(p=>PC[p]=css("--"+p));
 const INK=css("--ink"),INK2=css("--ink2"),MUT=css("--muted"),LINE=css("--line"),TEST=css("--test"),OTHER=css("--other"),OFF=css("--off");
 const BL=["#eff6ff","#dbeafe","#bfdbfe","#93c5fd","#60a5fa","#3b82f6","#2563eb","#1d4ed8","#1e40af"];
 const ci=v=>Math.max(0,Math.min(8,Math.round((v-17)/(31.5-17)*8)));
-let S={budget:70,rule:"Adaptive"};
+const heatT=v=>Math.pow(Math.max(0,Math.min(1,(v-17)/(31.5-17))),1.6),heatC=v=>{const t=heatT(v),a=[239,246,255],b=[30,58,138];return `rgb(${a.map((x,i)=>Math.round(x+(b[i]-x)*t)).join(",")})`};
+
+let S={budget:70,rule:"Threshold"};
 const NS="http://www.w3.org/2000/svg";
 function el(p,t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;p.appendChild(e);return e}
 function tx(p,x,y,s,o={}){return el(p,"text",Object.assign({x,y,fill:o.fill||INK,"font-size":o.size||13.5,"text-anchor":o.a||"start","font-weight":o.w||400},o.x||{}),s)}
@@ -280,8 +282,8 @@ function heat(){const{s,w,h}=box("cHeat");const L=150,T=22,cw=(w-L-4)/4,ch=(h-T-
  tx(s,L-8,14,"Budget →",{a:"end",fill:MUT,size:13});BUD.forEach((b,j)=>tx(s,L+j*cw+cw/2,14,b+"%",{a:"middle",fill:INK,size:13.5,w:600}));
  POL.forEach((p,i)=>{tx(s,L-8,T+i*ch+ch/2+5,PN[p],{a:"end",fill:INK,w:p===S.rule?700:400,size:13.5});
   BUD.forEach((b,j)=>{const q=cell(p,b),v=q.doneRate,on=p===S.rule&&b===S.budget,k=ci(v);
-   const r=el(s,"rect",{x:L+j*cw+2,y:T+i*ch+2,width:cw-4,height:ch-4,rx:4,fill:BL[k],stroke:on?INK:"none","stroke-width":on?3:0,tabindex:0,role:"button","aria-label":`${PN[p]} at ${b}% budget: ${v.toFixed(1)}% fully completed`,style:"cursor:pointer"});
-   tx(s,L+j*cw+cw/2,T+i*ch+ch/2+5,v.toFixed(1)+"%",{a:"middle",fill:k>=5?"#fff":"#1e3a8a",w:700,size:14,x:{"pointer-events":"none"}});
+   const r=el(s,"rect",{x:L+j*cw+2,y:T+i*ch+2,width:cw-4,height:ch-4,rx:4,fill:heatC(v),stroke:on?INK:"none","stroke-width":on?3:0,tabindex:0,role:"button","aria-label":`${PN[p]} at ${b}% budget: ${v.toFixed(1)}% fully completed`,style:"cursor:pointer"});
+   tx(s,L+j*cw+cw/2,T+i*ch+ch/2+5,v.toFixed(1)+"%",{a:"middle",fill:heatT(v)>.45?"#fff":"#1e3a8a",w:700,size:14,x:{"pointer-events":"none"}});
    const go=()=>{S.rule=p;S.budget=b;render()};r.addEventListener("click",go);r.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}});
    hover(r,`<b>${PN[p]}</b>, ${b}% budget<br>${f0(q.done)} fully completed (${p1(v)})<br>${f0(q.trunc)} cut short · ${f0(q.rej)} refused`+(b===70?`<br>Simulated months: ${D.mc.pol[p].lo}–${D.mc.pol[p].hi}%`:""))})});
  s.setAttribute("aria-label","Heatmap of requests fully completed for each rule and budget. "+POL.map(p=>PN[p]+": "+BUD.map(b=>cell(p,b).doneRate.toFixed(1)+"%").join(", ")).join("; "));}
@@ -299,7 +301,8 @@ function staticText(){const M=D.mc.pol,mo=D.mc.months,q70=cell("Quotas",70),W=D.
   <li><b>Cost</b> = tokens × OpenAI and Google list prices, about ${usd(D.cost)} for October.</li>
   <li><b>Simulation:</b> we replay requests from Oct 7–30 in arrival order, and a budget rule approves or refuses each one based on its estimated cost and the money left. Oct 1–6 is used to set up the rules.</li>
   <li><b>Budget comparison:</b> the full replay (${f0(D.evalN)} requests), one run per rule and budget. It caps answers at 1,024 tokens, which cuts off about 69% of requests even with a full budget, so we also show "served at all."</li>
-  <li><b>Ranges:</b> ${mo} simulated months at 70%, each about ${f0(Math.round(D.mc.n/100)*100)} requests resampled from October, run with the updated simulator and an 8,192-token limit.</li>`;
+  <li><b>Two token limits:</b> the October replay uses a 1,024-token limit; the ${D.mc.months} simulated months use 8,192, so their completion rates are higher.</li>
+  <li><b>Ranges:</b> ${mo} simulated months at 70%, each about ${f0(Math.round(D.mc.n/100)*100)} requests resampled from October, run with the updated simulator.</li>`;
  document.getElementById("wrong").innerHTML=`
   <li><b>The data is synthetic.</b> It comes from the competition, not real CMU usage.</li>
   <li><b>Prices are assumptions.</b> We used published list prices; the logs don't record the actual bill.</li>
