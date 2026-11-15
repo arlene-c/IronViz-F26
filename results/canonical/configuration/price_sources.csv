@@ -1,0 +1,6 @@
+model,source
+gpt-4o,https://developers.openai.com/api/docs/pricing
+gpt-4o-mini,https://developers.openai.com/api/docs/pricing
+o1-preview,https://developers.openai.com/api/docs/models/o1-preview
+gemini-1.5-pro,https://ai.google.dev/gemini-api/docs/pricing (prompts <=128k)
+gemini-1.5-flash,https://ai.google.dev/gemini-api/docs/pricing (prompts <=128k)

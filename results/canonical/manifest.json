@@ -1,0 +1,149 @@
+{
+  "status": "PRE-CORRECTION; provisional research results",
+  "source_checkout": "76e0a91e494c00c217dcfc2a118e5d3d25de1a4d",
+  "generating_revision": "not embedded by original experiments; source_checkout identifies curation only",
+  "warning": "Original outputs unchanged; repaired code does not validate old results. Bootstrap sets each contain replay plus ONE resample; no supported confidence intervals.",
+  "files": [
+    {
+      "path": "results/canonical/policies/run_metrics.csv",
+      "source": "outputs/authoritative_policies/run_metrics.csv",
+      "sha256": "2a663ac92889a44d022d6317242e4b0a8c42596610b421b07badd0c11f51e8a4",
+      "bytes": 18209,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/tenant_metrics.csv",
+      "source": "outputs/authoritative_policies/tenant_metrics.csv",
+      "sha256": "6dd792ded73951b2612cc654d0a42c183807f73ae295f5fae2793b9f27f38f03",
+      "bytes": 67529,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/experiment_summary.csv",
+      "source": "outputs/authoritative_policies/experiment_summary.csv",
+      "sha256": "c1a396ecc67c4d84f578d422b25d57b0df941c74676c8bb18b07aa0e3c5dd287",
+      "bytes": 43143,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/policy_comparisons.csv",
+      "source": "outputs/authoritative_policies/policy_comparisons.csv",
+      "sha256": "86a2cf8dc8f7a1c889248ba331cd2e532afef2b5c82a99b44d04f7bae83e6f1a",
+      "bytes": 7652,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/regime_map.csv",
+      "source": "outputs/authoritative_policies/regime_map.csv",
+      "sha256": "56ddddc5d583e4fe8faf850184a008f31ba1c954296d702f978beee80cf93797",
+      "bytes": 1466,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/scenario_metadata.json",
+      "source": "outputs/authoritative_policies/scenario_metadata.json",
+      "sha256": "6255f22c105d94e29ddf17a4629decc11c20cd57f6364af4c70d29967930ded5",
+      "bytes": 4039,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/findings.md",
+      "source": "outputs/authoritative_policies/findings.md",
+      "sha256": "f3acf0596484737796eb290cd2e6b6e32779be44ce152e6c97c45b98260b828a",
+      "bytes": 1135,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/local_bootstrap/run_metrics.csv",
+      "source": "outputs/authoritative_local_bootstrap/run_metrics.csv",
+      "sha256": "8cd788dd63573215fac4cc836f6fe024ea7c06f6a90ac47b6ff2cb989464570e",
+      "bytes": 9886,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/local_bootstrap/tenant_metrics.csv",
+      "source": "outputs/authoritative_local_bootstrap/tenant_metrics.csv",
+      "sha256": "09cd30949b0a7b1575df5440b7d04137b4c6dee0e4ad99cce0592b68b86e9d24",
+      "bytes": 35235,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/local_bootstrap/policy_comparisons.csv",
+      "source": "outputs/authoritative_local_bootstrap/policy_comparisons.csv",
+      "sha256": "2a0e24688e3004481af0d464a8613e627808cc60ac32a1c73a497da0bffa9d74",
+      "bytes": 4353,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/local_bootstrap/scenario_metadata.json",
+      "source": "outputs/authoritative_local_bootstrap/scenario_metadata.json",
+      "sha256": "1fa2199e51596998f8d339985491186b0b70de74b59b0c2b264ce5a94ce38ff8",
+      "bytes": 4709,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/day_bootstrap/run_metrics.csv",
+      "source": "outputs/authoritative_day_bootstrap/run_metrics.csv",
+      "sha256": "266b1bb74aa956f82a317aab30c273456390d170b62adfa4ec7dceaed7376e87",
+      "bytes": 9855,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/day_bootstrap/tenant_metrics.csv",
+      "source": "outputs/authoritative_day_bootstrap/tenant_metrics.csv",
+      "sha256": "29132db452dc098a7356ee861ed7834a4dc7c81144f8c0ecd2a60849e9da2c60",
+      "bytes": 35051,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/day_bootstrap/policy_comparisons.csv",
+      "source": "outputs/authoritative_day_bootstrap/policy_comparisons.csv",
+      "sha256": "9710cb526f898d5bdc04ca84e7bff692c15b749488bde9aa4c25e4b2c0faad11",
+      "bytes": 4351,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/day_bootstrap/scenario_metadata.json",
+      "source": "outputs/authoritative_day_bootstrap/scenario_metadata.json",
+      "sha256": "f1f99dd464258f1158e0746f29a2c9773cf5f813f291feba69198c0eb31d86a5",
+      "bytes": 4699,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/configuration/price_catalog_micro_usd.json",
+      "source": "outputs/canonical_reference/price_catalog_micro_usd.json",
+      "sha256": "69351b9f6cb858dd175e9f59a6545a538f442c271b94ebc5ce64eb67d57e1b9e",
+      "bytes": 1017,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/configuration/routing_compatibility.json",
+      "source": "outputs/canonical_reference/routing_compatibility.json",
+      "sha256": "cb6fc5e70a531da27b83850894968c6723d54c3beeb58587935a47ef0d9c0b32",
+      "bytes": 672,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/configuration/price_sources.csv",
+      "source": "outputs/canonical_reference/price_sources.csv",
+      "sha256": "eb710510b83e49c294c21a4ee68ca4b63d618b4240cda2c925d6db1f1620951b",
+      "bytes": 358,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/configuration/adaptation_report.json",
+      "source": "outputs/canonical_reference/adaptation_report.json",
+      "sha256": "6c92734d396c9dbf2de0b5e64d17f9729e27ea779cb2415eabaad539ed6abafe",
+      "bytes": 1133,
+      "export": "byte-identical"
+    },
+    {
+      "path": "results/canonical/policies/budget_trajectories.csv",
+      "source": "outputs/authoritative_policies/budget_timeseries.parquet",
+      "source_sha256": "0befe3fbfecc82e0b7768db6644cf6e4762fd5e3d860615b07ef8cbe023c0524",
+      "sha256": "c5779233c7d65ce7c878e2a533e1e576e906f8e69ccba2762eaa422aeab1e3c9",
+      "bytes": 805081,
+      "export": "every tenth existing sampled row per run plus final row; approximately every 1000 original events; no request IDs"
+    }
+  ]
+}

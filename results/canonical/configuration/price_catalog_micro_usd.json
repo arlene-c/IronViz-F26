@@ -1,0 +1,41 @@
+{
+  "version": "config/prices.csv (source dates not declared in catalog)",
+  "price_unit": "integer micro-USD per 1M tokens",
+  "rows": [
+    {
+      "provider": "OpenAI",
+      "model": "gpt-4o",
+      "input_price": 2500000,
+      "cached_input_price": 1250000,
+      "output_price": 10000000
+    },
+    {
+      "provider": "OpenAI",
+      "model": "gpt-4o-mini",
+      "input_price": 150000,
+      "cached_input_price": 75000,
+      "output_price": 600000
+    },
+    {
+      "provider": "OpenAI",
+      "model": "o1-preview",
+      "input_price": 15000000,
+      "cached_input_price": 7500000,
+      "output_price": 60000000
+    },
+    {
+      "provider": "Gemini",
+      "model": "gemini-1.5-pro",
+      "input_price": 1250000,
+      "cached_input_price": 312500,
+      "output_price": 5000000
+    },
+    {
+      "provider": "Gemini",
+      "model": "gemini-1.5-flash",
+      "input_price": 75000,
+      "cached_input_price": 18750,
+      "output_price": 300000
+    }
+  ]
+}

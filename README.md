@@ -1,120 +1,95 @@
-# Intelligence at Scale: should CMU ration AI, or make it cheaper?
+# The Cost of Scarcity
 
-CMU Student IronViz, Fall 2026. Analysis of 202,650 synthetic OpenAI and Gemini API calls (Oct 1–30, 2026)
-and a simulation of four budget rules for campus AI.
+CMU Student IronViz Fall 2026: how do admission rules allocate a limited AI
+inference budget across operational tenants? Inputs are 202,650 **synthetic**
+OpenAI/Gemini telemetry records from October 1-30, 2026; 192,847 are eligible.
 
-## Key findings
-- Two testing teams (`org-engineering-dev`, `prj-ai-sandbox-testing`) make 33% of calls but use 45% of tokens.
-  They barely cache (≈5% of calls vs 37–44%) and send ≈65–69% of calls to premium models.
-- During October, the other four teams raised cache use from ≈17% to 55–69% of calls and cut premium-model
-  use from ≈70% to 25–33%. The testing teams did not change.
-- o1-preview is 5% of calls but ≈51% of estimated cost (≈$5,710 for the month at list prices).
-- With 70% of October's budget, first come, first served serves ≈65% of requests and runs out around Oct 20;
-  team quotas serve ≈62%. Routing expensive requests to cheaper models serves 100% by downgrading ≈20%
-  (assuming the cheaper model's answer is acceptable; answer quality is not measured).
+## Results teammates can use immediately
 
-## Reproduce
+Download [results/canonical](results/canonical/) from the integration branch.
+[VISUALIZATION_HANDOFF.md](VISUALIZATION_HANDOFF.md) identifies columns, joins,
+units and limitations. No simulator run is needed to make figures.
+
+The preserved six-policy evaluation uses 154,278 requests after 38,569 training
+requests. At a modeled 70% evaluation budget ($3,079.115819):
+
+| Policy | Fully completed originals |
+|---|---:|
+| FCFS | 42,573 |
+| Equal quotas | 36,641 |
+| Training quotas | 44,699 |
+| Adaptive | 45,768 |
+| Pacing | 46,217 |
+| Threshold | 47,384 |
+
+These are **pre-correction, provisional simulation results**, not outputs from
+repaired code. Admission includes truncated executions. A 1,024-token cap and
+mean reservations cause 105,693 truncations even at 100% reference budget.
+Equal quotas strand $741.27 at 70%; Adaptive recovers capacity but engineering
+loses 1,900 completions versus FCFS. Each bootstrap set contains only one
+resample plus replay: no defensible confidence intervals. Routing quality is
+unmeasured and no routed policies are in this comparison.
+
+The descriptive summaries show o1-preview is 5.33% of eligible calls and 50.73%
+of modeled cost. Cache/model mix changes differ by tenant; these patterns do
+not establish learning or causal savings. Full-month modeled reference cost is
+$5,710.576193. Price effective dates are unavailable.
+
+## Install and verify safely
+
+Python 3.11+; create a virtual environment, then:
+
 ```bash
-pip install -r requirements.txt
-# put the two competition CSVs in data/raw/ (see data/raw/README.md)
-bash run_all.sh            # about 30 seconds with numba
+python -m pip install -e .
+python -m ironviz_f26 --help
+python -m pytest tests/test_phase1.py tests/test_phase2.py tests/test_integration_adapter.py tests/test_finalization.py
 ```
 
-## Repository layout
-| Path | Contents |
+For a small synthetic example (fictional prices; not competition evidence):
+
+```bash
+python -m ironviz_f26 generate-fixture --requests 16 --output outputs/smoke/requests.csv --price-catalog-output outputs/smoke/prices.json
+python -m ironviz_f26 validate-data --input outputs/smoke/requests.csv --error-report outputs/smoke/errors.csv
+python -m ironviz_f26 run-simulation --input outputs/smoke/requests.csv --price-catalog outputs/smoke/prices.json --output-dir outputs/smoke/result --policy FCFS --data-label "SYNTHETIC TEST DATA"
+```
+
+Full-data experiments, bootstrap sweeps and routing grids are expensive and are
+not part of installation or safe verification. Do not rerun them to obtain the
+published tables. Existing inputs can be adapted with `tools/adapt_reference.py`;
+its help documents paths. `tools/curate_results.py` copies completed aggregates
+only, checks reconciliation/hashes, and never executes policies.
+
+## Repository map
+
+| Path | Role |
 |---|---|
-| `src/ironviz_experiments.py` | Cleaning, pricing, descriptive datasets, Experiments 1–4, self-checks |
-| `config/prices.csv` | USD per 1M tokens, downgrade targets, and a source for each price |
-| `charts/` | Scripts that turn the results into the static and animated figures |
-| `results/` | Experiment outputs, analysis tables, `settings.json`, `checks.txt` |
-| `figures/static/` | Final PNG/SVG charts (alt text in `docs/ALT_TEXT.txt`) |
-| `figures/animated/` | Animated version of the charts (open in a browser) |
-| `data/raw/` | Where the competition files go (not committed) |
+| `ironviz_f26/`, `tests/` | Modular strict-budget backend and synthetic unit tests |
+| `results/canonical/` | Curated historical outputs, configuration and provenance manifest |
+| `documentation/DATA_CONTRACT.md` | Authoritative machine schema |
+| `METHODOLOGY.md` | Accounting, corrections and historical caveats |
+| `documentation/SPEC.md`, `documentation/archive/` | Original development specification and historical audits |
+| `src/`, `config/prices.csv`, `run_all.sh` | Preserved data-team analysis pipeline and pricing assumptions |
+| `results/analysis_*.csv`, `figures/`, `charts/`, `docs/ALT_TEXT.txt` | Preserved legacy analysis and visuals; not corrected modular results |
+| `outputs/` | Ignored local full traces, experiments and scratch artifacts |
+| `data/raw/` | Local raw CSVs; not included in the integration branch tree |
 
-## Experiments
-1. **Budget × policy**: FCFS, fixed quotas, adaptive sharing and smart routing at 100/85/70/50% of October's cost.
-2. **Who loses access**: % served by team × request size (small <2k, medium 2k–10k, large >10k input tokens).
-3. **Uncertainty**: 200 bootstrap months (12-hour blocks drawn within ±3 days, keeping October's cost trend).
-4. **Noisy neighbour**: `org-engineering-dev` traffic ×3 on Oct 12–15 at an 85% budget.
+The original `bash run_all.sh` regenerates legacy results/figures and is an
+expensive workflow, not a quickstart. Its soft-budget semantics, retrospective
+quota weights and first-observation estimate differ from the modular engine.
+Original charts remain intact and contain legacy conclusions; do not relabel
+them as modular results. See methodology and handoff before reusing titles/alt text.
 
-## Method notes and limitations
-- Rules decide with an **expected** cost (real input cost + median output of earlier requests for that team × model)
-  and are charged the **realized** cost, so no rule sees the future.
-- 9,803 rows are excluded and listed in `results/excluded_rows.csv`: 5,672 HTTP 400, 4,124 HTTP 429 (no usage,
-  not billed) and 7 records with negative reasoning tokens.
-- Prices are the last published list prices; these models are retired, and Gemini cache storage fees are not modelled.
-- The data is synthetic: call volume is flat, there are no user IDs, and "fairness" means across operational
-  tenants only, not demographic groups.
-- Downgrade quality is assumed, not measured. The o1-preview → gpt-4o mapping is a team choice (`config/prices.csv`).
+## Data and provenance
 
-## Sources
-- OpenAI model pricing: https://developers.openai.com/api/docs/pricing
-- Gemini API pricing: https://ai.google.dev/gemini-api/docs/pricing
-- OECD AI Principles: https://oecd.ai/en/ai-principles
+Raw telemetry and caches were already committed in upstream history. Finalization
+stops tracking their current copies without deleting local inputs or rewriting
+shared history; this does not remove historical Git objects. Large legacy cleaned
+outputs already tracked by the team are preserved. Never commit new raw copies,
+full event traces, credentials, environments or scratch experiments.
 
-## AI use
-Analysis code was drafted with AI assistance and reviewed, run and validated by the team; see the
-project documentation for prompts, decisions and checks.
-
-## Modular simulation backend
-
-The original `src/ironviz_experiments.py` pipeline, its committed results, and
-the static/animated chart sources remain the legacy reference implementation.
-The modular `ironviz_f26` package is the strict-budget research engine; its
-counterfactual routed completions are reported separately and are not claims of
-quality-equivalent service. Existing figures and hard-coded reference findings
-describe the data team's legacy outputs, not the modular engine's results.
-
-The backend accepts cleaned request CSV/Parquet files and a versioned price
-catalog. Adapt the committed data-team outputs without modifying them:
-
-```bash
-python tools/adapt_reference.py \
-  --clean results/clean_requests.csv \
-  --simulation results/requests_sim.csv \
-  --prices config/prices.csv \
-  --output-dir outputs/canonical_reference
-```
-
-The integration adapter maps `cached_tokens` to
-`cached_input_tokens` and converts the price CSV's USD-per-million values to
-integer micro-USD-per-million. It does not parse raw provider JSON. The
-authoritative input and output contracts are documented in
-`documentation/DATA_CONTRACT.md`.
-
-Run the modular backend after installing `requirements.txt`:
-
-```bash
-python -m ironviz_f26 validate-data \
-  --input outputs/canonical_reference/canonical_requests.csv \
-  --error-report outputs/canonical_reference/row_errors.csv
-python -m ironviz_f26 run-experiments \
-  --input outputs/canonical_reference/canonical_requests.csv \
-  --price-catalog outputs/canonical_reference/price_catalog_micro_usd.json \
-  --output-dir outputs/modular \
-  --budget-fractions 0.5,0.7,0.85,1.0 \
-  --reservation-mode mean
-python -m ironviz_f26 run-experiments \
-  --input outputs/canonical_reference/canonical_requests.csv \
-  --price-catalog outputs/canonical_reference/price_catalog_micro_usd.json \
-  --routing-compatibility outputs/canonical_reference/routing_compatibility.json \
-  --output-dir outputs/routing-counterfactual \
-  --budget-fractions 0.5,0.7,0.85,1.0 \
-  --policies FCFS+Routing,Adaptive+Routing \
-  --routing-eligibility 0.2,0.5,1.0 \
-  --routed-output-multipliers 0.5,0.7,1.0
-```
-
-For the data team's 12-hour local-block bootstrap within a ±3-day window, add
-`--bootstrap-method local_12h --bootstrap-block-hours 12 --bootstrap-window-days 3`.
-`day_block` remains available for methodological sensitivity. For a strict
-all-row FCFS replay with an expanding model-level historical estimate, use
-`python tools/run_online_fcfs.py`. It starts each unseen provider/model with a
-zero-output prior, so it avoids using the first row's realized output to price
-its own reservation.
-
-The original `bash run_all.sh` continues to regenerate the legacy reference
-outputs. Do not use those soft-budget outputs as validated modular results;
-compare them using `RECONCILIATION_REPORT.md` and the explicit cost/budget
-semantics. Routed completions remain counterfactual and are never represented
-as quality-equivalent service.
+Pricing citations are in `config/prices.csv` and the curated configuration;
+OpenAI: https://developers.openai.com/api/docs/pricing ; Gemini:
+https://ai.google.dev/gemini-api/docs/pricing . No real answer utility, demographic
+identity or quality-equivalent routing claim is supported. AI-assisted analysis
+and engineering require human review; preserved original work remains attributable
+through Git history.

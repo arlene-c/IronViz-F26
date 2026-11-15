@@ -1,0 +1,31 @@
+{
+  "data_label": "CLEANED REFERENCE OUTPUT; synthetic telemetry as labeled by data-team analysis",
+  "input_files": {
+    "cleaned": "results/clean_requests.csv",
+    "simulation_reference": "results/requests_sim.csv",
+    "price_catalog": "config/prices.csv"
+  },
+  "eligible_request_count": 192847,
+  "provenance_row_count": 202650,
+  "legacy_reference_row_count": 192847,
+  "price_catalog_version": "config/prices.csv (source dates not declared in catalog)",
+  "price_source_dates": "not supplied in config/prices.csv",
+  "rounding_reconciliation": {
+    "eligible_requests": 192847,
+    "canonical_micro_usd_total": 5710576193,
+    "canonical_usd_total": 5710.576193,
+    "legacy_unrounded_usd_total": 5710.44315,
+    "difference_usd": 0.13304299999981595,
+    "difference_pct_of_legacy": 0.0023298191839947824
+  },
+  "routing_compatibility_pairs": 3,
+  "outputs": [
+    "canonical_requests.csv",
+    "request_provenance.parquet",
+    "legacy_reference_costs.parquet",
+    "price_sources.csv",
+    "price_catalog_micro_usd.json",
+    "routing_compatibility.json",
+    "adaptation_report.json"
+  ]
+}

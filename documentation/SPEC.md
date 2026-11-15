@@ -1,3 +1,5 @@
+> Historical development specification; not the current implementation or result status. See README.md, METHODOLOGY.md and DATA_CONTRACT.md.
+
 # ROLE
 You are the lead simulation engineer for "The Cost of Scarcity" (CMU
 research/visualization competition). Build, run, test, and document a modular

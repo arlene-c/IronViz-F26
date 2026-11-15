@@ -1,0 +1,136 @@
+{
+  "data_label": "CLEANED REFERENCE INPUT; local-block bootstrap model",
+  "seed": 731,
+  "catalog_version": "config/prices.csv (source dates not declared in catalog)",
+  "training_request_count": 38569,
+  "evaluation_request_count": 154278,
+  "excluded_request_count": 0,
+  "training_window": "chronological leading fraction; used only for the global estimate and threshold tuning",
+  "training_quota_weights": {
+    "org-prod-core": 0.22871661808749522,
+    "prj-ai-sandbox-testing": 0.09446472768751643,
+    "org-marketing-ai": 0.2332003387414886,
+    "prj-ai-r-and-d": 0.0742998913095536,
+    "prj-ai-enterprise-prod": 0.07439492047908661,
+    "org-engineering-dev": 0.29492350369485953
+  },
+  "evaluation_window": "post-training requests; bootstrap resamples whole UTC calendar days",
+  "bootstrap_method": "day-block bootstrap with replacement; tenant mix and intra-day structure preserved within sampled days",
+  "bootstrap_sensitivity": {
+    "configured_method": "local_12h",
+    "local_block_hours": 12,
+    "local_window_days": 3.0
+  },
+  "paired_design": "same sampled workload, cost multiplier vector, scenario seed, and per-index routing draws for every policy in each scenario",
+  "random_streams": {
+    "workload": "SeedSequence spawn key 0",
+    "cost": "SeedSequence spawn key 1",
+    "routing": "SeedSequence spawn key 2",
+    "tenant_volume_reweighting": "SeedSequence spawn key 3",
+    "scenario_seed_derivation": "SeedSequence spawn key 4"
+  },
+  "assumptions": [
+    "All budgets and eligibility probabilities are modeled scenario assumptions.",
+    "Routed outcomes and routed output lengths are counterfactual; no quality equivalence is assumed.",
+    "Routed input token counts are held unchanged as an explicit scenario assumption.",
+    "Reservation multipliers scale training-window estimated costs; they are sensitivity factors, not empirical estimator modes.",
+    "Confidence intervals summarize workload resampling and modeled assumptions, not real-world cost uncertainty.",
+    "The fixture label SYNTHETIC TEST DATA does not describe CMU observations or real prices."
+  ],
+  "config": {
+    "budget_fractions": [
+      0.7
+    ],
+    "replicates": 2,
+    "seed": 731,
+    "training_fraction": 0.2,
+    "bootstrap": true,
+    "bootstrap_method": "local_12h",
+    "bootstrap_window_days": 3.0,
+    "bootstrap_block_hours": 12,
+    "demand_imbalance": [
+      1.0
+    ],
+    "estimator_noise": [
+      0.0
+    ],
+    "routing_eligibility": [
+      0.0
+    ],
+    "reservation_multipliers": [
+      1.0
+    ],
+    "routed_output_multipliers": [
+      0.7
+    ],
+    "routing_sigma": 0.0,
+    "policies": [
+      "FCFS",
+      "Quotas",
+      "TrainingQuotas",
+      "Adaptive",
+      "Pacing",
+      "Threshold"
+    ],
+    "trace_replicates": [
+      0,
+      1
+    ],
+    "trace_policies": [
+      "FCFS"
+    ],
+    "timeseries_stride": 100,
+    "strict_mode": true,
+    "output_cap": 1024,
+    "model_output_caps": {},
+    "routing_compatibility": [],
+    "reservation_mode": "mean",
+    "reservation_quantile": 0.9,
+    "data_label": "CLEANED REFERENCE INPUT; local-block bootstrap model"
+  },
+  "experiment_runtime_seconds": 130.26927760010585,
+  "scenarios": [
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmmean-q0.90-e0.00-m0.70-rep000",
+      "replicate": 0,
+      "workload_kind": "replay",
+      "seed": 2660768062,
+      "request_count": 154278,
+      "reference_cost_micro_usd": 4398736885,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2176060304119916,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "mean",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {},
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 0.7,
+      "trace": true,
+      "trace_policies": [
+        "FCFS"
+      ]
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmmean-q0.90-e0.00-m0.70-rep001",
+      "replicate": 1,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 3798412860,
+      "request_count": 154186,
+      "reference_cost_micro_usd": 4397274809,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2184870304502473,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "mean",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {},
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 0.7,
+      "trace": true,
+      "trace_policies": [
+        "FCFS"
+      ]
+    }
+  ]
+}

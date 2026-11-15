@@ -32,6 +32,9 @@ temp/
 /data/*_telemetry_raw.csv
 /data/**/*_telemetry_raw.csv
 /data/raw/
+!/data/raw/
+/data/raw/*
+!/data/raw/README.md
 /data/generated/
 /data/processed/
 /data/**/*.parquet
@@ -50,3 +53,11 @@ temp/
 !/data/samples/**
 !/outputs/samples/
 !/outputs/samples/**
+
+# Curated aggregates are tracked; large intermediates remain local.
+!/results/canonical/
+!/results/canonical/**
+/build/
+/dist/
+*.nbc
+*.nbi

@@ -1,0 +1,23 @@
+[
+  {
+    "source_provider": "Gemini",
+    "source_model": "gemini-1.5-pro",
+    "target_provider": "Gemini",
+    "target_model": "gemini-1.5-flash",
+    "status": "modeled compatibility assumption from config/prices.csv"
+  },
+  {
+    "source_provider": "OpenAI",
+    "source_model": "gpt-4o",
+    "target_provider": "OpenAI",
+    "target_model": "gpt-4o-mini",
+    "status": "modeled compatibility assumption from config/prices.csv"
+  },
+  {
+    "source_provider": "OpenAI",
+    "source_model": "o1-preview",
+    "target_provider": "OpenAI",
+    "target_model": "gpt-4o",
+    "status": "modeled compatibility assumption from config/prices.csv"
+  }
+]
