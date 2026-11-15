@@ -1,0 +1,238 @@
+{
+  "generator": "tools/build_presentation.py; pandas aggregations only, no policy execution",
+  "historical_status": "pre-correction provisional; original canonical files unchanged",
+  "pilot_status": "exploratory synthetic; 29 resamples plus replay",
+  "source_sha256": {
+    "results/canonical/policies/run_metrics.csv": "2a663ac92889a44d022d6317242e4b0a8c42596610b421b07badd0c11f51e8a4",
+    "results/canonical/policies/tenant_metrics.csv": "6dd792ded73951b2612cc654d0a42c183807f73ae295f5fae2793b9f27f38f03",
+    "results/canonical/local_bootstrap/run_metrics.csv": "8cd788dd63573215fac4cc836f6fe024ea7c06f6a90ac47b6ff2cb989464570e",
+    "results/canonical/day_bootstrap/run_metrics.csv": "266b1bb74aa956f82a317aab30c273456390d170b62adfa4ec7dceaed7376e87",
+    "outputs/monte_carlo_pilot/policy_completion_rates.csv": "326f1351c4f500a2af1c3244407d623069f4729a287dd44b23d48efee124a5ec",
+    "outputs/monte_carlo_pilot/scenario_metadata.json": "b1984fcf9ec1b6160a764af43d04d9297349b8fdcf8bec0d5ead007cece2bcfa"
+  },
+  "canonical_sha256": {
+    "results\\canonical\\manifest.json": "fbf12d72039876cf539898b569465437a1243c4abc8f99cb7e1e05710c7e195a",
+    "results\\canonical\\configuration\\adaptation_report.json": "6c92734d396c9dbf2de0b5e64d17f9729e27ea779cb2415eabaad539ed6abafe",
+    "results\\canonical\\configuration\\price_catalog_micro_usd.json": "69351b9f6cb858dd175e9f59a6545a538f442c271b94ebc5ce64eb67d57e1b9e",
+    "results\\canonical\\configuration\\price_sources.csv": "eb710510b83e49c294c21a4ee68ca4b63d618b4240cda2c925d6db1f1620951b",
+    "results\\canonical\\configuration\\routing_compatibility.json": "cb6fc5e70a531da27b83850894968c6723d54c3beeb58587935a47ef0d9c0b32",
+    "results\\canonical\\day_bootstrap\\policy_comparisons.csv": "9710cb526f898d5bdc04ca84e7bff692c15b749488bde9aa4c25e4b2c0faad11",
+    "results\\canonical\\day_bootstrap\\run_metrics.csv": "266b1bb74aa956f82a317aab30c273456390d170b62adfa4ec7dceaed7376e87",
+    "results\\canonical\\day_bootstrap\\scenario_metadata.json": "f1f99dd464258f1158e0746f29a2c9773cf5f813f291feba69198c0eb31d86a5",
+    "results\\canonical\\day_bootstrap\\tenant_metrics.csv": "29132db452dc098a7356ee861ed7834a4dc7c81144f8c0ecd2a60849e9da2c60",
+    "results\\canonical\\local_bootstrap\\policy_comparisons.csv": "2a0e24688e3004481af0d464a8613e627808cc60ac32a1c73a497da0bffa9d74",
+    "results\\canonical\\local_bootstrap\\run_metrics.csv": "8cd788dd63573215fac4cc836f6fe024ea7c06f6a90ac47b6ff2cb989464570e",
+    "results\\canonical\\local_bootstrap\\scenario_metadata.json": "1fa2199e51596998f8d339985491186b0b70de74b59b0c2b264ce5a94ce38ff8",
+    "results\\canonical\\local_bootstrap\\tenant_metrics.csv": "09cd30949b0a7b1575df5440b7d04137b4c6dee0e4ad99cce0592b68b86e9d24",
+    "results\\canonical\\policies\\budget_trajectories.csv": "c5779233c7d65ce7c878e2a533e1e576e906f8e69ccba2762eaa422aeab1e3c9",
+    "results\\canonical\\policies\\experiment_summary.csv": "c1a396ecc67c4d84f578d422b25d57b0df941c74676c8bb18b07aa0e3c5dd287",
+    "results\\canonical\\policies\\findings.md": "f3acf0596484737796eb290cd2e6b6e32779be44ce152e6c97c45b98260b828a",
+    "results\\canonical\\policies\\policy_comparisons.csv": "86a2cf8dc8f7a1c889248ba331cd2e532afef2b5c82a99b44d04f7bae83e6f1a",
+    "results\\canonical\\policies\\regime_map.csv": "56ddddc5d583e4fe8faf850184a008f31ba1c954296d702f978beee80cf93797",
+    "results\\canonical\\policies\\run_metrics.csv": "2a663ac92889a44d022d6317242e4b0a8c42596610b421b07badd0c11f51e8a4",
+    "results\\canonical\\policies\\scenario_metadata.json": "6255f22c105d94e29ddf17a4629decc11c20cd57f6364af4c70d29967930ded5",
+    "results\\canonical\\policies\\tenant_metrics.csv": "6dd792ded73951b2612cc654d0a42c183807f73ae295f5fae2793b9f27f38f03"
+  },
+  "outputs": {
+    "policy_budget_summary.csv": {
+      "rows": 24,
+      "columns": [
+        "dataset",
+        "result_status",
+        "policy",
+        "budget_pct",
+        "source_run_id",
+        "request_count",
+        "completed_requests",
+        "completion_pct",
+        "truncated_requests",
+        "truncation_pct",
+        "rejected_requests",
+        "rejection_pct",
+        "admitted_requests",
+        "budget_usd",
+        "spend_usd",
+        "unused_budget_usd",
+        "budget_utilization_pct",
+        "fcfs_completed_requests",
+        "fcfs_completion_pct",
+        "completion_difference_requests",
+        "completion_difference_pp",
+        "spend_difference_usd",
+        "utilization_difference_pp",
+        "min_tenant_completion_pct",
+        "tenant_completion_gap_pp"
+      ],
+      "sha256": "01454b6b19cb10578d4986a3398a3775bc67ddf1cabbbe137dac7e508bea2c98"
+    },
+    "tenant_tradeoffs_70pct.csv": {
+      "rows": 36,
+      "columns": [
+        "dataset",
+        "result_status",
+        "tenant",
+        "policy",
+        "budget_pct",
+        "source_run_id",
+        "request_count",
+        "completed_requests",
+        "completion_pct",
+        "fcfs_completed_requests",
+        "fcfs_completion_pct",
+        "completion_difference_requests",
+        "completion_difference_pp",
+        "rejected_requests",
+        "truncated_requests",
+        "spend_usd",
+        "spend_difference_usd"
+      ],
+      "sha256": "bcfc988e1080eb616054bd92a940d4e4718730986d61782ac2874104243f4bca"
+    },
+    "bootstrap_methods_70pct.csv": {
+      "rows": 24,
+      "columns": [
+        "dataset",
+        "result_status",
+        "policy",
+        "budget_pct",
+        "source_run_id",
+        "request_count",
+        "completed_requests",
+        "completion_pct",
+        "truncated_requests",
+        "truncation_pct",
+        "rejected_requests",
+        "rejection_pct",
+        "admitted_requests",
+        "budget_usd",
+        "spend_usd",
+        "unused_budget_usd",
+        "budget_utilization_pct",
+        "fcfs_completed_requests",
+        "fcfs_completion_pct",
+        "completion_difference_requests",
+        "completion_difference_pp",
+        "spend_difference_usd",
+        "utilization_difference_pp",
+        "min_tenant_completion_pct",
+        "tenant_completion_gap_pp",
+        "bootstrap_method",
+        "replicate",
+        "workload_kind"
+      ],
+      "sha256": "c14439d9196eed3dc52c14b70f1bc2638c6a45858974705f7bd507116b90901a"
+    },
+    "monte_carlo_pilot_summary.csv": {
+      "rows": 3,
+      "columns": [
+        "dataset",
+        "result_status",
+        "policy",
+        "bootstrap_method",
+        "budget_pct",
+        "resamples",
+        "median_completion_difference_pp",
+        "q25_completion_difference_pp",
+        "q75_completion_difference_pp",
+        "min_completion_difference_pp",
+        "max_completion_difference_pp",
+        "p025_completion_difference_pp",
+        "p975_completion_difference_pp",
+        "wins",
+        "ties",
+        "losses",
+        "win_pct",
+        "replay_completion_pct",
+        "replay_completion_difference_pp",
+        "median_completion_pct",
+        "median_min_tenant_completion_pct",
+        "median_budget_utilization_pct",
+        "strict_ranking_reversals"
+      ],
+      "sha256": "f64da53c3d591c900a69ed9b3b0c1e310044fa508db8b2a262ea981e605ff4c8"
+    },
+    "monte_carlo_pilot_replicates.csv": {
+      "rows": 90,
+      "columns": [
+        "dataset",
+        "result_status",
+        "policy",
+        "source_run_id",
+        "bootstrap_method",
+        "budget_pct",
+        "replicate",
+        "workload_kind",
+        "request_count",
+        "completed_requests",
+        "completion_pct",
+        "rejected_requests",
+        "rejection_pct",
+        "truncated_requests",
+        "truncation_pct",
+        "fcfs_completion_pct",
+        "completion_difference_pp",
+        "min_tenant_completion_pct",
+        "budget_utilization_pct"
+      ],
+      "sha256": "3d56788077d6a8749f5af568492f39cdcf9f5c0c5a38fe12b2393d22ef336295"
+    }
+  },
+  "pilot_configuration": {
+    "seed": 20261114,
+    "training_request_count": 400,
+    "evaluation_request_count": 1600,
+    "config": {
+      "budget_fractions": [
+        0.7
+      ],
+      "replicates": 30,
+      "seed": 20261114,
+      "training_fraction": 0.2,
+      "bootstrap": true,
+      "bootstrap_method": "local_12h",
+      "bootstrap_window_days": 3.0,
+      "bootstrap_block_hours": 12,
+      "demand_imbalance": [
+        1.0
+      ],
+      "estimator_noise": [
+        0.0
+      ],
+      "routing_eligibility": [
+        0.0
+      ],
+      "reservation_multipliers": [
+        1.0
+      ],
+      "routed_output_multipliers": [
+        1.0
+      ],
+      "routing_sigma": 0.0,
+      "policies": [
+        "FCFS",
+        "Adaptive",
+        "Pacing"
+      ],
+      "trace_replicates": [],
+      "trace_policies": [],
+      "timeseries_stride": 100,
+      "strict_mode": true,
+      "output_cap": 1024,
+      "model_output_caps": {},
+      "routing_compatibility": [],
+      "reservation_mode": "mean",
+      "reservation_quantile": 0.9,
+      "data_label": "EXPLORATORY SYNTHETIC MONTE CARLO PILOT; not institutional evidence",
+      "tenant_roster": [
+        "tenant-a",
+        "tenant-b",
+        "tenant-c"
+      ],
+      "horizon_start": "2026-01-05T00:00:00Z",
+      "horizon_end": "2026-01-21T00:00:00Z"
+    },
+    "pilot_runtime_seconds": 14.444975000340492,
+    "retimed_fixture": "100 requests/day uniformly spaced; 50 per 12-hour block; training first 4 days",
+    "synthetic_price_scaling": "fixture rates multiplied by 1000 to reduce component-rounding dominance; not real prices"
+  }
+}

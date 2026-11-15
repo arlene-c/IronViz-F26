@@ -81,5 +81,5 @@ hashes are protected by .gitattributes across platforms. Legacy source, pricing,
 analysis tables and visual assets remain unchanged.
 
 Follow-up local correctness and small Monte Carlo validation are documented in
-[documentation/VALIDATION.md](documentation/VALIDATION.md). Those exploratory
+[VALIDATION.md](VALIDATION.md). Those exploratory
 synthetic results do not replace or validate the curated historical results.
