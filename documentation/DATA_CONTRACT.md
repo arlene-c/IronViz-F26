@@ -1,6 +1,6 @@
 # DATA CONTRACT
 
-This contract describes Phase 4 inputs and generated outputs. Monetary values are integer micro-USD unless a column explicitly says otherwise. Budgets, tenant eligibility, reservation multipliers, cost noise, and routed outcomes are modeled scenario assumptions. `SYNTHETIC TEST DATA` is never CMU telemetry, a real bill, or a real price catalog. Routed outcomes are counterfactual and make no quality-equivalence claim.
+This contract describes **schema version 2 (post-correction)** inputs and outputs. Curated `results/canonical/` files retain their original pre-correction schema/definitions; see METHODOLOGY.md and the handoff. Never apply new semantics retrospectively to those files. Monetary values are integer micro-USD unless a column explicitly says otherwise. Budgets, tenant eligibility, reservation multipliers, cost noise, and routed outcomes are modeled scenario assumptions. `SYNTHETIC TEST DATA` is never CMU telemetry, a real bill, or a real price catalog. Routed outcomes are counterfactual and make no quality-equivalence claim.
 
 ## Inputs
 
@@ -49,7 +49,7 @@ reservation_before: integer micro-USD
 reservation_after_settlement: integer micro-USD
 realized_cost: integer micro-USD
 global_remaining: integer micro-USD after event settlement
-tenant_remaining: integer micro-USD after event settlement
+tenant_remaining: nullable integer micro-USD; quota entitlement / adaptive protected-own balance after observation, null for global-pool policies
 cumulative_counts: integer
 is_counterfactual: boolean
 observed_original_output_tokens: integer
@@ -59,8 +59,11 @@ overrun: integer micro-USD
 cost_uncertainty_multiplier: float
 budget_fraction: float
 budget_micro_usd: integer
-workload_kind: replay | volume_reweighted_replay | day_block_bootstrap
+workload_kind: replay | volume_reweighted_replay | day_block_bootstrap | local_12h_block_bootstrap
 replicate: integer
+output_cap_exceeded: boolean (admitted request output exceeds selected cap)
+reservation_shortfall: boolean (strict admitted output exceeds reservation-funded tokens)
+denial_reason: nullable INPUT_COST | GLOBAL_BUDGET | POLICY
 ```
 
 ### `budget_timeseries.parquet`
@@ -85,7 +88,7 @@ run_id, scenario_id, seed, policy, budget_fraction, budget_micro_usd, replicate,
 workload_kind, demand_imbalance, estimator_noise_sigma, routing_eligibility,
 reservation_multiplier, reservation_mode, reservation_quantile, output_cap,
 model_output_caps, routed_output_length_multiplier, hindsight_max_count,
-hindsight_max_min_rate, runtime_seconds
+hindsight_max_min_rate, runtime_seconds, threshold_tau_micro_usd
 ```
 
 Metric columns:
@@ -103,7 +106,8 @@ max_min_completion_gap, jain_completion_rate, gini_completion_rate,
 token_weighted_served_share, cost_weighted_served_share,
 reference_cost_micro_usd, completion_size_q1, completion_size_q2,
 completion_size_q3, completion_size_q4, gap_to_max_count_hindsight,
-gap_to_max_min_rate_hindsight
+gap_to_max_min_rate_hindsight, first_denial_timestamp,
+first_global_budget_denial_timestamp, output_cap_exceeded_count, reservation_shortfall_count
 ```
 
 `completed_total` is a count for comparison only; original and routed counts/rates remain separate. Routed completion count is not quality or utility.
@@ -127,7 +131,7 @@ token_weighted_served_share, cost_weighted_served_share
 Grouped by:
 
 ```text
-policy, budget_fraction, demand_imbalance, estimator_noise_sigma,
+workload_kind, policy, budget_fraction, demand_imbalance, estimator_noise_sigma,
 routing_eligibility, reservation_multiplier, reservation_mode, reservation_quantile,
 output_cap, model_output_caps, routed_output_length_multiplier, replicates
 ```
@@ -155,7 +159,7 @@ paired_completed_total_difference, paired_realized_cost_micro_usd_difference,
 paired_min_tenant_completion_rate_difference, paired_budget_utilization_difference
 ```
 
-the exact columns are `mean_P`, `ci95_low_P`, `ci95_high_P`, `win_rate_P`, and `effect_size_P`. Differences are policy minus FCFS within the same sampled scenario. CIs are percentile intervals across replicates and describe workload resampling/model assumptions only.
+the exact columns are `mean_P`, `ci95_low_P`, `ci95_high_P`, `win_rate_P`, and `effect_size_P`. Differences are policy minus FCFS within the same sampled scenario. Replay and resampled workload kinds are grouped separately. Legacy-named ci95 fields are nullable percentile ranges of resampled outcomes, emitted only with at least 20 resamples; they are not confidence intervals for a mean effect. Cost win rates count negative differences as wins; completion/minimum/utilization win rates count positive differences. No statistical significance is asserted.
 
 ### `policy_comparisons.csv`
 
@@ -207,3 +211,45 @@ The output directory contains these PNGs:
 - `routing_sensitivity.png`: completion counts across modeled routing eligibility values for routed policies.
 
 These are diagnostic views. The CSV and Parquet tables are the machine-readable source of truth.
+
+## Schema 2 semantic changes and configured boundaries
+
+CLI `--tenant-roster a,b` freezes an institutional roster; without it the runner
+uses training tenants only, never the evaluation roster. Unknown tenants receive
+no fixed quota/protection. FCFS has no tenant entitlement. `--horizon-start` and
+`--horizon-end` are explicit ISO timestamps required for Adaptive/Pacing; direct
+engine callers provide the same constructor settings. Requests outside supplied
+boundaries fail. Timestamps normalize to UTC with fixed microsecond precision
+before sorting; timezone-naive timestamps are interpreted as UTC.
+
+Mean/quantile reservations estimate original-model output using training only,
+then apply the declared routing length and noise factors and selected-model cap.
+Cap mode reserves the selected target's full cap, ignoring length/noise/multiplier
+factors. Both modes use selected-target prices and actual input/cache counts.
+`output_cap_exceeded` and `reservation_shortfall` are overlapping diagnostics,
+not mutually exclusive causal categories; rejected requests have both false.
+
+`cost_weighted_served_share` now measures original-model reference cost of fully
+completed ORIGINAL requests divided by original demand reference cost. Routed
+CF completion is deliberately excluded; it has no demonstrated equivalent value.
+Total spend/completed_total includes wasted truncated execution costs; subgroup
+cost-per-completion uses spending on that execution group (including truncation)
+divided by its completed count, null when no completions exist.
+
+`first_denial_timestamp` is any first rejection; `first_global_budget_denial_timestamp`
+is a first failure to fit the global reservation. Neither implies no later cheap
+requests fit. `time_to_budget_exhaustion_seconds` now means first post-event
+nonpositive global balance relative to first workload timestamp, null otherwise.
+Hindsight bounds describe original-model full costs; routed runs have null
+incomparable hindsight gaps. Threshold tuning uses training reservations for
+admission and actual capped/strict settlements for cost, optimizing fully completed
+training requests. Its tau is stored; adaptive/pacing remain fixed defaults.
+
+The output writer explicitly includes appended trace/metric fields. Scenario
+metadata adds `schema_version`, frozen `tenant_roster`, `horizon_start`, and
+`horizon_end`. Preserve these alongside all current outputs.
+
+Schema 2 regime maps also retain workload_kind, routing_eligibility,
+reservation_multiplier, reservation_mode, reservation_quantile, output_cap,
+model_output_caps and routed_output_length_multiplier; they do not silently pool
+those settings. Comparison exports retain these configuration fields as well.

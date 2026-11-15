@@ -1,0 +1,2 @@
+# Curated snapshots must retain source bytes across Windows/Linux checkouts.
+/results/canonical/** -text whitespace=cr-at-eol

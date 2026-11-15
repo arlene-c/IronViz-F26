@@ -135,6 +135,11 @@ def load_reference_outputs(
     simulated = simulated.sort_values(["timestamp", "request_id"], kind="stable").reset_index(drop=True)
     if eligible["request_id"].astype(str).tolist() != simulated["request_id"].astype(str).tolist():
         raise ValueError("Cleaned and simulation request ordering differs")
+    for column in ('provider', 'model', 'tenant', 'input_tokens', 'output_tokens', 'cached_tokens'):
+        if not eligible[column].reset_index(drop=True).eq(simulated[column].reset_index(drop=True)).all():
+            raise ValueError(f"Cleaned/reference attribute mismatch: {column}")
+    if not pd.to_datetime(eligible.timestamp, utc=True, format='mixed').equals(pd.to_datetime(simulated.timestamp, utc=True, format='mixed')):
+        raise ValueError("Cleaned/reference timestamp mismatch")
 
     provider_counts = eligible.groupby("model")["provider"].nunique()
     ambiguous_models = provider_counts[provider_counts > 1].index.tolist()

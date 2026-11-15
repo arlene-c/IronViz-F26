@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
@@ -78,6 +79,7 @@ def test_training_reservation_modes_use_training_only_outputs() -> None:
     observed_estimates = {}
     for mode in ("mean", "quantile", "cap"):
         config = ExperimentConfig(
+        horizon_start="2026-01-01T00:00:00Z", horizon_end="2026-01-31T23:59:59Z",
             budget_fractions=(1.0,),
             replicates=1,
             training_fraction=0.5,
@@ -104,6 +106,7 @@ def test_training_reservation_modes_use_training_only_outputs() -> None:
     changed_future[2]["output_tokens"] = 800
     changed_future[3]["output_tokens"] = 1000
     mean_config = ExperimentConfig(
+        horizon_start="2026-01-01T00:00:00Z", horizon_end="2026-01-31T23:59:59Z",
         budget_fractions=(1.0,),
         replicates=1,
         training_fraction=0.5,
@@ -161,9 +164,11 @@ def test_strict_output_cap_truncates_and_settles_without_overspend() -> None:
     assert engine.ledger.global_remaining == 95
 
 
+@pytest.mark.scenario_sweep
 def test_runner_pairs_workload_cost_and_routing_draws(tmp_path: Path) -> None:
     rows = generate_fixture(seed=77, n_requests=48)
     config = ExperimentConfig(
+        horizon_start="2026-01-01T00:00:00Z", horizon_end="2026-01-31T23:59:59Z",
         budget_fractions=(0.7,),
         replicates=2,
         seed=303,
@@ -193,9 +198,11 @@ def test_runner_pairs_workload_cost_and_routing_draws(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.scenario_sweep
 def test_output_writer_creates_contract_tables_and_charts(tmp_path: Path) -> None:
     rows = generate_fixture(seed=19, n_requests=24)
     config = ExperimentConfig(
+        horizon_start="2026-01-01T00:00:00Z", horizon_end="2026-01-31T23:59:59Z",
         budget_fractions=(0.5, 0.7, 0.85, 1.0),
         replicates=1,
         training_fraction=0.25,

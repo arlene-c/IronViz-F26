@@ -56,7 +56,7 @@ class InputAdapter:
         rows: list[RequestRow] = []
         previous_timestamp = None
         column_positions = {column: index + 1 for index, column in enumerate(df.columns)}
-        timestamps = pd.to_datetime(df["timestamp"], errors="coerce", utc=True)
+        timestamps = pd.to_datetime(df["timestamp"], errors="coerce", utc=True, format="mixed")
         token_columns = ("input_tokens", "output_tokens", "cached_input_tokens")
         token_values = {
             column: pd.to_numeric(df[column], errors="coerce").to_numpy(dtype=float)
@@ -121,7 +121,7 @@ class InputAdapter:
             rows.append(
                 RequestRow(
                     request_id=request_id,
-                    timestamp=str(get_value("timestamp")),
+                    timestamp=timestamp_value.isoformat(timespec="microseconds").replace("+00:00", "Z"),
                     provider=str(get_value("provider")),
                     model=str(get_value("model")),
                     tenant=str(get_value("tenant")),

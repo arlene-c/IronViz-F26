@@ -46,20 +46,21 @@ class Quotas(BasePolicy):
         tenants = self.cfg.get("tenants", ())
         if not self._weights and tenants:
             self._weights = {tenant: 1.0 for tenant in tenants}
+        if any(not math.isfinite(float(w)) or float(w) < 0 for w in self._weights.values()):
+            raise ValueError("tenant weights must be finite and non-negative")
+        if self._weights and sum(self._weights.values()) <= 0:
+            raise ValueError("tenant weights must have a positive sum")
+
+    def entitlement_remaining(self, tenant, state):
+        if not self._weights:
+            raise ValueError("equal quotas require a configured tenant roster")
+        share = int(self.budget * self._weights.get(tenant, 0) / sum(self._weights.values()))
+        return share - state.tenant_spent.get(tenant, 0)
 
     def decide(self, view: PreAdmissionView, state: ObservableState) -> bool:
         if state.global_remaining < view.estimated_cost:
             return False
-        weights = self._weights or {}
-        if not weights:
-            tenant_budget = self.budget
-        else:
-            total_weight = sum(float(w) for w in weights.values())
-            if total_weight <= 0:
-                tenant_budget = self.budget
-            else:
-                tenant_budget = int((float(weights.get(view.tenant, 0.0)) / total_weight) * max(self.budget, 0))
-        tenant_available = tenant_budget - state.tenant_spent.get(view.tenant, 0)
+        tenant_available = self.entitlement_remaining(view.tenant, state)
         return tenant_available >= view.estimated_cost
 
 
@@ -76,6 +77,8 @@ class _TimedPolicy(BasePolicy):
         self._horizon = max(0.0, self._end - self._start) if self._start is not None and self._end is not None else 0.0
 
     def progress(self, timestamp: str) -> float:
+        if self._start is None or self._end is None:
+            raise ValueError("timed policies require a configured start/end horizon")
         current = _timestamp_seconds(timestamp)
         start = self._start if self._start is not None else current
         horizon = self._horizon if self._horizon > 0 else 1.0
@@ -136,6 +139,11 @@ class AdaptiveSharing(_TimedPolicy):
             total -= expired_cost
         self._spend_window_totals[tenant] = max(0, total)
         return max(0, total) / self.window
+
+    def entitlement_remaining(self, tenant, state):
+        # Remaining protected own funds; borrowing capacity is not an entitlement.
+        own_spend = state.tenant_spent.get(tenant, 0) - self.borrowed_spend.get(tenant, 0)
+        return max(0, int(self.protected.get(tenant, 0) - own_spend - self.lender_debits.get(tenant, 0)))
 
     def _reserve(self, tenant: str, progress: float, now: float) -> float:
         protected = self.protected.get(tenant, 0.0)
@@ -289,8 +297,14 @@ class CostThreshold(BasePolicy):
         budget: int,
         *,
         candidate_count: int = 64,
+        settlement_costs: list[int] | None = None,
+        completion_flags: list[bool] | None = None,
     ) -> "CostThreshold":
         costs = [int(cost) for cost in training_reservations]
+        settlements = list(settlement_costs) if settlement_costs is not None else costs
+        completions = list(completion_flags) if completion_flags is not None else [True] * len(costs)
+        if len(settlements) != len(costs) or len(completions) != len(costs) or any(v < 0 for v in settlements):
+            raise ValueError("training settlement/completion vectors must match reservations")
         if not costs:
             raise ValueError("training_reservations must not be empty")
         if any(cost < 0 for cost in costs) or budget < 0:
@@ -313,10 +327,10 @@ class CostThreshold(BasePolicy):
         for tau in candidates:
             count = 0
             spend = 0
-            for cost in costs:
+            for cost, actual, complete in zip(costs, settlements, completions):
                 if cost <= tau and spend + cost <= budget:
-                    count += 1
-                    spend += cost
+                    count += int(complete)
+                    spend += actual
             key = (count, -spend, -tau)
             if best_key is None or key > best_key:
                 best_key = key

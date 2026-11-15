@@ -9,6 +9,7 @@ from .ledger import Ledger
 from .money import Money
 from .pricing import PriceCatalog
 from .state import ObservableState, PreAdmissionView
+from .timeutil import utc_timestamp
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,7 +30,7 @@ class TraceEvent:
     reservation_after_settlement: int
     realized_cost: int
     global_remaining: int
-    tenant_remaining: int
+    tenant_remaining: int | None
     cumulative_counts: int
     is_counterfactual: bool = False
     observed_original_output_tokens: int | None = None
@@ -38,6 +39,9 @@ class TraceEvent:
     cost_uncertainty_multiplier: float = 1.0
     source_request_id: str | None = None
     allowed_output_tokens: int = 0
+    output_cap_exceeded: bool = False
+    reservation_shortfall: bool = False
+    denial_reason: str | None = None
 
 
 class SimulationEngine:
@@ -53,6 +57,9 @@ class SimulationEngine:
         output_caps: Mapping[str, int] | None = None,
         seed: int = 0,
         scenario_id: str = "scenario-0",
+        tenant_roster: Sequence[str] = (),
+        horizon_start: str | None = None,
+        horizon_end: str | None = None,
     ):
         self.catalog = catalog
         self.policy = policy
@@ -65,6 +72,13 @@ class SimulationEngine:
             raise ValueError("output caps must be non-negative")
         self.seed = int(seed)
         self.scenario_id = scenario_id
+        self.tenant_roster = tuple(tenant_roster)
+        self.horizon_start = utc_timestamp(horizon_start) if horizon_start else None
+        self.horizon_end = utc_timestamp(horizon_end) if horizon_end else None
+        if bool(self.horizon_start) != bool(self.horizon_end):
+            raise ValueError("provide both horizon_start and horizon_end")
+        if self.horizon_start and self.horizon_end <= self.horizon_start:
+            raise ValueError("horizon_end must follow horizon_start")
         self.ledger = Ledger(self.budget)
         self.policy.reset({"budget": self.budget})
         self._events: list[TraceEvent] = []
@@ -138,8 +152,14 @@ class SimulationEngine:
         self.ledger = Ledger(self.budget)
         self._events = []
         self._tenant_counts = defaultdict(int)
+        normalized = [self._coerce_row(row) for row in requests]
+        for row in normalized:
+            row["timestamp"] = utc_timestamp(str(row["timestamp"]))
+            self.catalog.lookup(str(row["provider"]), str(row["model"]))
+        if len({str(row["request_id"]) for row in normalized}) != len(normalized):
+            raise ValueError("duplicate request_id")
         ordered = sorted(
-            (self._coerce_row(row) for row in requests),
+            normalized,
             key=lambda row: (str(row["timestamp"]), str(row["request_id"])),
         )
         if cost_multipliers is None:
@@ -154,11 +174,13 @@ class SimulationEngine:
             raise ValueError("estimated costs must be non-negative integer micro-USD values")
         policy_cfg = {
             "budget": self.budget,
-            "tenants": sorted({str(row["tenant"]) for row in ordered}),
-            "start_timestamp": str(ordered[0]["timestamp"]) if ordered else None,
-            "end_timestamp": str(ordered[-1]["timestamp"]) if ordered else None,
+            "tenants": self.tenant_roster,
+            "start_timestamp": self.horizon_start,
+            "end_timestamp": self.horizon_end,
         }
         self.policy.reset(policy_cfg)
+        if self.horizon_start and any(not self.horizon_start <= str(row["timestamp"]) <= self.horizon_end for row in ordered):
+            raise ValueError("request outside configured horizon")
         if hasattr(self.policy, "prepare_run"):
             self.policy.prepare_run(len(ordered), self.seed)
 
@@ -222,9 +244,9 @@ class SimulationEngine:
                     modeled_routed_output_tokens=modeled_routed_output_tokens,
                     cost_uncertainty_multiplier=cost_multiplier,
                     source_request_id=str(row.get("source_request_id", row["request_id"])),
+                    denial_reason=("INPUT_COST" if view.input_cost > view.estimated_cost else "GLOBAL_BUDGET" if view.estimated_cost > state.global_remaining else "POLICY"),
                 )
                 self._append_event(event)
-                self.policy.observe("REJECTED", self._observable_state())
                 continue
 
             reservation_before = view.estimated_cost
@@ -255,9 +277,9 @@ class SimulationEngine:
                     modeled_routed_output_tokens=modeled_routed_output_tokens,
                     cost_uncertainty_multiplier=cost_multiplier,
                     source_request_id=str(row.get("source_request_id", row["request_id"])),
+                    denial_reason="GLOBAL_BUDGET",
                 )
                 self._append_event(event)
-                self.policy.observe("REJECTED", self._observable_state())
                 continue
 
             output_cap = self.output_caps.get(view.model, self.output_cap)
@@ -306,12 +328,20 @@ class SimulationEngine:
                 cost_uncertainty_multiplier=cost_multiplier,
                 source_request_id=str(row.get("source_request_id", row["request_id"])),
                 allowed_output_tokens=allowed,
+                output_cap_exceeded=output_tokens > output_cap,
+                reservation_shortfall=self.strict_mode and output_tokens > (
+                    max(0, reservation_before - view.input_cost) * 1_000_000 // view.output_price
+                    if view.output_price else output_tokens
+                ),
             )
             self._append_event(event)
-            self.policy.observe(outcome, self._observable_state())
 
         return self._events
 
     def _append_event(self, event: TraceEvent) -> None:
         self._events.append(event)
         self._tenant_counts[event.tenant] += 1
+        state = self._observable_state()
+        self.policy.observe(event.outcome, state)
+        balance = self.policy.entitlement_remaining(event.tenant, state) if hasattr(self.policy, "entitlement_remaining") else None
+        self._events[-1] = replace(event, tenant_remaining=balance, cumulative_counts=len(self._events))

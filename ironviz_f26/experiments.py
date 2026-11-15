@@ -19,6 +19,7 @@ from .money import Money
 from .policies import AdaptiveSharing, CostThreshold, FCFS, Pacing, Quotas
 from .pricing import PriceCatalog
 from .routing import RoutingWrapper
+from .timeutil import utc_timestamp
 
 DEFAULT_POLICIES = (
     "FCFS",
@@ -59,8 +60,17 @@ class ExperimentConfig:
     reservation_mode: str = "mean"
     reservation_quantile: float = 0.9
     data_label: str = "USER-PROVIDED CLEANED INPUT"
+    tenant_roster: tuple[str, ...] = ()
+    horizon_start: str | None = None
+    horizon_end: str | None = None
 
     def __post_init__(self) -> None:
+        for values in (self.budget_fractions, self.demand_imbalance, self.estimator_noise,
+                       self.routing_eligibility, self.reservation_multipliers, self.routed_output_multipliers):
+            if not values or any(not math.isfinite(value) for value in values):
+                raise ValueError("scenario grids must be nonempty and finite")
+        if len(set(self.tenant_roster)) != len(self.tenant_roster):
+            raise ValueError("tenant roster must not contain duplicates")
         if self.replicates < 1:
             raise ValueError("replicates must be at least one")
         if self.bootstrap_method not in {"day_block", "local_12h"}:
@@ -117,7 +127,7 @@ def _as_dict(row: Mapping[str, Any] | object) -> dict[str, Any]:
 
 
 def _parse_timestamp(value: str) -> datetime:
-    return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    return datetime.fromisoformat(utc_timestamp(value).replace("Z", "+00:00"))
 
 
 def modeled_request_cost(row: Mapping[str, Any], catalog: PriceCatalog) -> int:
@@ -235,7 +245,10 @@ def _volume_reweight(
 def _eligible_split(
     rows: Sequence[Mapping[str, Any]], training_fraction: float
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
-    normalized = sorted((_as_dict(row) for row in rows), key=lambda row: (str(row["timestamp"]), str(row["request_id"])))
+    normalized = [_as_dict(row) for row in rows]
+    for row in normalized:
+        row["timestamp"] = utc_timestamp(str(row["timestamp"]))
+    normalized.sort(key=lambda row: (str(row["timestamp"]), str(row["request_id"])))
     eligible = [
         row for row in normalized
         if str(row.get("original_status", "")).lower() == "success"
@@ -275,6 +288,7 @@ def _metrics(
     truncated_by_tenant: Counter[str] = Counter()
     realized_by_tenant: Counter[str] = Counter()
     served_tokens_by_tenant: Counter[str] = Counter()
+    completed_reference_by_tenant: Counter[str] = Counter()
     total_reference = sum(reference_by_tenant.values())
     total_demand_tokens = sum(demand_tokens.values())
     quartile_cuts = np.quantile(
@@ -296,6 +310,7 @@ def _metrics(
             served_tokens_by_tenant[tenant] += int(row["input_tokens"]) + event.allowed_output_tokens
         if event.outcome == "COMPLETED_ORIGINAL":
             completed_original_by_tenant[tenant] += 1
+            completed_reference_by_tenant[tenant] += modeled_request_cost(row, catalog)
         elif event.outcome == "COMPLETED_ROUTED_CF":
             completed_routed_by_tenant[tenant] += 1
         elif event.outcome == "REJECTED":
@@ -333,11 +348,13 @@ def _metrics(
         else 0.0
     )
     first_timestamp = _parse_timestamp(str(workload[0]["timestamp"])) if workload else None
+    first_denial = next((event for event in events if event.outcome == 'REJECTED'), None)
+    first_global_denial = next((event for event in events if event.denial_reason == 'GLOBAL_BUDGET'), None)
     exhausted = next(
         (
             event
             for event in events
-            if event.outcome == "REJECTED" and event.estimated_cost > event.global_remaining
+            if event.global_remaining <= 0
         ),
         None,
     )
@@ -363,18 +380,22 @@ def _metrics(
         "unused_reservation_micro_usd": unused_reservation,
         "overrun_micro_usd": overrun,
         "cost_per_completed_request_micro_usd": realized_cost / completed_total if completed_total else None,
-        "cost_per_original_completion_micro_usd": realized_cost / completed_original if completed_original else None,
-        "cost_per_routed_completion_micro_usd": realized_cost / completed_routed if completed_routed else None,
+        "cost_per_original_completion_micro_usd": sum(event.realized_cost for event in events if not event.is_counterfactual) / completed_original if completed_original else None,
+        "cost_per_routed_completion_micro_usd": sum(event.realized_cost for event in events if event.is_counterfactual) / completed_routed if completed_routed else None,
         "budget_utilization": realized_cost / budget if budget else 0.0,
         "budget_remaining_micro_usd": budget - realized_cost,
         "budget_remaining_fraction": (budget - realized_cost) / budget if budget else 0.0,
         "time_to_budget_exhaustion_seconds": time_to_exhaustion,
+        "first_denial_timestamp": first_denial.timestamp if first_denial else None,
+        "first_global_budget_denial_timestamp": first_global_denial.timestamp if first_global_denial else None,
+        "output_cap_exceeded_count": sum(event.output_cap_exceeded for event in events),
+        "reservation_shortfall_count": sum(event.reservation_shortfall for event in events),
         "min_tenant_completion_rate": min(completion_rates, default=0.0),
         "max_min_completion_gap": max(completion_rates, default=0.0) - min(completion_rates, default=0.0),
         "jain_completion_rate": jain,
         "gini_completion_rate": gini,
         "token_weighted_served_share": sum(served_tokens_by_tenant.values()) / total_demand_tokens if total_demand_tokens else 0.0,
-        "cost_weighted_served_share": realized_cost / total_reference if total_reference else 0.0,
+        "cost_weighted_served_share": sum(completed_reference_by_tenant.values()) / total_reference if total_reference else 0.0,
         "reference_cost_micro_usd": reference_cost,
         "completion_size_q1": quartile_completed[0] / quartile_demand[0] if quartile_demand[0] else 0.0,
         "completion_size_q2": quartile_completed[1] / quartile_demand[1] if quartile_demand[1] else 0.0,
@@ -406,7 +427,7 @@ def _metrics(
                 "token_weighted_served_share": served_tokens_by_tenant[tenant] / demand_tokens[tenant]
                 if demand_tokens[tenant]
                 else 0.0,
-                "cost_weighted_served_share": realized_by_tenant[tenant] / tenant_reference
+                "cost_weighted_served_share": completed_reference_by_tenant[tenant] / tenant_reference
                 if tenant_reference
                 else 0.0,
             }
@@ -425,13 +446,17 @@ class ExperimentRunner:
                 (source_provider, source_model): (target_provider, target_model)
                 for source_provider, source_model, target_provider, target_model in self.config.routing_compatibility
             }
+            if len(explicit) != len(self.config.routing_compatibility):
+                raise ValueError("duplicate routing source pair")
+            for source, target in explicit.items():
+                original = self.catalog.lookup(*source)
+                selected = self.catalog.lookup(*target)
+                a = (original.input_price, original.cached_input_price, original.output_price)
+                b = (selected.input_price, selected.cached_input_price, selected.output_price)
+                if any(y > x for x, y in zip(a, b)) or a == b:
+                    raise ValueError("configured route must reduce component prices")
             return explicit
-        available = set(self.catalog._rows)
-        candidates = {
-            ("openai", "gpt-4o"): ("openai", "gpt-4o-mini"),
-            ("anthropic", "claude-3.5-sonnet"): ("openai", "gpt-4o-mini"),
-        }
-        return {source: target for source, target in candidates.items() if source in available and target in available}
+        return {}  # Routing must be explicitly configured.
 
     def _policies(
         self,
@@ -445,9 +470,11 @@ class ExperimentRunner:
         eligibility: float,
         output_multiplier: float,
         sigma: float,
+        training_settlements: list[int],
+        training_completions: list[bool],
     ) -> dict[str, Any]:
         threshold = (
-            CostThreshold().fit(training_costs, max(0, int(training_reference * fraction)))
+            CostThreshold().fit(training_costs, max(0, int(training_reference * fraction)), settlement_costs=training_settlements, completion_flags=training_completions)
             if "Threshold" in names
             else None
         )
@@ -482,6 +509,10 @@ class ExperimentRunner:
     def run(self, requests: Sequence[Mapping[str, Any] | object]) -> ExperimentResults:
         experiment_started = time.perf_counter()
         training, evaluation, excluded = _eligible_split(requests, self.config.training_fraction)
+        config = self.config
+        roster = config.tenant_roster or tuple(sorted({str(row['tenant']) for row in training}))
+        if any(name in config.policies for name in ('Adaptive', 'Pacing', 'Adaptive+Routing')) and not (config.horizon_start and config.horizon_end):
+            raise ValueError("Adaptive/Pacing require explicit horizon_start and horizon_end")
         training_costs = [modeled_request_cost(row, self.catalog) for row in training]
         training_outputs_by_model: dict[str, list[int]] = defaultdict(list)
         for row in training:
@@ -503,6 +534,19 @@ class ExperimentRunner:
             if config.reservation_mode == "quantile":
                 return model_output_quantiles.get(model, global_output_quantile)
             return model_output_means.get(model, global_output_mean)
+
+        def reservation(row, selected_provider, selected_model, noise=1.0, multiplier=1.0, route_factor=1.0):
+            record = self.catalog.lookup(selected_provider, selected_model)
+            cap = int(config.model_output_caps.get(selected_model, config.output_cap))
+            if config.reservation_mode == 'cap':
+                tokens = cap  # The selected target's full cap; no output-length/noise scaling.
+            else:
+                prediction = estimated_output_tokens(str(row['model']))
+                tokens = min(cap, max(0, math.ceil(prediction * noise * multiplier * route_factor)))
+            cached = int(row.get('cached_input_tokens', 0))
+            input_cost = Money.cost_for_tokens(int(row['input_tokens']) - cached, record.input_price)
+            input_cost += Money.cost_for_tokens(cached, record.cached_input_price)
+            return input_cost + Money.cost_for_tokens(tokens, record.output_price), input_cost
 
         training_reference = sum(training_costs)
         training_spend_by_tenant: Counter[str] = Counter()
@@ -572,22 +616,23 @@ class ExperimentRunner:
                     routed_pair = compatibility_map.get((provider, original_model))
                     if routed_pair is not None:
                         pairs.append(routed_pair)
-                    predicted_output = estimated_output_tokens(original_model)
                     for selected_provider, selected_model in pairs:
-                        record = self.catalog.lookup(selected_provider, selected_model)
-                        model_cap = int(config.model_output_caps.get(selected_model, config.output_cap))
-                        route_length_factor = output_multiplier if selected_model != original_model else 1.0
-                        estimated_tokens = predicted_output * float(cost_draws[request_index])
-                        estimated_tokens *= reservation_multiplier * route_length_factor
-                        reserved_tokens = min(model_cap, max(0, int(math.ceil(estimated_tokens))))
-                        input_tokens = int(row["input_tokens"])
-                        cached_tokens = int(row.get("cached_input_tokens", 0))
-                        input_cost = Money.cost_for_tokens(input_tokens - cached_tokens, record.input_price)
-                        input_cost += Money.cost_for_tokens(cached_tokens, record.cached_input_price)
-                        estimated_costs[(str(row["request_id"]), selected_model)] = input_cost + Money.cost_for_tokens(
-                            reserved_tokens,
-                            record.output_price,
-                        )
+                        route_length_factor = output_multiplier if (selected_provider, selected_model) != (provider, original_model) else 1.0
+                        estimate, _ = reservation(row, selected_provider, selected_model, float(cost_draws[request_index]), reservation_multiplier, route_length_factor)
+                        estimated_costs[(str(row["request_id"]), selected_model)] = estimate
+                training_reservations, training_settlements, training_completions = [], [], []
+                training_rng = np.random.default_rng(np.random.SeedSequence(config.seed, spawn_key=(5,)))
+                training_noise = training_rng.lognormal(-0.5 * noise * noise, noise, len(training))
+                for row, draw in zip(training, training_noise):
+                    provider, model = str(row['provider']), str(row['model'])
+                    estimate, input_cost = reservation(row, provider, model, float(draw), reservation_multiplier)
+                    price = self.catalog.lookup(provider, model)
+                    cap = int(config.model_output_caps.get(model, config.output_cap))
+                    limit = min(cap, (estimate - input_cost) * 1_000_000 // price.output_price if price.output_price else cap) if config.strict_mode else cap
+                    actual_output = int(row['output_tokens'])
+                    training_reservations.append(estimate)
+                    training_settlements.append(input_cost + Money.cost_for_tokens(min(actual_output, limit), price.output_price))
+                    training_completions.append(actual_output <= limit)
                 scenario_seed = _seed_value(config.seed, 4, replicate, imbalance_index)
                 scenario_id = (
                     f"i{imbalance:.2f}-n{noise:.2f}-r{reservation_multiplier:.2f}-rm{config.reservation_mode}"
@@ -623,7 +668,9 @@ class ExperimentRunner:
                     budget = int(reference_cost * fraction)
                     policies = self._policies(
                         config.policies,
-                        training_costs=training_costs,
+                        training_costs=training_reservations,
+                        training_settlements=training_settlements,
+                        training_completions=training_completions,
                         training_tenant_weights=training_tenant_weights,
                         training_reference=training_reference,
                         budget=budget,
@@ -653,6 +700,9 @@ class ExperimentRunner:
                             output_caps=config.model_output_caps,
                             seed=scenario_seed,
                             scenario_id=scenario_key,
+                            tenant_roster=roster,
+                            horizon_start=config.horizon_start,
+                            horizon_end=config.horizon_end,
                         )
                         multipliers = [float(draw) * reservation_multiplier for draw in cost_draws]
                         events = engine.run(sampled, cost_multipliers=multipliers, estimated_costs=estimated_costs)
@@ -686,10 +736,11 @@ class ExperimentRunner:
                             "hindsight_max_count": benchmark_max.admitted_count,
                             "hindsight_max_min_rate": min(benchmark_min.completion_rates.values(), default=0.0),
                             "runtime_seconds": runtime_seconds,
+                            "threshold_tau_micro_usd": getattr(policy, 'tau', None),
                         }
-                        metrics["gap_to_max_count_hindsight"] = benchmark_max.admitted_count - metrics["completed_total"]
+                        metrics["gap_to_max_count_hindsight"] = benchmark_max.admitted_count - metrics["completed_original"] if not any(event.is_counterfactual for event in events) else None
                         metrics["gap_to_max_min_rate_hindsight"] = (
-                            run_metadata["hindsight_max_min_rate"] - metrics["min_tenant_completion_rate"]
+                            run_metadata["hindsight_max_min_rate"] - metrics["min_tenant_completion_rate"] if not any(event.is_counterfactual for event in events) else None
                         )
                         run_rows.append({**run_metadata, **metrics})
                         for tenant_row in run_tenants:
@@ -733,6 +784,10 @@ class ExperimentRunner:
         regime = _regime_map(comparisons)
         metadata = {
             "data_label": config.data_label,
+            "schema_version": "2; post-correction",
+            "tenant_roster": roster,
+            "horizon_start": config.horizon_start,
+            "horizon_end": config.horizon_end,
             "seed": config.seed,
             "catalog_version": self.catalog.version,
             "training_request_count": len(training),
@@ -741,7 +796,7 @@ class ExperimentRunner:
             "training_window": "chronological leading fraction; used only for the global estimate and threshold tuning",
             "training_quota_weights": training_tenant_weights,
             "evaluation_window": "post-training requests; bootstrap resamples whole UTC calendar days",
-            "bootstrap_method": "day-block bootstrap with replacement; tenant mix and intra-day structure preserved within sampled days",
+            "bootstrap_method": config.bootstrap_method,
             "bootstrap_sensitivity": {
                 "configured_method": config.bootstrap_method,
                 "local_block_hours": config.bootstrap_block_hours,
@@ -805,7 +860,7 @@ def _summarize(run_df: pd.DataFrame, comparisons: pd.DataFrame) -> pd.DataFrame:
     if run_df.empty:
         return pd.DataFrame()
     group_columns = [
-        "policy", "budget_fraction", "demand_imbalance", "estimator_noise_sigma", "routing_eligibility",
+        "policy", "workload_kind", "budget_fraction", "demand_imbalance", "estimator_noise_sigma", "routing_eligibility",
         "reservation_multiplier", "reservation_mode", "reservation_quantile", "output_cap", "model_output_caps",
         "routed_output_length_multiplier",
     ]
@@ -832,17 +887,12 @@ def _summarize(run_df: pd.DataFrame, comparisons: pd.DataFrame) -> pd.DataFrame:
         for metric in metrics:
             values = pd.to_numeric(group[metric], errors="coerce").dropna().to_numpy(dtype=float)
             record[f"mean_{metric}"] = float(np.mean(values)) if len(values) else None
-            record[f"ci95_low_{metric}"] = float(np.percentile(values, 2.5)) if len(values) else None
-            record[f"ci95_high_{metric}"] = float(np.percentile(values, 97.5)) if len(values) else None
-        policy_comparisons = comparisons[
-            (comparisons["policy"] == record["policy"])
-            & (comparisons["budget_fraction"] == record["budget_fraction"])
-            & (comparisons["demand_imbalance"] == record["demand_imbalance"])
-            & (comparisons["estimator_noise_sigma"] == record["estimator_noise_sigma"])
-            & (comparisons["routing_eligibility"] == record["routing_eligibility"])
-            & (comparisons["reservation_multiplier"] == record["reservation_multiplier"])
-            & (comparisons["routed_output_length_multiplier"] == record["routed_output_length_multiplier"])
-        ] if not comparisons.empty else pd.DataFrame()
+            record[f"ci95_low_{metric}"] = float(np.percentile(values, 2.5)) if len(values) >= 20 and record["workload_kind"].endswith("bootstrap") else None
+            record[f"ci95_high_{metric}"] = float(np.percentile(values, 97.5)) if len(values) >= 20 and record["workload_kind"].endswith("bootstrap") else None
+        policy_comparisons = comparisons
+        for column in group_columns:
+            if not policy_comparisons.empty:
+                policy_comparisons = policy_comparisons[policy_comparisons[column] == record[column]]
         for metric in comparison_metrics:
             values = (
                 pd.to_numeric(policy_comparisons[metric], errors="coerce").dropna().to_numpy(dtype=float)
@@ -850,11 +900,11 @@ def _summarize(run_df: pd.DataFrame, comparisons: pd.DataFrame) -> pd.DataFrame:
                 else np.asarray([], dtype=float)
             )
             record[f"mean_{metric}"] = float(np.mean(values)) if len(values) else (0.0 if record["policy"] == "FCFS" else None)
-            record[f"ci95_low_{metric}"] = float(np.percentile(values, 2.5)) if len(values) else (0.0 if record["policy"] == "FCFS" else None)
-            record[f"ci95_high_{metric}"] = float(np.percentile(values, 97.5)) if len(values) else (0.0 if record["policy"] == "FCFS" else None)
-            record[f"win_rate_{metric}"] = float(np.mean(values > 0)) if len(values) else (0.0 if record["policy"] == "FCFS" else None)
+            record[f"ci95_low_{metric}"] = float(np.percentile(values, 2.5)) if len(values) >= 20 and record["workload_kind"].endswith("bootstrap") else None
+            record[f"ci95_high_{metric}"] = float(np.percentile(values, 97.5)) if len(values) >= 20 and record["workload_kind"].endswith("bootstrap") else None
+            record[f"win_rate_{metric}"] = float(np.mean(values < 0 if "realized_cost" in metric else values > 0)) if len(values) else (0.0 if record["policy"] == "FCFS" else None)
             standard_deviation = float(np.std(values, ddof=1)) if len(values) > 1 else 0.0
-            record[f"effect_size_{metric}"] = float(np.mean(values) / standard_deviation) if standard_deviation else None
+            record[f"effect_size_{metric}"] = float(np.mean(values) / standard_deviation) if standard_deviation and record["workload_kind"].endswith("bootstrap") else None
         rows.append(record)
     return pd.DataFrame(rows)
 
@@ -862,7 +912,9 @@ def _summarize(run_df: pd.DataFrame, comparisons: pd.DataFrame) -> pd.DataFrame:
 def _regime_map(comparisons: pd.DataFrame) -> pd.DataFrame:
     if comparisons.empty:
         return pd.DataFrame()
-    group_columns = ["policy", "budget_fraction", "demand_imbalance", "estimator_noise_sigma"]
+    group_columns = ["policy", "budget_fraction", "demand_imbalance", "estimator_noise_sigma", "workload_kind",
+                     "routing_eligibility", "reservation_multiplier", "reservation_mode", "reservation_quantile",
+                     "output_cap", "model_output_caps", "routed_output_length_multiplier"]
     result = (
         comparisons.groupby(group_columns, dropna=False, sort=True)[
             ["paired_completed_total_difference", "paired_min_tenant_completion_rate_difference", "paired_budget_utilization_difference"]

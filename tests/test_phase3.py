@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import pytest
 
 from ironviz_f26.benchmarks import max_count_hindsight, max_min_tenant_hindsight
 from ironviz_f26.engine import SimulationEngine
@@ -85,7 +86,7 @@ def test_adaptive_sharing_borrows_unused_quota_and_improves_utilization() -> Non
         window=10,
         max_borrow_fraction=1,
     )
-    adaptive_engine = SimulationEngine(catalog=CATALOG, policy=adaptive_policy, budget=200, estimator=estimator)
+    adaptive_engine = SimulationEngine(catalog=CATALOG, policy=adaptive_policy, budget=200, estimator=estimator, horizon_start="2026-01-01T00:00:00Z", horizon_end="2026-01-01T00:00:03Z")
 
     quota_events = quotas_engine.run(requests)
     adaptive_events = adaptive_engine.run(requests)
@@ -126,7 +127,7 @@ def test_adaptive_sharing_never_double_promises_lender_balance() -> None:
         rho=0,
         max_borrow_fraction=0.5,
     )
-    capped_policy.reset({"budget": 1000, "tenants": ["tenant-a", "tenant-b"]})
+    capped_policy.reset({"budget": 1000, "tenants": ["tenant-a", "tenant-b"], "start_timestamp": "2026-01-01T00:00:00Z", "end_timestamp": "2026-01-01T00:00:10Z"})
     assert capped_policy.decide(_view("tenant-a", 700, request_id="cap-first"), _state(1000))
     assert capped_policy.borrowed_reserved["tenant-a"] == 200
     assert not capped_policy.decide(_view("tenant-a", 700, request_id="cap-second"), _state(1000))
@@ -252,6 +253,7 @@ def _modeled_cost(request: dict[str, object]) -> int:
     )
 
 
+@pytest.mark.scenario_sweep
 def test_small_scarcity_experiment_fixture_at_50_and_70_percent() -> None:
     fixture = generate_fixture(seed=2026, n_requests=48)
     split = 14
@@ -305,6 +307,8 @@ def test_small_scarcity_experiment_fixture_at_50_and_70_percent() -> None:
                 estimator=estimator,
                 seed=2026,
                 scenario_id=f"fixture-{fraction:.1f}-{name}",
+                tenant_roster=("tenant-a", "tenant-b", "tenant-c"),
+                horizon_start="2026-01-01T00:00:00Z", horizon_end="2026-01-31T23:59:59Z",
             )
             events = engine.run(evaluation)
             completed = sum(event.outcome in {"COMPLETED_ORIGINAL", "COMPLETED_ROUTED_CF"} for event in events)

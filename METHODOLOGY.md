@@ -45,6 +45,37 @@ not upper bounds for cheaper routed service. Avoid those interpretations in figu
 
 ## Current-code corrections
 
-Finalization corrections and verification are recorded here when complete.
+Schema 2 corrections are implemented and covered by targeted small regressions:
+integer ceiling arithmetic; catalog units/duplicate/value/pair validation;
+UTC normalization; cleaned/reference attribute reconciliation; configured horizon
+and explicit/training-only roster; selected-target full cap reservation; separate
+cap/reservation flags and denial causes; settled policy entitlement balances;
+aggregate reservation release; original-only reference-cost-weighted completion;
+execution-group spending ratios; distinct first denial/global-fit denial/zero-balance
+exhaustion; null incomparable routed hindsight gaps; training threshold reservations,
+settlements and completion objective; saved tau; separate replay/bootstrap summaries;
+lower-spend win direction; suppressed intervals with fewer than 20 resamples;
+and condition-specific paired diagnostic points without averaged interval endpoints.
+
+These corrections can change rankings and metric meanings. Historical tables remain
+pre-correction and provisional. **No full-data corrected run has been performed.**
+Use `python -m pytest -q` for safe tests: scenario-sweep tests are marked and excluded
+by default. They must not be enabled during submission stabilization. Tests use
+synthetic records only; no full-data command is executed. Horizon flags are required
+for timed policies; FCFS quickstart does not require a horizon.
+
+Original files under outputs remain local, with ambiguous development artifacts
+retained rather than deleted. Historical audits were archived byte-for-byte. Raw
+CSV/cache tracking was removed; local files and shared Git history are unchanged.
+Raw CSVs already exist in upstream history, which was not rewritten.
 The machine contract is documentation/DATA_CONTRACT.md. The original specification
 and archived audits are development provenance, not current implementation claims.
+
+## Finalization verification
+
+Safe suite: 46 passed, 3 scenario-sweep tests deselected. Editable 0.2.0 installation
+and pip dependency check passed. CLI generation/validation and one FCFS smoke run
+used 16 synthetic requests (3 training, 13 evaluation); no full-data experiment ran.
+CI repeats the safe checks; a hosted CI outcome is not claimed here. Curated byte
+hashes are protected by .gitattributes across platforms. Legacy source, pricing,
+analysis tables and visual assets remain unchanged.

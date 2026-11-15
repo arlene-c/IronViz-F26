@@ -42,7 +42,7 @@ Python 3.11+; create a virtual environment, then:
 ```bash
 python -m pip install -e .
 python -m ironviz_f26 --help
-python -m pytest tests/test_phase1.py tests/test_phase2.py tests/test_integration_adapter.py tests/test_finalization.py
+python -m pytest -q
 ```
 
 For a small synthetic example (fictional prices; not competition evidence):
@@ -72,6 +72,11 @@ only, checks reconciliation/hashes, and never executes policies.
 | `results/analysis_*.csv`, `figures/`, `charts/`, `docs/ALT_TEXT.txt` | Preserved legacy analysis and visuals; not corrected modular results |
 | `outputs/` | Ignored local full traces, experiments and scratch artifacts |
 | `data/raw/` | Local raw CSVs; not included in the integration branch tree |
+
+Timed policies require explicit `--horizon-start` and `--horizon-end`;
+`--tenant-roster` overrides a training-only tenant roster. Full schemas and
+post-correction definitions are in the data contract. Scenario-sweep tests are
+excluded by default; do not enable them during finalization.
 
 The original `bash run_all.sh` regenerates legacy results/figures and is an
 expensive workflow, not a quickstart. Its soft-budget semantics, retrospective

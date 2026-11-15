@@ -9,6 +9,8 @@ class Ledger:
 
     def __init__(self, budget: int):
         self.budget = int(budget)
+        if self.budget < 0:
+            raise ValueError("budget must be non-negative")
         self.global_remaining = self.budget
         self.global_spent = 0
         self._tenant_spent = defaultdict(int)
@@ -34,13 +36,16 @@ class Ledger:
             raise ValueError("settlement surplus must be non-negative")
 
         if reservation_id is None:
-            # Preserve the Phase 1 aggregate settlement contract.
+            if any(owner == tenant for owner, _ in self._reservations.values()):
+                raise ValueError("named reservations require reservation_id settlement")
             before_reserved = self._tenant_reserved.get(tenant, 0)
+            if released_surplus > before_reserved:
+                raise ValueError("settlement surplus exceeds outstanding reservation")
             settlement_increment = max(0, before_reserved - released_surplus)
             self._tenant_spent[tenant] += settlement_increment
             self.global_spent += settlement_increment
             self.global_remaining += released_surplus
-            self._tenant_reserved[tenant] = max(0, before_reserved - settlement_increment)
+            self._tenant_reserved[tenant] = 0
             return
 
         try:

@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ironviz-f26"
-version = "0.1.0"
-description = "Phase 1 simulation backend for The Cost of Scarcity"
+version = "0.2.0"
+description = "Strict-budget simulation and curated IronViz research results"
 requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26,<3",
@@ -24,3 +24,5 @@ exclude = ["tests*"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
+addopts = "-m 'not scenario_sweep'"
+markers = ["scenario_sweep: multi-policy/scenario experiment tests; excluded from safe verification"]

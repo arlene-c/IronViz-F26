@@ -101,3 +101,6 @@ class RoutingWrapper:
 
     def observe(self, outcome: str, state: ObservableState) -> None:
         self.inner.observe(outcome, state)
+
+    def entitlement_remaining(self, tenant, state):
+        return self.inner.entitlement_remaining(tenant, state) if hasattr(self.inner, "entitlement_remaining") else None

@@ -46,15 +46,19 @@ def _catalog_json(catalog: PriceCatalog) -> dict:
 
 def load_catalog(path: str | Path) -> PriceCatalog:
     payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    if payload.get("price_unit") != "integer micro-USD per 1M tokens":
+        raise ValueError("invalid catalog price_unit")
     rows = {}
     for item in payload["rows"]:
         record = PriceRecord(
             provider=str(item["provider"]),
             model=str(item["model"]),
-            input_price=int(item["input_price"]),
-            cached_input_price=int(item["cached_input_price"]),
-            output_price=int(item["output_price"]),
+            input_price=item["input_price"],
+            cached_input_price=item["cached_input_price"],
+            output_price=item["output_price"],
         )
+        if (record.provider, record.model) in rows:
+            raise ValueError(f"duplicate catalog pair: {record.provider}/{record.model}")
         rows[(record.provider, record.model)] = record
     return PriceCatalog(version=str(payload["version"]), rows=rows)
 
@@ -180,6 +184,10 @@ def build_parser() -> argparse.ArgumentParser:
     experiments.add_argument("--bootstrap-window-days", type=float, default=3.0)
     experiments.add_argument("--bootstrap-block-hours", type=int, default=12)
     experiments.add_argument("--routing-compatibility")
+    for command in (simulation, experiments):
+        command.add_argument("--tenant-roster", help="comma-separated configured tenants; defaults to training tenants only")
+        command.add_argument("--horizon-start", help="configured ISO budget horizon start; required for timed policies")
+        command.add_argument("--horizon-end", help="configured ISO budget horizon end; required for timed policies")
 
     report = commands.add_parser("generate-report", help="regenerate findings and diagnostic charts from output tables")
     report.add_argument("--output-dir", required=True)
@@ -221,6 +229,9 @@ def _config_from_args(args: argparse.Namespace, *, policies: tuple[str, ...] | N
         bootstrap_block_hours=getattr(args, "bootstrap_block_hours", 12),
         routing_compatibility=_load_routing_compatibility(args.routing_compatibility),
         data_label=args.data_label,
+        tenant_roster=tuple(t.strip() for t in (args.tenant_roster or '').split(',') if t.strip()),
+        horizon_start=args.horizon_start,
+        horizon_end=args.horizon_end,
     )
 
 
@@ -268,6 +279,9 @@ def _run(args: argparse.Namespace) -> int:
                 timeseries_stride=args.timeseries_stride,
                 routing_compatibility=_load_routing_compatibility(args.routing_compatibility),
                 data_label=args.data_label,
+                tenant_roster=tuple(t.strip() for t in (args.tenant_roster or '').split(',') if t.strip()),
+                horizon_start=args.horizon_start,
+                horizon_end=args.horizon_end,
             )
         else:
             config = _config_from_args(args)
