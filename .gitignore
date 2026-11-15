@@ -1,0 +1,52 @@
+# Python environments and caches
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.py[cod]
+*$py.class
+*.egg-info/
+
+# Editor and operating-system temporary files
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*.tmp
+*.temp
+*.bak
+*.orig
+*.log
+.idea/
+.vscode/*.log
+
+# Local logs and scratch space
+logs/
+tmp/
+temp/
+
+# Raw telemetry and generated datasets
+/data/*_telemetry_raw.csv
+/data/**/*_telemetry_raw.csv
+/data/raw/
+/data/generated/
+/data/processed/
+/data/**/*.parquet
+/data/**/*.arrow
+/data/**/*.feather
+
+# Generated simulation artifacts
+/outputs/
+/artifacts/
+*.prof
+
+# Explicitly curated reproducibility fixtures/examples stay versionable
+!/data/fixtures/
+!/data/fixtures/**
+!/data/samples/
+!/data/samples/**
+!/outputs/samples/
+!/outputs/samples/**

@@ -1,4 +1,6 @@
-pandas>=2.2
-numpy>=1.26
-matplotlib>=3.8
-numba>=0.59   # optional: makes the simulation ~50x faster
+numpy>=1.26,<3
+pandas>=2.2,<4
+matplotlib>=3.8,<4
+numba>=0.59,<1
+pyarrow>=14,<27
+pytest>=8,<10

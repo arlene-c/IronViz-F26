@@ -55,3 +55,30 @@ bash run_all.sh            # about 30 seconds with numba
 ## AI use
 Analysis code was drafted with AI assistance and reviewed, run and validated by the team; see the
 project documentation for prompts, decisions and checks.
+
+## Modular simulation backend
+
+The original `src/ironviz_experiments.py` pipeline, its committed results, and
+the static/animated chart sources remain the legacy reference implementation.
+The modular `ironviz_f26` package is the strict-budget research engine; its
+counterfactual routed completions are reported separately and are not claims of
+quality-equivalent service. Existing figures and hard-coded reference findings
+describe the data team's legacy outputs, not the modular engine's results.
+
+The backend accepts cleaned request CSV/Parquet files and a versioned price
+catalog. The integration adapter maps `cached_tokens` to
+`cached_input_tokens` and converts the price CSV's USD-per-million values to
+integer micro-USD-per-million. It does not parse raw provider JSON. The
+authoritative input and output contracts are documented in
+`documentation/DATA_CONTRACT.md`.
+
+Run the modular backend after installing `requirements.txt`:
+
+```bash
+python -m ironviz_f26 validate-data --input results/requests_sim.csv --error-report outputs/row_errors.csv
+python -m ironviz_f26 run-experiments --input outputs/canonical_requests.csv --price-catalog outputs/catalog_micro_usd.json --output-dir outputs/modular --budget-fractions 0.5,0.7,0.85,1.0
+```
+
+The original `bash run_all.sh` continues to regenerate the legacy reference
+outputs. Do not use the reference results as validated modular results; compare
+them using the separate integration reports and explicit cost/budget semantics.

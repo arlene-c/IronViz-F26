@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ironviz-f26"
+version = "0.1.0"
+description = "Phase 1 simulation backend for The Cost of Scarcity"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26,<3",
+  "pandas>=2.0,<4",
+  "pyarrow>=14,<27",
+  "matplotlib>=3.8,<4",
+  "pytest>=8,<10",
+]
+
+[project.scripts]
+ironviz = "ironviz_f26.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ironviz_f26*"]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
