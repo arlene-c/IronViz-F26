@@ -81,5 +81,11 @@ D["mc"] = {"resamples": int(pe.resamples.max()), "n": int(res.request_count.medi
                        "wins": int(pe.loc[p, "wins"]), "ties": int(pe.loc[p, "ties"]), "losses": int(pe.loc[p, "losses"]),
                        "medRate": round(float(ps.loc[p, "median_completion_pct"]), 2), "medTrunc": round(float(ps.loc[p, "median_truncation_pct"]), 2)}
                    for p in POL}}
+rep0 = rr[rr.replicate == 0].set_index("policy")
+for p in POL:
+    q = res[res.policy == p].sort_values("replicate")
+    D["mc"]["pol"][p].update({"rates": q.completion_pct.round(3).tolist(), "floors": q.min_tenant_completion_pct.round(3).tolist(),
+                              "replayRate": round(float(rep0.loc[p, "completion_pct"]), 3), "replayFloor": round(float(rep0.loc[p, "min_tenant_completion_pct"]), 3),
+                              "medFloor": round(float(q.min_tenant_completion_pct.median()), 2)})
 open(OUT, "w").write(open(TPL).read().replace("/*__DATA__*/null", json.dumps(D)))
 print("ok", OUT)

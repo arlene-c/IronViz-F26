@@ -46,7 +46,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .take b{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);flex:none}
 .chart{display:flex;flex-direction:column;min-height:0;min-width:0}
 .ct{font-size:16px;font-weight:600;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.chart>svg{flex:1;min-height:0;margin-top:8px}
+.chart>svg{flex:1;min-height:0;margin-top:8px;margin-bottom:22px}
 svg{display:block;width:100%;height:100%;overflow:visible}
 svg text{font-family:Inter,sans-serif}
 svg .ann{font-family:Caveat,cursive;font-weight:700}
@@ -80,7 +80,7 @@ svg.ic{width:14px;height:14px;flex:none;display:inline-block;margin:0}
 .mc .num{font-size:26px;font-weight:700;letter-spacing:-.02em}
 .mc .num small{font-size:13.5px;font-weight:500;color:var(--ink2);margin-left:3px}
 .mc .def{font-size:14px;color:var(--ink2)}
-.mc svg{flex:1;min-height:0;margin-top:2px}
+.mc svg{flex:1;min-height:0;margin-top:2px;margin-bottom:14px}
 .rules{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
 .rc{border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:#fff;text-align:left;font:inherit;display:flex;flex-direction:column;gap:2px}
 .rc:hover{border-color:var(--line2)}
@@ -134,6 +134,8 @@ const shortT=t=>t.replace("prj-ai-","").replace("org-","");
 const pctOf=(a,n)=>100*a/n;
 function el(p,t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;p.appendChild(e);return e}
 function tx(p,x,y,s,o={}){return el(p,"text",Object.assign({x,y,fill:o.fill||INK,"font-size":o.size||13,"text-anchor":o.a||"start","font-weight":o.w||500},o.x||{}),s)}
+function axes(s,w,h,xt,yt,o={}){const sz=o.size||13;if(xt)tx(s,o.cx??w/2,h+(o.dx??18),xt,{a:"middle",fill:INK2,size:sz,w:600});
+ if(yt){const yy=o.cy??h/2,xx=o.yx??-14;tx(s,xx,yy,yt,{a:"middle",fill:INK2,size:sz,w:600,x:{transform:`rotate(-90 ${xx} ${yy})`}})}}
 function svgIn(par){const s=el(par,"svg",{});const r=s.getBoundingClientRect();const w=Math.max(220,r.width),h=Math.max(110,r.height);s.setAttribute("viewBox",`0 0 ${w} ${h}`);return{s,w,h}}
 function shapeD(k,x,y,r){return{circle:`M${x-r},${y}a${r},${r} 0 1,0 ${2*r},0a${r},${r} 0 1,0 ${-2*r},0`,square:`M${x-r*.9},${y-r*.9}h${1.8*r}v${1.8*r}h${-1.8*r}z`,
  triangle:`M${x},${y-r*1.15}L${x+r*1.1},${y+r*.8}L${x-r*1.1},${y+r*.8}z`,tdown:`M${x},${y+r*1.15}L${x+r*1.1},${y-r*.8}L${x-r*1.1},${y-r*.8}z`,
@@ -164,7 +166,7 @@ function takeaway(v,html){const d=document.createElement("div");d.className="tak
 const sw=(c,lab)=>`<span><i class="sw" style="background:${c}"></i>${lab}</span>`;
 
 /* data helpers */
-const BUDS=[50,70,85,100],SIM={bi:1,rule:"Adaptive",adv:"rules"};
+const BUDS=[50,70,85,100],SIM={bi:1,rule:"Adaptive",adv:"rules",mcv:"eff"};
 const bud=()=>BUDS[SIM.bi],cell=(p,b=bud())=>D.cells[p+"_"+b];
 const OUTC={done:"#1c1917",trunc:"#d6d3d1",rej:"#ea580c"};
 const budSlider=()=>`<div class="sl"><div class="top"><label for="bud">Budget available</label><span class="val" id="budV">${bud()}%</span></div>
@@ -203,7 +205,7 @@ const CH=[
  dek:()=>`Before deciding how to ration a budget, it helps to know where the money goes. Requests are not equally expensive: the price depends on the model and on the size of the prompt. Each chart compares a share of calls (gray) with the matching share of the estimated cost (dark), first by model and then by team.`,
  draw:v=>{const b=body(v,"1fr 1fr");
   /* by model */
-  const c=chart(b,"By model","log",sw("#d6d3d1","Share of calls")+sw(INK,"Share of cost"));const{s,w,h}=svgIn(c);
+  const c=chart(b,"By model","log",sw("#d6d3d1","Share of calls")+sw(INK,"Share of cost"));const{s,w,h}=svgIn(c);axes(s,w,h,"Share of all calls / of estimated cost (%)","Model",{cx:(140+w-150)/2});
   const ms=D.models,X0=140,X1=w-150,rh=(h-24)/ms.length,X=x=>X0+x/60*(X1-X0),bars=[],pos={};
   [0,20,40,60].forEach(x=>{el(s,"line",{x1:X(x),x2:X(x),y1:0,y2:h-20,stroke:LINE});tx(s,X(x),h-3,x+"%",{a:"middle",fill:SOFT,size:13})});
   ms.forEach(([m,c2,co],i)=>{const bh=Math.min(18,rh*.3),y=i*rh+rh/2-bh-2,hot=m==="o1-preview";tx(s,X0-12,y+bh+6,m,{a:"end",w:hot?700:500,size:14.5});
@@ -213,7 +215,7 @@ const CH=[
   const o=pos["o1-preview"];note(s,X1+70,o.y+70,o.x+40,o.y+4,"5% of calls,\nhalf the bill",{c:TEST,bend:-.25});
   const mm=pos["gpt-4o-mini"];if(mm)note(s,X1+60,mm.y+16,mm.xc+44,mm.y-14,"cheap models:\nalmost free",{bend:.25});
   /* by team */
-  const c3=chart(b,"By team","log",sw("#d6d3d1","Share of calls")+sw(INK,"Share of cost"));const S3=svgIn(c3),s3=S3.s,w3=S3.w,h3=S3.h;
+  const c3=chart(b,"By team","log",sw("#d6d3d1","Share of calls")+sw(INK,"Share of cost"));const S3=svgIn(c3),s3=S3.s,w3=S3.w,h3=S3.h;axes(s3,w3,h3,"Share of all calls / of estimated cost (%)","Team",{cx:(190+w3-150)/2});
   const T0=190,T1=w3-150,rh3=(h3-24)/6,XT=x=>T0+x/40*(T1-T0);let eng=null;
   [0,10,20,30,40].forEach(x=>{el(s3,"line",{x1:XT(x),x2:XT(x),y1:0,y2:h3-20,stroke:LINE});tx(s3,XT(x),h3-3,x+"%",{a:"middle",fill:SOFT,size:13})});
   D.teams.forEach((t,i)=>{const st=D.stats[t],e=isExp(i),bh=Math.min(16,rh3*.3),y=i*rh3+rh3/2-bh-2;tx(s3,T0-12,y+bh+6,t,{a:"end",w:e?700:500,fill:e?TEST:INK,size:14});
@@ -228,7 +230,7 @@ const CH=[
 {label:"Changing habits",title:()=>`Four teams changed their AI habits in October; the testing teams did not`,
  dek:()=>`Cost is not fixed; it depends on habits. Reusing a cached prompt makes the repeated part of a request much cheaper, and premium models cost far more per token than small ones. These charts follow both habits week by week, with one line per team.`,
  draw:v=>{const b=body(v,"1fr 1fr"),H=habits();
-  [["cache","Calls that reuse a cached prompt"],["prem","Calls sent to a premium model"]].forEach(([key,title])=>{const c=chart(b,title,"log",sw(TEST,"Testing teams")+sw(OTHER,"Other four teams"));const{s,w,h}=svgIn(c);
+  [["cache","Calls that reuse a cached prompt"],["prem","Calls sent to a premium model"]].forEach(([key,title])=>{const c=chart(b,title,"log",sw(TEST,"Testing teams")+sw(OTHER,"Other four teams"));const{s,w,h}=svgIn(c);axes(s,w,h,"Week of October","Share of the team's calls (%)",{cx:(44+w-20)/2});
    const nW=D.weeks.length,L=44,R=w-20,T=10,B=h-28,X=i=>L+i/(nW-1)*(R-L),Y=y=>B-y/80*(B-T);
    [0,20,40,60,80].forEach(y=>{el(s,"line",{x1:L,x2:R,y1:Y(y),y2:Y(y),stroke:LINE});tx(s,L-10,Y(y)+4,y+"%",{a:"end",fill:SOFT,size:13})});
    ["Oct 1–7","Oct 8–14","Oct 15–21","Oct 22–30"].slice(0,nW).forEach((d,i)=>tx(s,X(i),h-4,d,{a:i===0?"start":i===nW-1?"end":"middle",fill:SOFT,size:13}));
@@ -249,7 +251,7 @@ const CH=[
   const best=POL.reduce((a,p)=>cell(p).rate>cell(a).rate?p:a,POL[0]),worst=POL.reduce((a,p)=>cell(p).rate<cell(a).rate?p:a,POL[0]),most=POL.reduce((a,p)=>cell(p).left>cell(a).left?p:a,POL[0]);
   POL.forEach(p=>{const r=cell(p),m=document.createElement("div");m.className="mc";
    m.innerHTML=`<div class="h"><span class="nm">${icon(SHAPE[p],PC[p])}${PN[p]}</span><span class="num" style="${p===best?`color:${GREEN}`:""}">${r.rate.toFixed(1)}%<small>completed</small></span></div><div class="def">${DEF[p]}</div>`;g.appendChild(m);
-   requestAnimationFrame(()=>{const{s,w,h}=svgIn(m);const L=40,Rx=w-8,T=8,B=h-20,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(Rx-L),Y=y=>B-y/100*(B-T),tr=r.trace;
+   requestAnimationFrame(()=>{const{s,w,h}=svgIn(m);axes(s,w,h,"Date (October)","Budget left",{cx:(40+w-8)/2,size:11.5,dx:13,yx:-9});const L=40,Rx=w-8,T=8,B=h-20,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(Rx-L),Y=y=>B-y/100*(B-T),tr=r.trace;
     [0,50,100].forEach(y=>{el(s,"line",{x1:L,x2:Rx,y1:Y(y),y2:Y(y),stroke:LINE});tx(s,L-6,Y(y)+4,y+"%",{a:"end",fill:SOFT,size:12})});[7,14,21,28].forEach(d=>tx(s,X(d),h-3,"Oct "+d,{a:"middle",fill:SOFT,size:12}));
     const area=el(s,"path",{fill:PC[p],"fill-opacity":.1}),line=el(s,"polyline",{fill:"none",stroke:PC[p],"stroke-width":2.5,"stroke-linecap":"round","stroke-linejoin":"round"});
     animate(1100,pp=>{const n=Math.max(2,Math.floor(tr.length*ease(pp))),pts=tr.slice(0,n).map(([d,y])=>[X(d),Y(y)]);line.setAttribute("points",pts.map(q=>q.join(",")).join(" "));area.setAttribute("d",`M${pts.map(q=>q.join(",")).join("L")}L${pts[pts.length-1][0]},${B}L${pts[0][0]},${B}Z`)});
@@ -263,7 +265,7 @@ const CH=[
  dek:()=>`A rule can complete more requests overall and still treat one team badly. Each row is a team, and each shape shows the share of that team's requests a rule completes in full. The wider the gray band in a row, the more that team's outcome depends on which rule CMU picks.`,
  controls:()=>budSlider(),
  draw:v=>{const b=body(v,"1fr");const c=chart(b,`Requests completed in full, by team and rule, at a ${bud()}% budget`,"sim",POL.map(p=>`<span>${icon(SHAPE[p],PC[p])}${PN[p]}</span>`).join(""));
-  const{s,w,h}=svgIn(c);const all=POL.flatMap(p=>cell(p).teams),lo=Math.max(0,Math.floor(Math.min(...all)/5)*5-5),hi=Math.ceil(Math.max(...all)/5)*5+5;
+  const{s,w,h}=svgIn(c);axes(s,w,h,"Share of the team's requests completed in full (%)","Team",{cx:(230+w-190)/2});const all=POL.flatMap(p=>cell(p).teams),lo=Math.max(0,Math.floor(Math.min(...all)/5)*5-5),hi=Math.ceil(Math.max(...all)/5)*5+5;
   const L=230,Rx=w-190,T=8,rh=(h-T-28)/6,X=x=>L+(x-lo)/(hi-lo)*(Rx-L);
   for(let x=lo;x<=hi;x+=5){el(s,"line",{x1:X(x),x2:X(x),y1:T,y2:h-24,stroke:LINE});tx(s,X(x),h-5,x+"%",{a:"middle",fill:SOFT,size:13})}
   const marks=[];let worst={v:101};D.teams.forEach((t,i)=>{const y=T+i*rh+rh/2;el(s,"circle",{cx:6,cy:y,r:5,fill:pc(i)});tx(s,18,y+5,t,{fill:isExp(i)?TEST:INK,w:isExp(i)?700:500,size:15});
@@ -279,7 +281,7 @@ const CH=[
 
 {label:"What works",title:()=>`Pacing spending and capping costly requests hold up best as budgets shrink`,
  dek:()=>`This grid summarizes every simulation we ran. Each cell is the share of requests completed in full for one rule at one budget, and darker means more. Reading across a row shows how well a rule holds up as the money shrinks from 100% to 50%.`,
- draw:v=>{v.style.gridTemplateRows="1fr";const b=body(v,"1.1fr 1fr");b.style.gap="48px";const c=chart(b,"Requests completed in full, every rule at every budget","sim");const{s,w,h}=svgIn(c);
+ draw:v=>{v.style.gridTemplateRows="1fr";const b=body(v,"1.1fr 1fr");b.style.gap="48px";const c=chart(b,"Requests completed in full, every rule at every budget","sim");const{s,w,h}=svgIn(c);axes(s,w,h,"","Budget rule");
   const BUD=[100,85,70,50],L=180,T=28,cw=(w-L)/4,ch=(h-T-40)/POL.length,RAMP=["#eff6ff","#dbeafe","#bfdbfe","#93c5fd","#60a5fa","#3b82f6","#2563eb","#1d4ed8","#1e40af"],
    ci=x=>Math.max(0,Math.min(8,Math.round((x-17)/(31.5-17)*8)));
   tx(s,L-12,17,"Budget",{a:"end",fill:SOFT,size:13,w:600});BUD.forEach((bb,j)=>tx(s,L+j*cw+cw/2,17,bb+"%",{a:"middle",fill:INK,size:15,w:700}));const cells=[];
@@ -299,15 +301,15 @@ const CH=[
 
 {label:"Advanced simulation",title:()=>`A closer look at the simulation`,
  dek:()=>SIM.adv==="rules"?`This view is for readers who want more detail. Pick a rule to compare it with first come, first served team by team, and see how every request ends: completed in full, cut short by the 1,024-token output limit, or refused for lack of money.`:`One replay of October gives one ranking, but a slightly different month might rank the rules differently. To test this, we built ${D.mc.resamples} simulated months, each about ${f0(Math.round(D.mc.n/100)*100)} requests resampled in 12-hour blocks from October, and compared every rule with first come, first served on the same requests at a ${D.mc.budget}% budget.`,
- controls:()=>`<div style="display:flex;gap:28px;align-items:flex-end"><div class="subtabs" role="group" aria-label="View"><button data-adv="rules" aria-pressed="${SIM.adv==="rules"}">Rule by rule</button><button data-adv="mc" aria-pressed="${SIM.adv==="mc"}">Monte Carlo</button></div>${SIM.adv==="rules"?budSlider():""}</div>`,
- draw:v=>{if(SIM.adv==="mc"){drawMC(v);return}
+ controls:()=>`<div style="display:flex;gap:28px;align-items:flex-end"><div class="subtabs" role="group" aria-label="View"><button data-adv="rules" aria-pressed="${SIM.adv==="rules"}">Rule by rule</button><button data-adv="mc" aria-pressed="${SIM.adv==="mc"}">Monte Carlo</button></div>${SIM.adv==="rules"?budSlider():`<div class="subtabs" role="group" aria-label="Monte Carlo chart"><button data-mcv="eff" aria-pressed="${SIM.mcv==="eff"}">Gain over first come</button><button data-mcv="rate" aria-pressed="${SIM.mcv==="rate"}">Completion rates</button><button data-mcv="floor" aria-pressed="${SIM.mcv==="floor"}">Lowest-served team</button></div>`}</div>`,
+ draw:v=>{if(SIM.adv==="mc"){({eff:drawMC,rate:drawMCRate,floor:drawMCFloor})[SIM.mcv](v);return}
   v.style.gridTemplateRows="auto 1fr auto";const fc=cell("FCFS");
   const rc=document.createElement("div");rc.className="rules";v.appendChild(rc);
   POL.forEach(p=>{const r=cell(p),d=r.done-fc.done,bt=document.createElement("button");bt.className="rc"+(p===SIM.rule?" on":"");bt.setAttribute("aria-pressed",p===SIM.rule);
    bt.innerHTML=`<div class="nm">${icon(SHAPE[p],PC[p])}${PN[p]}</div><div class="num">${r.rate.toFixed(1)}%</div>${p==="FCFS"?`<div class="delta" style="color:${SOFT}">baseline</div>`:`<div class="delta" style="color:${d>0?GREEN:d<0?RED:SOFT}">${d>0?"+":d<0?"−":""}${f0(Math.abs(d))} requests</div>`}`;
    bt.onclick=()=>{SIM.rule=p;go(cur)};rc.appendChild(bt)});
   const b=body(v,"1.3fr 1fr");const r=cell(SIM.rule);
-  const c=chart(b,`Each team under ${PN[SIM.rule].toLowerCase()}`,"sim",SIM.rule==="FCFS"?"":`<span><i style="display:inline-block;width:2.5px;height:14px;background:${INK}"></i>First come, first served</span>`);const{s,w,h}=svgIn(c);
+  const c=chart(b,`Each team under ${PN[SIM.rule].toLowerCase()}`,"sim",SIM.rule==="FCFS"?"":`<span><i style="display:inline-block;width:2.5px;height:14px;background:${INK}"></i>First come, first served</span>`);const{s,w,h}=svgIn(c);axes(s,w,h,"Share of the team's requests completed in full (%)","Team",{cx:(220+w-90)/2});
   const XM=Math.ceil(Math.max(...r.teams,...fc.teams)/10)*10+10,L=220,Rx=w-90,rh=(h-26)/6,X=x=>L+x/XM*(Rx-L);
   for(let x=0;x<=XM;x+=10){el(s,"line",{x1:X(x),x2:X(x),y1:0,y2:h-22,stroke:LINE});tx(s,X(x),h-4,x+"%",{a:"middle",fill:SOFT,size:13})}
   const bars=[];D.teams.forEach((t,i)=>{const y=i*rh+rh*.2,bh=rh*.6,dd=r.teamsDone[i]-fc.teamsDone[i];el(s,"circle",{cx:6,cy:y+bh/2,r:5,fill:pc(i)});tx(s,18,y+bh/2+5,t,{fill:isExp(i)?TEST:INK,w:isExp(i)?700:500,size:15});
@@ -318,7 +320,7 @@ const CH=[
   if(SIM.rule!=="FCFS")tx(s,w,-4,"Change",{a:"end",size:13,fill:SOFT,w:600});
   animate(800,pp=>bars.forEach(([bb,l,val,i])=>{const e=ease(pp);bb.setAttribute("width",Math.max(2,(X(val)-L)*e));l.setAttribute("x",Math.max(L+(X(val)-L)*e,SIM.rule!=="FCFS"?X(fc.teams[i]):0)+8);l.textContent=rd(val*e)+"%"}));
   const c2=chart(b,"How every request ends","sim",[["done","Completed in full"],["trunc","Cut short"],["rej","Refused"]].map(([k,n])=>sw(OUTC[k],n)).join(""));
-  const S2=svgIn(c2),s2=S2.s,w2=S2.w,h2=S2.h,L2=160,R2=w2-2,rh2=(h2-24)/POL.length,X2=x=>L2+x/100*(R2-L2),segs=[];
+  const S2=svgIn(c2),s2=S2.s,w2=S2.w,h2=S2.h;axes(s2,w2,h2,"Share of all requests (%)","Budget rule",{cx:(160+w2-2)/2});const L2=160,R2=w2-2,rh2=(h2-24)/POL.length,X2=x=>L2+x/100*(R2-L2),segs=[];
   [0,50,100].forEach(x=>tx(s2,X2(x),h2-4,x+"%",{a:x===0?"start":x===100?"end":"middle",fill:SOFT,size:13}));
   POL.forEach((p,i)=>{const q=cell(p),y=i*rh2+rh2*.15,bh=rh2*.7,on=p===SIM.rule;tx(s2,L2-12,y+bh/2+5,PN[p],{a:"end",fill:INK,w:on?700:500,size:14});
    let x0=0;[["done",q.done,"completed in full"],["trunc",q.trunc,"cut short"],["rej",q.rej,"refused"]].forEach(([k,n,lab])=>{const pv=pctOf(n,q.n),rr=el(s2,"rect",{x:X2(x0),y,height:bh,width:0,fill:OUTC[k],opacity:on?1:.45});segs.push([rr,X2(x0+pv)-X2(x0)]);
@@ -333,7 +335,7 @@ function drawMC(v){const M=D.mc,P=["Quotas","TrainingQuotas","Adaptive","Pacing"
  const b=body(v,"1.55fr 1fr");b.style.gap="44px";
  const c=chart(b,`Change in requests completed vs. first come, first served, in ${M.resamples} simulated months`,"pilot",
   `<span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${SOFT}"></i>One simulated month</span><span><i class="sw" style="background:#e7e5e4"></i>Middle half</span><span><i style="display:inline-block;width:3px;height:14px;background:${INK}"></i>Median</span>`);
- const{s,w,h}=svgIn(c);const all=P.flatMap(p=>M.pol[p].diffs),lo=Math.min(-2,Math.floor(Math.min(...all))-1),hi=Math.ceil(Math.max(...all)/2)*2;
+ const{s,w,h}=svgIn(c);axes(s,w,h,"Change in requests completed vs. first come, first served (points)","Budget rule",{cx:(200+w-10)/2});const all=P.flatMap(p=>M.pol[p].diffs),lo=Math.min(-2,Math.floor(Math.min(...all))-1),hi=Math.ceil(Math.max(...all)/2)*2;
  const L=200,R=w-10,T=6,B=h-30,rh=(B-T)/P.length,X=x=>L+(x-lo)/(hi-lo)*(R-L);
  for(let x=Math.ceil(lo/2)*2;x<=hi;x+=2){el(s,"line",{x1:X(x),x2:X(x),y1:T,y2:B,stroke:x===0?INK:LINE,"stroke-width":x===0?1.5:1});tx(s,X(x),h-8,(x>0?"+":"")+x+" pts",{a:"middle",fill:x===0?INK:SOFT,size:13,w:x===0?700:500})}
  const dots=[];P.forEach((p,i)=>{const q=M.pol[p],y=T+i*rh+rh/2;
@@ -347,7 +349,7 @@ function drawMC(v){const M=D.mc,P=["Quotas","TrainingQuotas","Adaptive","Pacing"
  const ty=T+4*rh+rh/2,tq=M.pol.Threshold;note(s,X(tq.med)-190,ty+2,X(tq.q25)-10,ty,`ahead in all ${tq.wins}`,{c:GREEN,bend:-.2});
  const side=document.createElement("div");side.className="mcside";b.appendChild(side);
  const c2=chart(side,"How often each rule beat first come, first served","pilot",sw("#15803d","Better")+sw("#d6d3d1","Tie")+sw("#b91c1c","Worse"));c2.style.height="230px";
- const S2=svgIn(c2),s2=S2.s,w2=S2.w,h2=S2.h,L2=170,rh2=(h2-6)/P.length,X2=n=>L2+n/M.resamples*(w2-L2);
+ const S2=svgIn(c2),s2=S2.s,w2=S2.w,h2=S2.h;axes(s2,w2,h2,"Simulated months (of 49)","Budget rule",{cx:(170+w2)/2});const L2=170,rh2=(h2-6)/P.length,X2=n=>L2+n/M.resamples*(w2-L2);
  P.forEach((p,i)=>{const q=M.pol[p],y=i*rh2+rh2*.18,bh=rh2*.64;tx(s2,L2-12,y+bh/2+5,PN[p],{a:"end",size:14,w:600});let x0=0;
   [[q.wins,"#15803d","better"],[q.ties,"#d6d3d1","tied"],[q.losses,"#b91c1c","worse"]].forEach(([n,col,lab])=>{if(!n)return;const r=el(s2,"rect",{x:X2(x0),y,width:X2(x0+n)-X2(x0),height:bh,fill:col});
    if(X2(x0+n)-X2(x0)>18)tx(s2,X2(x0+n/2),y+bh/2+5,n,{a:"middle",size:13.5,w:700,fill:col==="#d6d3d1"?INK:"#fff",x:{"pointer-events":"none"}});hover(r,`<b>${PN[p]}</b>: ${lab} than first come, first served in ${n} of ${M.resamples} simulated months`);x0+=n})});
@@ -355,6 +357,47 @@ function drawMC(v){const M=D.mc,P=["Quotas","TrainingQuotas","Adaptive","Pacing"
  t.innerHTML=`<p><b>The winners hold up.</b> Cost threshold (${th.med>0?"+":""}${th.med.toFixed(1)} pts), spend pacing (+${pa.med.toFixed(1)}) and adaptive sharing (+${ad.med.toFixed(1)}) beat first come, first served in every one of the ${M.resamples} months, and their order never changed.</p>
   <p><b>Equal quotas is a coin flip.</b> It beat first come, first served in ${qq.wins} months and lost in ${qq.losses}, while leaving money unspent.</p>`;side.appendChild(t);
  takeaway(v,`The ranking from the October replay survives: in ${M.resamples} simulated months, cost threshold and spend pacing always beat first come, first served, by about ${rd(pa.med)}–${rd(th.med)} points. Ranges here describe how much the result moves between months, not a formal confidence interval.`)}
+
+const qtl=(a,q)=>{const b=a.slice().sort((x,y)=>x-y),i=(b.length-1)*q,l=Math.floor(i);return b[l]+(b[Math.min(l+1,b.length-1)]-b[l])*(i-l)};
+function drawMCRate(v){const M=D.mc,P=POL;
+ const b=body(v,"1fr");const c=chart(b,`Requests fully completed in each of ${M.resamples} simulated months, with the original replay`,"pilot",
+  `<span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${SOFT}"></i>One simulated month</span><span><i class="sw" style="background:#e7e5e4"></i>Middle half</span><span><i style="display:inline-block;width:3px;height:14px;background:${INK}"></i>Median</span><span><svg class="ic" viewBox="0 0 14 14"><path d="${shapeD("diamond",7,7,5)}" fill="#fff" stroke="${INK}" stroke-width="1.6"/></svg>Original replay</span>`);
+ const{s,w,h}=svgIn(c);axes(s,w,h,"Requests fully completed (%)","Budget rule",{cx:(200+w-120)/2});const all=P.flatMap(p=>M.pol[p].rates.concat([M.pol[p].replayRate])),lo=Math.floor(Math.min(...all))-1,hi=Math.ceil(Math.max(...all))+1;
+ const L=200,R=w-120,T=6,B=h-30,rh=(B-T)/P.length,X=x=>L+(x-lo)/(hi-lo)*(R-L);
+ for(let x=Math.ceil(lo);x<=hi;x+=2){el(s,"line",{x1:X(x),x2:X(x),y1:T,y2:B,stroke:LINE});tx(s,X(x),h-8,x+"%",{a:"middle",fill:SOFT,size:13})}
+ const dots=[];P.forEach((p,i)=>{const q=M.pol[p],y=T+i*rh+rh/2,md=qtl(q.rates,.5);
+  tx(s,L-16,y+5,PN[p],{a:"end",size:15,w:600});tx(s,R+14,y+5,`median ${md.toFixed(1)}%`,{size:14,w:600,fill:INK2});
+  el(s,"rect",{x:X(qtl(q.rates,.25)),y:y-rh*.3,width:Math.max(3,X(qtl(q.rates,.75))-X(qtl(q.rates,.25))),height:rh*.6,rx:5,fill:"#e7e5e4"});
+  let sd=11+i;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
+  q.rates.forEach((r,j)=>{const cc=el(s,"circle",{cx:X(r),cy:y+(rnd()-.5)*rh*.46,r:4,fill:PC[p],"fill-opacity":.85,stroke:"#fff","stroke-width":.8,opacity:0});dots.push([cc,j]);hover(cc,`<b>${PN[p]}</b>, simulated month ${j+1}<br>${r.toFixed(2)}% fully completed`)});
+  el(s,"line",{x1:X(md),x2:X(md),y1:y-rh*.32,y2:y+rh*.32,stroke:INK,"stroke-width":3});
+  const rp=el(s,"path",{d:shapeD("diamond",X(q.replayRate),y-rh*.36,6.5),fill:"#fff",stroke:INK,"stroke-width":1.8});hover(rp,`<b>${PN[p]}</b>, original replay<br>${q.replayRate.toFixed(2)}% fully completed`)});
+ animate(900,pp=>dots.forEach(([cc,j])=>cc.setAttribute("opacity",seg(pp,j/50*.6,j/50*.6+.4))));
+ const th=M.pol.Threshold,yT=T+5*rh+rh/2;note(s,X(th.replayRate)-230,yT-rh*.55,X(th.replayRate)-8,yT-rh*.38,"the replay sits inside\nevery rule's spread",{bend:-.25});
+ takeaway(v,`The original replay lands inside each rule's range of simulated months, and the order is the same: cost threshold (median ${qtl(th.rates,.5).toFixed(1)}%) and spend pacing (${qtl(M.pol.Pacing.rates,.5).toFixed(1)}%) at the top, first come, first served and equal quotas near ${Math.round(qtl(M.pol.FCFS.rates,.5))}%. One October replay was not a lucky draw.`)}
+function drawMCFloor(v){const M=D.mc,P=POL;
+ const b=body(v,"1.6fr 1fr");b.style.gap="40px";
+ const c=chart(b,`Overall completion vs. the lowest-served team, in each of ${M.resamples} simulated months`,"pilot",P.map(p=>`<span>${icon(SHAPE[p],PC[p])}${PN[p]}</span>`).join(""));
+ const{s,w,h}=svgIn(c);const xs=P.flatMap(p=>M.pol[p].rates),ys=P.flatMap(p=>M.pol[p].floors);
+ const x0=Math.floor(Math.min(...xs))-1,x1=Math.ceil(Math.max(...xs))+1,y0=Math.floor(Math.min(...ys)/5)*5,y1=Math.ceil(Math.max(...ys)/5)*5;
+ const L=56,R=w-10,T=8,B=h-40,X=x=>L+(x-x0)/(x1-x0)*(R-L),Y=y=>B-(y-y0)/(y1-y0)*(B-T);
+ for(let x=Math.ceil(x0/2.5)*2.5;x<=x1;x+=2.5){el(s,"line",{x1:X(x),x2:X(x),y1:T,y2:B,stroke:LINE});tx(s,X(x),B+18,x+"%",{a:"middle",fill:SOFT,size:13})}
+ for(let y=y0;y<=y1;y+=5){el(s,"line",{x1:L,x2:R,y1:Y(y),y2:Y(y),stroke:LINE});tx(s,L-8,Y(y)+4,y+"%",{a:"end",fill:SOFT,size:13})}
+ tx(s,(L+R)/2,h-2,"Requests fully completed, all teams →",{a:"middle",fill:INK2,size:13.5,w:600});
+ tx(s,14,(T+B)/2,"Lowest-served team's completion →",{a:"middle",fill:INK2,size:13.5,w:600,x:{transform:`rotate(-90 14 ${(T+B)/2})`}});
+ const marks=[];P.forEach(p=>{const q=M.pol[p];q.rates.forEach((r,j)=>{const m=el(s,"path",{d:shapeD(SHAPE[p],X(r),Y(q.floors[j]),4.5),fill:PC[p],"fill-opacity":.55,opacity:0});marks.push(m);hover(m,`<b>${PN[p]}</b>, simulated month ${j+1}<br>${r.toFixed(1)}% completed overall<br>Lowest-served team: ${q.floors[j].toFixed(1)}%`)});
+  el(s,"path",{d:shapeD(SHAPE[p],X(qtl(q.rates,.5)),Y(q.medFloor),9),fill:PC[p],stroke:"#fff","stroke-width":2})});
+ animate(900,pp=>marks.forEach((m,k)=>m.setAttribute("opacity",seg(pp,(k%49)/49*.6,(k%49)/49*.6+.4))));
+ const Q=M.pol.Quotas,A=M.pol.Adaptive,F=M.pol.FCFS,Th=M.pol.Threshold;
+ note(s,X(qtl(Q.rates,.5))+170,Y(Q.medFloor)+6,X(qtl(Q.rates,.5))+14,Y(Q.medFloor),`equal quotas: same total,\nworst floor (${rd(Q.medFloor)}%)`,{c:RED,bend:.2});
+ note(s,X(44.9),Y(A.medFloor)+4,X(qtl(A.rates,.5))+12,Y(A.medFloor),`adaptive: more total,\nlower floor than first come`,{bend:.25});
+ note(s,X(qtl(Th.rates,.5)),Y(Th.medFloor)+78,X(qtl(Th.rates,.5)),Y(Th.medFloor)+14,"best on both",{c:GREEN,bend:.15});
+ const side=document.createElement("div");side.className="mcside";b.appendChild(side);
+ side.innerHTML=`<p class="ct">Why this matters</p><p>A rule can complete more requests overall and still leave one team worse off. This chart puts both on one view: further right means more requests completed, higher means the worst-served team does better.</p>
+  <p><b>Cost threshold and spend pacing</b> sit in the top right: they raise the total and protect the lowest-served team (median ${rd(Th.medFloor)}% vs ${rd(F.medFloor)}% under first come, first served).</p>
+  <p><b>Adaptive sharing</b> completes more overall than first come, first served, but its lowest-served team does worse (${rd(A.medFloor)}% vs ${rd(F.medFloor)}%).</p>
+  <p><b>Equal quotas</b> matches first come, first served overall but drops its lowest-served team to ${rd(Q.medFloor)}%.</p>`;
+ takeaway(v,`More completions don't automatically protect the worst-off team. Only cost threshold and spend pacing improve both the total and the lowest-served team in every simulated month.`)}
 
 /* shell */
 let cur=0;const host=document.getElementById("ch"),tabs=document.getElementById("tabs");
@@ -366,6 +409,7 @@ function go(i){cur=Math.max(0,Math.min(CH.length-1,i));const c=CH[cur];tip.style
  document.getElementById("prev").disabled=cur===0;document.getElementById("next").disabled=cur===CH.length-1;
  const sl=document.getElementById("bud");if(sl)sl.addEventListener("input",()=>{SIM.bi=+sl.value;document.getElementById("budV").textContent=bud()+"%";clearTimeout(deb);deb=setTimeout(()=>{go(cur);const n=document.getElementById("bud");if(n)n.focus()},120)});
  host.querySelectorAll("[data-adv]").forEach(b=>b.onclick=()=>{SIM.adv=b.dataset.adv;go(cur)});
+ host.querySelectorAll("[data-mcv]").forEach(b=>b.onclick=()=>{SIM.mcv=b.dataset.mcv;go(cur)});
  const st=document.getElementById("stage");host.classList.remove("fade");void host.offsetWidth;host.classList.add("fade");
  requestAnimationFrame(()=>c.draw(st))}
 document.getElementById("prev").onclick=()=>go(cur-1);document.getElementById("next").onclick=()=>go(cur+1);

@@ -45,7 +45,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:2px solid #2563eb;outline-
 .card .q{font-size:14px;color:var(--ink2);margin:3px 0 6px}
 .tag{font-size:12.5px;padding:1px 7px;border-radius:5px;font-weight:500;letter-spacing:0;text-transform:none}
 .tag.r{background:#f5f5f4;color:#44403c;border:1px solid #e7e5e4}.tag.s{background:#eff6ff;color:#1e40af;border:1px solid #dbeafe}
-.plot{flex:1;min-height:0}
+.plot{flex:1;min-height:0;margin-bottom:18px}
 svg{display:block;width:100%;height:100%;overflow:visible}
 svg text{font-family:inherit}
 .row2 .plot{height:250px}.row3 .plot{height:250px}
@@ -184,6 +184,8 @@ let S={budget:70,rule:"Threshold"};
 const NS="http://www.w3.org/2000/svg";
 function el(p,t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;p.appendChild(e);return e}
 function tx(p,x,y,s,o={}){return el(p,"text",Object.assign({x,y,fill:o.fill||INK,"font-size":o.size||13.5,"text-anchor":o.a||"start","font-weight":o.w||400},o.x||{}),s)}
+function axes(s,w,h,xt,yt,o={}){if(xt)tx(s,o.cx??w/2,h+16,xt,{a:"middle",fill:INK2,size:12.5,w:600});
+ if(yt){const yy=o.cy??h/2,xx=o.yx??-9;tx(s,xx,yy,yt,{a:"middle",fill:INK2,size:12.5,w:600,x:{transform:`rotate(-90 ${xx} ${yy})`}})}}
 function box(id){const s=document.getElementById(id);s.innerHTML="";const r=s.getBoundingClientRect();const w=Math.max(260,r.width),h=Math.max(120,r.height);s.setAttribute("viewBox",`0 0 ${w} ${h}`);return{s,w,h}}
 function shapeD(k,x,y,r){return{circle:`M${x-r},${y}a${r},${r} 0 1,0 ${2*r},0a${r},${r} 0 1,0 ${-2*r},0`,square:`M${x-r*.9},${y-r*.9}h${1.8*r}v${1.8*r}h${-1.8*r}z`,
  triangle:`M${x},${y-r*1.15}L${x+r*1.1},${y+r*.8}L${x-r*1.1},${y+r*.8}z`,tdown:`M${x},${y+r*1.15}L${x+r*1.1},${y-r*.8}L${x-r*1.1},${y-r*.8}z`,
@@ -223,7 +225,7 @@ function kpis(){const c=cell(),f=cell("FCFS"),m=D.mc.pol[S.rule];
  if(c.left>=5)msg+=` It leaves ${usd(c.leftUsd)} unspent.`;
  document.getElementById("insight").textContent=msg;}
 
-function models(){const{s,w,h}=box("cModel");const ms=D.models.slice().sort((a,b)=>b[2]-a[2]);const L=118,R=w-58,T=2,rh=(h-T-22)/ms.length,X=v=>L+v/60*(R-L);
+function models(){const{s,w,h}=box("cModel");axes(s,w,h,"Share of calls / of estimated cost (%)","Model",{cx:(118+w-58)/2});const ms=D.models.slice().sort((a,b)=>b[2]-a[2]);const L=118,R=w-58,T=2,rh=(h-T-22)/ms.length,X=v=>L+v/60*(R-L);
  const o1=ms.find(m=>m[0]==="o1-preview");document.getElementById("tModel").textContent=`o1-preview is ${rd(o1[1])}% of calls but ${rd(o1[2])}% of the estimated cost`;
  [0,20,40,60].forEach(v=>{el(s,"line",{x1:X(v),x2:X(v),y1:T,y2:h-20,stroke:LINE});tx(s,X(v),h-4,v+"%",{a:"middle",fill:MUT,size:13})});
  ms.forEach(([m,calls,cost],i)=>{const y=T+i*rh,bh=rh*0.32,o=m==="o1-preview";
@@ -236,7 +238,7 @@ function models(){const{s,w,h}=box("cModel");const ms=D.models.slice().sort((a,b
  s.setAttribute("aria-label","Paired bars by model comparing share of calls and share of estimated cost. "+ms.map(([m,c,k])=>`${m}: ${c.toFixed(0)}% of calls, ${k.toFixed(0)}% of cost`).join("; "));}
 
 function week(){const{s,w,h}=box("cWeek");const gap=20,pw=(w-gap)/2,T=22,B=h-22,nW=D.weeks.length;
- [["cache","Calls using cache"],["prem","Calls to premium models"]].forEach(([k,lab],m)=>{const L=m*(pw+gap)+32,R=m*(pw+gap)+pw-6,X=i=>L+i/(nW-1)*(R-L),Y=v=>B-v/80*(B-T);
+ [["cache","Calls using cache"],["prem","Calls to premium models"]].forEach(([k,lab],m)=>{const L=m*(pw+gap)+32,R=m*(pw+gap)+pw-6,X=i=>L+i/(nW-1)*(R-L),Y=v=>B-v/80*(B-T);axes(s,w,h,"Week of October",m===0?"Share of the team's calls (%)":"",{cx:(L+R)/2});
   tx(s,L-30,12,lab,{w:600,size:13.5});
   [0,40,80].forEach(v=>{el(s,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});tx(s,L-5,Y(v)+4,v+"%",{a:"end",fill:MUT,size:13})});
   ["Wk 1","Wk 2","Wk 3","Wk 4"].slice(0,nW).forEach((t,i)=>tx(s,X(i),h-4,t,{a:i===0?"start":i===nW-1?"end":"middle",fill:MUT,size:13}));
@@ -245,7 +247,7 @@ function week(){const{s,w,h}=box("cWeek");const gap=20,pw=(w-gap)/2,T=22,B=h-22,
    v.forEach((y,j)=>{const c=el(s,"circle",{cx:X(j),cy:Y(y),r:test?3.5:2.6,fill:test?TEST:OTHER});hover(c,`<b>${t}</b><br>${D.weeks[j]}: ${y.toFixed(0)}% ${k==="cache"?"using cache":"to premium models"}`)})})});
  s.setAttribute("aria-label","Two line charts by week. Four teams raise cache use from about 17% to 55 to 69% and cut premium-model use from about 71% to 25 to 33%. The two testing teams stay near 5% cache use and about 66% premium.");}
 
-function drain(){const{s,w,h}=box("cDrain");const L=40,R=w-104,T=8,B=h-22,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(R-L),Y=v=>B-v/100*(B-T),c=cell();
+function drain(){const{s,w,h}=box("cDrain");axes(s,w,h,"Date (October)","Budget left (%)",{cx:(40+w-104)/2});const L=40,R=w-104,T=8,B=h-22,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(R-L),Y=v=>B-v/100*(B-T),c=cell();
  document.getElementById("tDrain").textContent=c.left>=5?`${PN[S.rule]} leaves ${usd(c.leftUsd)} unspent at a ${S.budget}% budget`:S.rule==="FCFS"&&S.budget<100?`First come, first served spends everything, so late requests are refused`:`${PN[S.rule]} uses the whole ${S.budget}% budget by Oct 30`;
  document.getElementById("qDrain").textContent=`Budget left from Oct 7 to Oct 30 · ${PN[S.rule]} highlighted, other rules in gray`;
  [0,50,100].forEach(v=>{el(s,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});tx(s,L-6,Y(v)+4,v+"%",{a:"end",fill:MUT,size:13})});
@@ -262,7 +264,7 @@ function drain(){const{s,w,h}=box("cDrain");const L=40,R=w-104,T=8,B=h-22,D0=7,D
  hit.addEventListener("mouseleave",()=>{tip.style.opacity=0;vl.setAttribute("opacity",0)});
  s.setAttribute("aria-label",`Line chart of budget left from Oct 7 to Oct 30 at a ${S.budget}% budget, highlighting ${PN[S.rule]}. Budget left at the end: `+POL.map(p=>`${PN[p]} ${cell(p).left.toFixed(0)}%`).join("; "));}
 
-function teams(){const{s,w,h}=box("cTeams");const c=cell(),f=cell("FCFS");const L=150,R=w-58,top=4,rh=(h-24-top)/6,XM=50,X=v=>L+v/XM*(R-L);
+function teams(){const{s,w,h}=box("cTeams");axes(s,w,h,"Share of the team's requests fully completed (%)","Team",{cx:(172+w-58)/2});const c=cell(),f=cell("FCFS");const L=172,R=w-58,top=4,rh=(h-24-top)/6,XM=50,X=v=>L+v/XM*(R-L);
  let worst=-1,wd=0;c.teams.forEach((v,i)=>{const d=v-f.teams[i];if(d<wd){wd=d;worst=i}});
  const lowest=c.teams.indexOf(Math.min(...c.teams));
  document.getElementById("tTeams").textContent=S.rule==="FCFS"?`Under first come, first served, ${D.teams[lowest]} completes the fewest requests (${rd(c.teams[lowest])}%)`:
@@ -278,7 +280,7 @@ function teams(){const{s,w,h}=box("cTeams");const c=cell(),f=cell("FCFS");const 
   hover(b,`<b>${t}</b> (${D.provider[i]})<br>${p1(v)} fully completed (${f0(c.teamsDone[i])})`+(S.rule!=="FCFS"?`<br>First come, first served: ${p1(f.teams[i])}`:"")+(S.budget===70&&S.rule!=="FCFS"?`<br>Simulated months, median change: ${pts(D.mc.pol[S.rule].teams[i])}`:""))});
  s.setAttribute("aria-label",`Bar chart of requests fully completed per team under ${PN[S.rule]} at ${S.budget}%. `+D.teams.map((t,i)=>`${t} ${rd(c.teams[i])}%`).join(", "));}
 
-function heat(){const{s,w,h}=box("cHeat");const L=150,T=22,cw=(w-L-4)/4,ch=(h-T-4)/POL.length;
+function heat(){const{s,w,h}=box("cHeat");axes(s,w,h,"","Budget rule");const L=150,T=22,cw=(w-L-4)/4,ch=(h-T-4)/POL.length;
  tx(s,L-8,14,"Budget →",{a:"end",fill:MUT,size:13});BUD.forEach((b,j)=>tx(s,L+j*cw+cw/2,14,b+"%",{a:"middle",fill:INK,size:13.5,w:600}));
  POL.forEach((p,i)=>{tx(s,L-8,T+i*ch+ch/2+5,PN[p],{a:"end",fill:INK,w:p===S.rule?700:400,size:13.5});
   BUD.forEach((b,j)=>{const q=cell(p,b),v=q.doneRate,on=p===S.rule&&b===S.budget,k=ci(v);
