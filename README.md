@@ -1,161 +1,93 @@
-# The Cost of Scarcity
+# The Cost of Scarcity: Should CMU Ration AI, or Make It Cheaper?
 
-**Who keeps access to AI when the budget runs short?** This CMU Student IronViz
-Fall 2026 project examines that question through synthetic OpenAI and Gemini
-telemetry, modeled inference costs, and six allocation policies. It connects
-usage analysis with an auditable simulator to show how a policy can increase
-completed requests while shifting access between teams?or leave money unused
-while requests are denied.
+**Who keeps access to AI when a shared budget runs short?** This CMU Student IronViz 2026 project combines synthetic OpenAI and Gemini telemetry with a strict-budget simulator to compare six allocation strategies. It shows how request costs, model choices and budget rules affect both overall service and access across six operational teams.
 
-## The problem
+Limited budgets create competing objectives: complete more requests, protect each team's access, avoid idle allocations, and control spending. A higher completion count can conceal a team loss. Cheaper model substitutions introduce another question: what answer quality would users give up?
 
-An institution has a shared AI budget and teams with different request volumes,
-model choices, and costs. Serving requests in arrival order is simple. Fixed team
-allocations protect entitlements. Sharing, pacing, and cost thresholds make
-different compromises. We compare **fully completed requests, access across
-operational teams, and budget utilization**.
+## What we found
 
-## The dataset
+- **Costs are concentrated.** o1-preview represents 5.33% of eligible calls but 50.73% of reconstructed expenditure in the synthetic month.
+- **Locked allocations can waste capacity.** In the preserved historical 70% budget replay, Equal Quotas leaves $741.27 unused while rejecting 33,745 requests. Adaptive completes 3,195 more requests than FCFS, but engineering-dev loses 1,900 completions.
+- **The corrected October subset study has a stable leading order.** Across 49 matched workload resamples, Threshold beats Pacing, and Pacing beats Adaptive, every time. Equal Quotas versus FCFS is much less stable.
+- **Execution assumptions matter.** Conservative output reservations sharply reduce truncation and change the size of policy advantages.
 
-| Scope | Records |
-|---|---:|
-| Synthetic API telemetry, October 1?30, 2026 | 202,650 |
-| Eligible successful requests | 192,847 |
-| Operational tenants | 6 |
-| Historical comparison: training requests | 38,569 |
-| Historical comparison: evaluation requests | 154,278 |
+The completed Monte Carlo study uses 5,000 October evaluation requests and a separate earlier training sample. At a modeled 70% budget:
 
-These are synthetic competition records, **not actual CMU billing**. Full-month
-modeled reference expenditure is **$5,710.576193**; the evaluation reference is
-**$4,398.736885**. Neither is a verified invoice.
-
-## Our approach
-
-1. **Reconstruct cost:** price uncached input, cached input, and output separately.
-2. **Compare allocation choices:** FCFS, equal quotas, training-calibrated quotas,
-   adaptive sharing, pacing, and a cost threshold.
-3. **Account explicitly:** reserve before execution, settle modeled costs, and
-   distinguish completed, truncated, and rejected requests.
-4. **Explore sensitivity:** compare policies on identical resampled workloads
-   in a small, separately labeled synthetic Monte Carlo pilot.
-
-## What the historical replay shows
-
-At a modeled **70% evaluation budget ($3,079.115819)**:
-
-| Policy | Fully completed requests | Unused modeled budget |
+| Policy | Median fully completed | Median paired gain over FCFS |
 |---|---:|---:|
-| First come, first served | 42,573 | <$0.01 |
-| Equal quotas | 36,641 | $741.27 |
-| Training-calibrated quotas | 44,699 | $101.37 |
-| Adaptive sharing | 45,768 | $78.57 |
-| Pacing | 46,217 | <$0.01 |
-| Cost threshold | 47,384 | <$0.01 |
+| First come, first served | 35.35% | reference |
+| Equal Quotas | 35.49% | +0.26 pp |
+| Training Quotas | 39.36% | +3.93 pp |
+| Adaptive sharing | 40.22% | +4.87 pp |
+| Spend pacing | 45.46% | +10.16 pp |
+| Cost threshold | 47.63% | +12.30 pp |
 
-- **Equal budgets do not guarantee equal access.** Equal quotas leave $741.27
-  unused while rejecting 33,745 requests.
-- **Aggregate gains can conceal a team loss.** Adaptive adds 3,195 completions
-  over FCFS, while engineering-dev loses 1,900.
-- **A small request class dominates modeled cost.** Across the eligible month,
-  o1-preview accounts for 5.33% of calls and 50.73% of estimated expenditure.
+These are **modeled outcomes on synthetic competition telemetry**, conditional on one subset, budget and reservation setting. They do not establish a universal winner or actual CMU performance. Historical replay results precede correctness repairs and use different assumptions; keep them separate from this study.
 
-The policy table preserves **pre-correction, provisional experiment results**.
-Mean reservations and a 1,024-token output cap cause substantial truncation even
-at a 100% reference budget. These numbers describe modeled trade-offs; they do
-not establish greater answer utility or the best policy for CMU.
+## Dataset and approach
 
-## Why it matters
+The source contains **202,650 synthetic API records from October 1-30, 2026**. After exclusions, **192,847 successful requests** are eligible across six tenants and five models. Full-month component-rounded reference expenditure is $5,710.576193; it is a modeled list-price reconstruction, not an invoice.
 
-A policy can serve more requests by favoring cheaper executions, improve some
-teams' access at another's expense, or protect allocations that remain unused.
-An institutional decision needs more than one completion-count ranking. Our
-results make those competing objectives visible.
+The project connects four layers:
 
-## Results and visualizations
+1. **Telemetry and descriptive analysis:** reconcile usage fields, exclusions, premium-model concentration, cached input and calendar trends.
+2. **Event-driven allocation:** compare FCFS, Equal Quotas, Training Quotas, Adaptive, Pacing and Threshold with explicit reservations, settlements and integer micro-USD accounting.
+3. **Counterfactual routing:** model eligible cheaper-model substitutions with explicit compatibility and output-length assumptions. Quality equivalence is not measured; routing is disabled in the headline comparisons.
+4. **Paired Monte Carlo analysis:** resample local 12-hour workload blocks and give every policy the same requests and budget. Train estimates and calibrated parameters using only the earlier training window.
 
-**Download individual CSVs from GitHub and build charts without running Python.**
-Start with the [visualization handoff](VISUALIZATION_HANDOFF.md) for exact columns,
-chart suggestions, joins, and caveats.
+Admission authorizes execution; a request can then truncate. **Full completion** means delivering its entire original output, which still does not measure answer quality or task usefulness.
 
-| Chart-ready dataset | What it supports |
-|---|---|
-| [Policy ? budget](results/presentation/policy_budget_summary.csv) | All 24 historical runs: outcomes, spending, unused money, FCFS differences |
-| [Tenant trade-offs at 70%](results/presentation/tenant_tradeoffs_70pct.csv) | Winners and losers across six tenants and policies |
-| [Bootstrap methods at 70%](results/presentation/bootstrap_methods_70pct.csv) | Separate replay and single-resample probes by method |
-| [Monte Carlo summary](results/presentation/monte_carlo_pilot_summary.csv) | Paired medians, dispersion, wins/ties/losses, ranking reversals |
-| [Monte Carlo replicates](results/presentation/monte_carlo_pilot_replicates.csv) | All 90 pilot runs: replay plus 29 resamples for three policies |
+## Explore the project
 
-See the [data dictionary](results/presentation/data_dictionary.md) and
-[source provenance](results/presentation/provenance.json). Original historical
-exports remain unchanged in [results/canonical](results/canonical/).
+Start with the [visualization handoff](VISUALIZATION_HANDOFF.md) and [chart-ready datasets](results/presentation/). No simulation is needed to make the final figures. One [data dictionary](results/presentation/data_dictionary.md) defines units, denominators and joins; [provenance](results/presentation/provenance.json) records saved inputs and output hashes.
 
-The team's [static figures](figures/static/) and
-[animated charts](figures/animated/animated_charts.html) preserve the original
-presentation. Their simulation panels use the legacy pipeline, not corrected
-modular results. A descriptive preview:
+The existing [interactive story](figures/story.html) and [dashboard](figures/dashboard.html) explore descriptive telemetry, the **historical pre-correction replay**, and the separately labeled **corrected Monte Carlo study**. Download/open the HTML locally to interact; GitHub's file view displays source. The handoff provides seven chart specifications, including the reservation sensitivity.
 
 ![Six teams differ in prompt size, premium-model use and caching.](figures/static/04_team_fingerprints_2D.png)
 
-## Monte Carlo: a separate synthetic exploration
-
-The completed pilot compares FCFS, Adaptive and Pacing on **29 paired workload
-resamples plus a separate replay**, using 2,000 fictional source requests.
-Pacing's median completion advantage is **+11.75 percentage points** over FCFS;
-Adaptive's is **?0.125 points**, reversing its positive replay ordering in 16 of
-29 draws. These are conditional synthetic outcomes, not full-data confidence
-intervals or evidence of institutional policy superiority.
-
-The [Monte Carlo findings](documentation/MONTE_CARLO.md) explain the design.
-A [small mechanism investigation](documentation/PACING_INVESTIGATION.md) shows
-that Pacing also selects among request costs: it drops requests exceeding the
-current allowance rather than queuing them. More completions do not imply
-more useful output.
+The [descriptive static figures](figures/static/) support the usage narrative. Outdated admission/routing graphics were removed rather than presented as strict full-completion evidence.
 
 ## Repository guide
 
 | Path | Purpose |
 |---|---|
-| `results/presentation/` | Chart-ready CSVs, dictionary and provenance |
-| `results/canonical/` | Preserved historical outputs and configuration |
-| `ironviz_f26/` | Modular budget simulation engine |
-| `src/`, `config/` | Original preparation/analysis and pricing assumptions |
-| `charts/`, `figures/` | Preserved visualization code and assets |
-| `documentation/` | Methodology, contracts, validation and investigations |
-| `tests/`, `tools/` | Safe checks and reusable utilities |
-| `outputs/`, `data/raw/` | Ignored local experiment artifacts and raw inputs |
+| `results/presentation/` | Single entry point for all final chart-ready CSVs |
+| `results/canonical/` | Frozen historical six-policy results and original manifest |
+| `results/monte_carlo/` | Exact study samples, saved aggregates, configuration and cap audits |
+| `results/analysis_*.csv` | Descriptive source summaries used by active chart builders |
+| `ironviz_f26/` | Current simulation, accounting, routing and experiment backend |
+| `src/`, `config/` | Telemetry preparation and price assumptions |
+| `charts/`, `figures/` | Descriptive charts and interactive story/dashboard |
+| `documentation/` | Methodology, contract, Monte Carlo report and cleanup record |
+| `tests/`, `tools/` | Safe checks, saved-result aggregation and bounded research utilities |
 
-## Run the code safely
+The 25.9 MB cleaned telemetry remains tracked because the active story and descriptive chart builder use it. Raw records and regenerable simulation/exclusion intermediates remain local and ignored. See the inspected [cleanup manifest](documentation/CLEANUP.md) for removal and retention decisions.
 
-With Python 3.11+ in a virtual environment:
+## Run safely
+
+Use Python 3.11+ in a virtual environment:
 
 ```bash
 python -m pip install -e .
 python -m pytest -q
 python -m ironviz_f26 --help
-```
-
-Rebuild presentation aggregates from saved tables only:
-
-```bash
 python tools/build_presentation.py
 ```
 
-That command executes **no simulation policies**. From a fresh checkout it uses
-the published pilot replicate table to rebuild the pilot summary. Expensive
-sweeps and the legacy `run_all.sh` are not part of the handoff workflow.
-Scenario-sweep tests remain excluded by default.
+The presentation command reads **versioned saved tables only** and executes no policies. It works from a fresh checkout without raw telemetry or ignored experiment directories. Scenario-sweep tests are excluded by default.
 
-## Methodology and limitations
+A small synthetic smoke test, separate from published results:
 
-See the [methodology](documentation/METHODOLOGY.md),
-[data contract](documentation/DATA_CONTRACT.md), and
-[correctness validation](documentation/VALIDATION.md). Historical experiments
-preceded repairs and were not regenerated. Historical bootstrap probes have
-one resample per method. Price effective dates, task utility and quality-preserving
-model substitutions are unverified. Tenant disparity concerns operational groups,
-not demographic fairness.
+```bash
+python -m ironviz_f26 generate-fixture --output outputs/smoke/requests.csv --price-catalog-output outputs/smoke/price_catalog.json --requests 24
+python -m ironviz_f26 validate-data --input outputs/smoke/requests.csv
+python -m ironviz_f26 run-simulation --input outputs/smoke/requests.csv --price-catalog outputs/smoke/price_catalog.json --output-dir outputs/smoke/fcfs --policy FCFS --budget-fraction 0.7
+```
 
-Raw files remain untracked and protected locally; some raw data already exists
-in upstream Git history, which this work does not rewrite. Original teammate work
-and attribution remain preserved. Analysis and engineering used AI assistance;
-interpretations require human review.
+See [methodology and optional reproduction](documentation/METHODOLOGY.md) and the [Monte Carlo report](documentation/MONTE_CARLO.md) for research commands. Expensive reproduction is separate from routine verification.
+
+## Interpretation
+
+Telemetry is synthetic; prices lack verified effective dates. Reservations limit execution output as well as admission. The Monte Carlo distribution holds training estimates and the chosen subset fixed, so it does not cover all sources of uncertainty. Historical results are provisional and were not rerun with the corrected engine. Tenant comparisons concern operational groups, not demographic fairness. No result demonstrates quality-preserving routing or institutional savings. See the [methodology](documentation/METHODOLOGY.md), [Monte Carlo report](documentation/MONTE_CARLO.md) and [data contract](documentation/DATA_CONTRACT.md).
+
+The repository combines the team's data analysis, visualization and simulation contributions. Analysis and engineering used AI assistance; scientific interpretation requires human review.

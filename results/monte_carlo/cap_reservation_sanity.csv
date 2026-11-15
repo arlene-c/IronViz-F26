@@ -1,0 +1,4 @@
+mode,cap,requests,completed,truncated,rejected,cap_exceeded,reservation_shortfall
+mean,1024,64,12,52,0,52,52
+mean,8192,64,34,30,0,0,30
+quantile,8192,64,60,4,0,0,4

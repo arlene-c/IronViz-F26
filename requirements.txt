@@ -1,6 +1,0 @@
-numpy>=1.26,<3
-pandas>=2.2,<4
-matplotlib>=3.8,<4
-numba>=0.59,<1
-pyarrow>=14,<27
-pytest>=8,<10

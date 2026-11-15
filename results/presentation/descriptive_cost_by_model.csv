@@ -1,0 +1,6 @@
+dataset,result_status,provider,model,calls,cost_usd,call_share_pct,cost_share_pct
+synthetic_october_telemetry,descriptive_synthetic,Gemini,gemini-1.5-flash,42090,15.57,21.83,0.27
+synthetic_october_telemetry,descriptive_synthetic,Gemini,gemini-1.5-pro,47553,1241.54,24.66,21.74
+synthetic_october_telemetry,descriptive_synthetic,OpenAI,gpt-4o,49636,1515.6,25.74,26.54
+synthetic_october_telemetry,descriptive_synthetic,OpenAI,gpt-4o-mini,43290,41.04,22.45,0.72
+synthetic_october_telemetry,descriptive_synthetic,OpenAI,o1-preview,10278,2896.7,5.33,50.73

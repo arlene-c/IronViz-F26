@@ -4,14 +4,16 @@ import argparse
 from dataclasses import asdict
 import json
 from pathlib import Path
+import sys
 
 import pandas as pd
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from ironviz_f26.reference_adapter import load_reference_outputs
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Adapt committed cleaned/reference outputs to the modular simulator contract.")
+    parser = argparse.ArgumentParser(description="Adapt prepared cleaned/reference outputs to the modular simulator contract.")
     parser.add_argument("--clean", default="results/clean_requests.csv")
     parser.add_argument("--simulation", default="results/requests_sim.csv")
     parser.add_argument("--prices", default="config/prices.csv")

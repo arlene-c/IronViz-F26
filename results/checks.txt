@@ -1,5 +1,0 @@
-fcfs at 100% admits 100.00% (expected ~100%)
-same inputs give identical decisions
-realized spend equals sum of daily spend for every policy/budget (real October)
-no request is both refused and downgraded
-fcfs and routing never overspend more than 1% (estimate vs realized cost)

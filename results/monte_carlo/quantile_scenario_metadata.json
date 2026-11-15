@@ -1,0 +1,388 @@
+{
+  "data_label": "MODELED OCTOBER COMPETITION SUBSET; synthetic telemetry; conditional local-block resampling",
+  "schema_version": "2; post-correction",
+  "tenant_roster": [
+    "org-engineering-dev",
+    "org-marketing-ai",
+    "org-prod-core",
+    "prj-ai-enterprise-prod",
+    "prj-ai-r-and-d",
+    "prj-ai-sandbox-testing"
+  ],
+  "horizon_start": "2026-10-07T00:00:00Z",
+  "horizon_end": "2026-10-31T00:00:00Z",
+  "seed": 20261115,
+  "catalog_version": "config/prices.csv (source dates not declared in catalog)",
+  "training_request_count": 1250,
+  "evaluation_request_count": 5000,
+  "excluded_request_count": 0,
+  "training_window": "fixed chronological pre-evaluation sample; model reservations, tenant quota weights and threshold calibration use training only",
+  "training_quota_weights": {
+    "org-prod-core": 0.22694445190613283,
+    "prj-ai-sandbox-testing": 0.09817082543423682,
+    "prj-ai-enterprise-prod": 0.07703746092841793,
+    "org-marketing-ai": 0.22609134086507265,
+    "org-engineering-dev": 0.29268026590355056,
+    "prj-ai-r-and-d": 0.0790756549625892
+  },
+  "evaluation_window": "October 7-30 UTC subset; replay or local 12-hour blocks sampled within +/-3 days and retimed within the fixed horizon",
+  "bootstrap_method": "local_12h",
+  "bootstrap_sensitivity": {
+    "configured_method": "local_12h",
+    "local_block_hours": 12,
+    "local_window_days": 3.0
+  },
+  "paired_design": "same sampled workload, cost multiplier vector, scenario seed, and per-index routing draws for every policy in each scenario",
+  "random_streams": {
+    "workload": "SeedSequence spawn key 0",
+    "cost": "SeedSequence spawn key 1",
+    "routing": "SeedSequence spawn key 2",
+    "tenant_volume_reweighting": "SeedSequence spawn key 3",
+    "scenario_seed_derivation": "SeedSequence spawn key 4"
+  },
+  "assumptions": [
+    "All budgets and eligibility probabilities are modeled scenario assumptions.",
+    "Routed outcomes and routed output lengths are counterfactual; no quality equivalence is assumed.",
+    "Routed input token counts are held unchanged as an explicit scenario assumption.",
+    "Reservation multipliers scale training-window estimated costs; they are sensitivity factors, not empirical estimator modes.",
+    "Confidence intervals summarize workload resampling and modeled assumptions, not real-world cost uncertainty.",
+    "The fixture label SYNTHETIC TEST DATA does not describe CMU observations or real prices."
+  ],
+  "config": {
+    "budget_fractions": [
+      0.7
+    ],
+    "replicates": 11,
+    "seed": 20261115,
+    "training_fraction": 0.20004,
+    "bootstrap": true,
+    "bootstrap_method": "local_12h",
+    "bootstrap_window_days": 3.0,
+    "bootstrap_block_hours": 12,
+    "demand_imbalance": [
+      1.0
+    ],
+    "estimator_noise": [
+      0.0
+    ],
+    "routing_eligibility": [
+      0.0
+    ],
+    "reservation_multipliers": [
+      1.0
+    ],
+    "routed_output_multipliers": [
+      1.0
+    ],
+    "routing_sigma": 0.0,
+    "policies": [
+      "FCFS",
+      "Adaptive",
+      "Pacing"
+    ],
+    "trace_replicates": [],
+    "trace_policies": [],
+    "timeseries_stride": 10000,
+    "strict_mode": true,
+    "output_cap": 8192,
+    "model_output_caps": {
+      "gpt-4o": 8192,
+      "gpt-4o-mini": 8192,
+      "o1-preview": 8192,
+      "gemini-1.5-pro": 8192,
+      "gemini-1.5-flash": 8192
+    },
+    "routing_compatibility": [],
+    "reservation_mode": "quantile",
+    "reservation_quantile": 0.9,
+    "data_label": "MODELED OCTOBER COMPETITION SUBSET; synthetic telemetry; conditional local-block resampling",
+    "tenant_roster": [
+      "org-engineering-dev",
+      "org-marketing-ai",
+      "org-prod-core",
+      "prj-ai-enterprise-prod",
+      "prj-ai-r-and-d",
+      "prj-ai-sandbox-testing"
+    ],
+    "horizon_start": "2026-10-07T00:00:00Z",
+    "horizon_end": "2026-10-31T00:00:00Z"
+  },
+  "experiment_runtime_seconds": 17.28887930000201,
+  "scenarios": [
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep000",
+      "replicate": 0,
+      "workload_kind": "replay",
+      "seed": 1299167573,
+      "request_count": 5000,
+      "reference_cost_micro_usd": 147690173,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2476190476190476,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep001",
+      "replicate": 1,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 4290126913,
+      "request_count": 5004,
+      "reference_cost_micro_usd": 151467536,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2561643835616438,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep002",
+      "replicate": 2,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 2304366571,
+      "request_count": 4999,
+      "reference_cost_micro_usd": 148194006,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2506849315068493,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep003",
+      "replicate": 3,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 1788358991,
+      "request_count": 5022,
+      "reference_cost_micro_usd": 150384506,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2533875338753389,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep004",
+      "replicate": 4,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 2218700059,
+      "request_count": 5009,
+      "reference_cost_micro_usd": 147238017,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.243572395128552,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep005",
+      "replicate": 5,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 2006423771,
+      "request_count": 5001,
+      "reference_cost_micro_usd": 144788702,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2411924119241193,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep006",
+      "replicate": 6,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 3937064786,
+      "request_count": 4989,
+      "reference_cost_micro_usd": 143495036,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2268456375838925,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep007",
+      "replicate": 7,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 379017275,
+      "request_count": 5010,
+      "reference_cost_micro_usd": 146868521,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.233153638814016,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep008",
+      "replicate": 8,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 1963608168,
+      "request_count": 5004,
+      "reference_cost_micro_usd": 147744498,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.23680649526387,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep009",
+      "replicate": 9,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 795628257,
+      "request_count": 4999,
+      "reference_cost_micro_usd": 149092341,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2425474254742548,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    },
+    {
+      "scenario_id": "i1.00-n0.00-r1.00-rmquantile-q0.90-e0.00-m1.00-rep010",
+      "replicate": 10,
+      "workload_kind": "local_12h_block_bootstrap",
+      "seed": 3979882982,
+      "request_count": 5010,
+      "reference_cost_micro_usd": 149256939,
+      "demand_imbalance_factor": 1.0,
+      "observed_tenant_volume_ratio": 1.2411924119241193,
+      "estimator_noise_sigma": 0.0,
+      "reservation_multiplier": 1.0,
+      "reservation_mode": "quantile",
+      "reservation_quantile": 0.9,
+      "model_output_caps": {
+        "gpt-4o": 8192,
+        "gpt-4o-mini": 8192,
+        "o1-preview": 8192,
+        "gemini-1.5-pro": 8192,
+        "gemini-1.5-flash": 8192
+      },
+      "routing_eligibility_probability": 0.0,
+      "routed_output_length_multiplier": 1.0,
+      "trace": false,
+      "trace_policies": []
+    }
+  ]
+}

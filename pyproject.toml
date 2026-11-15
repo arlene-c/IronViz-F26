@@ -18,6 +18,9 @@ dependencies = [
 [project.scripts]
 ironviz = "ironviz_f26.cli:main"
 
+[project.optional-dependencies]
+legacy = ["numba>=0.59,<1"]
+
 [tool.setuptools.packages.find]
 include = ["ironviz_f26*"]
 exclude = ["tests*"]

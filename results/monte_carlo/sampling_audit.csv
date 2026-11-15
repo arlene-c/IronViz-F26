@@ -1,0 +1,140 @@
+population,metric,category,source_value,subset_value,difference,unit
+evaluation,tenant,org-engineering-dev,17.21373105692322,17.080000000000002,-0.1337310569232173,percent; difference in pp
+evaluation,tenant,org-marketing-ai,18.217762739988853,18.34,0.12223726001114699,percent; difference in pp
+evaluation,tenant,org-prod-core,18.066088489609665,18.240000000000002,0.1739115103903366,percent; difference in pp
+evaluation,tenant,prj-ai-enterprise-prod,15.706063080931823,15.740000000000002,0.03393691906817864,percent; difference in pp
+evaluation,tenant,prj-ai-r-and-d,15.834402831252673,15.9,0.06559716874732757,percent; difference in pp
+evaluation,tenant,prj-ai-sandbox-testing,14.961951801293768,14.7,-0.26195180129376894,percent; difference in pp
+evaluation,provider,Gemini,46.502417713478266,46.339999999999996,-0.16241771347826983,percent; difference in pp
+evaluation,provider,OpenAI,53.49758228652174,53.66,0.16241771347825562,percent; difference in pp
+evaluation,model,gemini-1.5-flash,23.584049572849015,23.28,-0.30404957284901357,percent; difference in pp
+evaluation,model,gemini-1.5-pro,22.91836814062925,23.06,0.1416318593707473,percent; difference in pp
+evaluation,model,gpt-4o,23.904898948651137,24.12,0.2151010513488636,percent; difference in pp
+evaluation,model,gpt-4o-mini,24.27112096345558,23.919999999999998,-0.35112096345558186,percent; difference in pp
+evaluation,model,o1-preview,5.3215623744150164,5.62,0.29843762558498366,percent; difference in pp
+evaluation,day,2026-10-07,4.164560079855844,4.18,0.015439920144155295,percent; difference in pp
+evaluation,day,2026-10-08,4.167800982641725,4.12,-0.04780098264172494,percent; difference in pp
+evaluation,day,2026-10-09,4.167800982641725,4.18,0.012199017358274666,percent; difference in pp
+evaluation,day,2026-10-10,4.178820052113717,4.22,0.041179947886282875,percent; difference in pp
+evaluation,day,2026-10-11,4.173634607656309,4.2,0.026365392343691063,percent; difference in pp
+evaluation,day,2026-10-12,4.162615538184316,4.14,-0.02261553818431672,percent; difference in pp
+evaluation,day,2026-10-13,4.165856440970197,4.18,0.014143559029802688,percent; difference in pp
+evaluation,day,2026-10-14,4.112057454724588,4.14,0.027942545275411845,percent; difference in pp
+evaluation,day,2026-10-15,4.171041885427605,4.12,-0.05104188542760468,percent; difference in pp
+evaluation,day,2026-10-16,4.182060954899597,4.2,0.01793904510040356,percent; difference in pp
+evaluation,day,2026-10-17,4.171041885427605,4.2,0.028958114572395388,percent; difference in pp
+evaluation,day,2026-10-18,4.177523690999365,4.2,0.02247630900063502,percent; difference in pp
+evaluation,day,2026-10-19,4.161319177069965,4.08,-0.08131917706996461,percent; difference in pp
+evaluation,day,2026-10-20,4.172986427099133,4.279999999999999,0.10701357290086655,percent; difference in pp
+evaluation,day,2026-10-21,4.132151051997044,4.14,0.007848948002955325,percent; difference in pp
+evaluation,day,2026-10-22,4.205395454957933,4.26,0.05460454504206691,percent; difference in pp
+evaluation,day,2026-10-23,4.165856440970197,4.16,-0.005856440970196886,percent; difference in pp
+evaluation,day,2026-10-24,4.169097343756077,4.18,0.010902656243922948,percent; difference in pp
+evaluation,day,2026-10-25,4.195672746600293,4.18,-0.015672746600293053,percent; difference in pp
+evaluation,day,2026-10-26,4.160670996512788,4.14,-0.020670996512788697,percent; difference in pp
+evaluation,day,2026-10-27,4.152892829826676,4.08,-0.07289282982667622,percent; difference in pp
+evaluation,day,2026-10-28,4.1703937048704285,4.1000000000000005,-0.07039370487042795,percent; difference in pp
+evaluation,day,2026-10-29,4.159374635398437,4.1000000000000005,-0.059374635398436126,percent; difference in pp
+evaluation,day,2026-10-30,4.159374635398437,4.22,0.06062536460156309,percent; difference in pp
+evaluation,hour,0,4.165208260413021,4.02,-0.14520826041302115,percent; difference in pp
+evaluation,hour,1,4.15872645484126,3.6799999999999997,-0.47872645484126064,percent; difference in pp
+evaluation,hour,2,4.171041885427605,4.3,0.12895811457239503,percent; difference in pp
+evaluation,hour,3,4.166504621527372,4.42,0.2534953784726275,percent; difference in pp
+evaluation,hour,4,4.183357316013949,4.04,-0.1433573160139492,percent; difference in pp
+evaluation,hour,5,4.133447413111396,4.3999999999999995,0.2665525868886034,percent; difference in pp
+evaluation,hour,6,4.165208260413021,3.92,-0.2452082604130208,percent; difference in pp
+evaluation,hour,7,4.176875510442189,4.24,0.06312448955781136,percent; difference in pp
+evaluation,hour,8,4.163911899298669,4.46,0.29608810070133096,percent; difference in pp
+evaluation,hour,9,4.165208260413021,4.36,0.1947917395869796,percent; difference in pp
+evaluation,hour,10,4.154837371498204,4.12,-0.034837371498204206,percent; difference in pp
+evaluation,hour,11,4.166504621527372,4.12,-0.046504621527372336,percent; difference in pp
+evaluation,hour,12,4.178171871556541,4.16,-0.01817187155654043,percent; difference in pp
+evaluation,hour,13,4.157430093726909,4.64,0.48256990627309104,percent; difference in pp
+evaluation,hour,14,4.173634607656309,3.8600000000000003,-0.3136346076563088,percent; difference in pp
+evaluation,hour,15,4.146411024254917,4.16,0.013588975745083332,percent; difference in pp
+evaluation,hour,16,4.171041885427605,4.54,0.36895811457239525,percent; difference in pp
+evaluation,hour,17,4.145114663140564,3.8600000000000003,-0.2851146631405639,percent; difference in pp
+evaluation,hour,18,4.152892829826676,3.8600000000000003,-0.29289282982667597,percent; difference in pp
+evaluation,hour,19,4.193080024371589,4.34,0.14691997562841053,percent; difference in pp
+evaluation,hour,20,4.196320927157469,3.94,-0.2563209271574691,percent; difference in pp
+evaluation,hour,21,4.176875510442189,4.42,0.24312448955781107,percent; difference in pp
+evaluation,hour,22,4.178820052113717,3.9800000000000004,-0.19882005211371645,percent; difference in pp
+evaluation,hour,23,4.159374635398437,4.16,0.0006253646015634828,percent; difference in pp
+evaluation,cache_used,any,33.726130750981994,33.54,-0.18613075098199516,percent; difference in pp
+evaluation,premium_model,premium,52.14482946369541,52.800000000000004,0.6551705363045954,percent; difference in pp
+evaluation,input_tokens,mean,7249.039409377876,7305.0258,55.98639062212442,tokens
+evaluation,input_tokens,q0.25,2945.0,2973.0,28.0,tokens
+evaluation,input_tokens,q0.5,5082.0,5184.5,102.5,tokens
+evaluation,input_tokens,q0.75,9844.0,10050.0,206.0,tokens
+evaluation,input_tokens,q0.9,15542.0,15516.400000000016,-25.599999999983993,tokens
+evaluation,input_tokens,q0.99,28293.23000000001,27874.170000000006,-419.06000000000495,tokens
+evaluation,input_tokens,q1,49534.0,41196.0,-8338.0,tokens
+evaluation,output_tokens,mean,1191.0230298551965,1196.6272,5.604170144803447,tokens
+evaluation,output_tokens,q0.25,682.0,685.0,3.0,tokens
+evaluation,output_tokens,q0.5,1018.0,1036.5,18.5,tokens
+evaluation,output_tokens,q0.75,1599.0,1594.25,-4.75,tokens
+evaluation,output_tokens,q0.9,2124.0,2139.0,15.0,tokens
+evaluation,output_tokens,q0.99,3238.2300000000105,3184.2900000000063,-53.94000000000415,tokens
+evaluation,output_tokens,q1,5631.0,4649.0,-982.0,tokens
+evaluation,reference_cost,per request,0.028511757249899534,0.0295380346,0.001026277350100465,modeled USD/request
+training,tenant,org-engineering-dev,17.45183956026861,17.28,-0.1718395602686087,percent; difference in pp
+training,tenant,org-marketing-ai,18.05854442687132,18.0,-0.058544426871321775,percent; difference in pp
+training,tenant,org-prod-core,18.07928647359278,18.0,-0.07928647359278074,percent; difference in pp
+training,tenant,prj-ai-enterprise-prod,15.668023542223027,15.920000000000002,0.2519764577769745,percent; difference in pp
+training,tenant,prj-ai-r-and-d,15.7017293681454,15.920000000000002,0.21827063185460105,percent; difference in pp
+training,tenant,prj-ai-sandbox-testing,15.040576628898858,14.879999999999999,-0.16057662889885904,percent; difference in pp
+training,provider,Gemini,46.41032953926729,46.72,0.3096704607327112,percent; difference in pp
+training,provider,OpenAI,53.589670460732705,53.28000000000001,-0.309670460732697,percent; difference in pp
+training,model,gemini-1.5-flash,14.791672068241335,14.879999999999999,0.08832793175866449,percent; difference in pp
+training,model,gemini-1.5-pro,31.61865747102595,31.840000000000003,0.22134252897405204,percent; difference in pp
+training,model,gpt-4o,33.07319349736835,33.2,0.12680650263165205,percent; difference in pp
+training,model,gpt-4o-mini,15.154657885866888,15.040000000000001,-0.11465788586688674,percent; difference in pp
+training,model,o1-preview,5.361819077497472,5.04,-0.3218190774974721,percent; difference in pp
+training,day,2026-10-01,16.60141564468874,16.24,-0.36141564468874066,percent; difference in pp
+training,day,2026-10-02,16.614379423889652,16.88,0.2656205761103472,percent; difference in pp
+training,day,2026-10-03,16.606601156369106,16.96,0.35339884363089524,percent; difference in pp
+training,day,2026-10-04,16.764759262620238,16.56,-0.20475926262023947,percent; difference in pp
+training,day,2026-10-05,16.712904145816587,16.56,-0.1529041458165885,percent; difference in pp
+training,day,2026-10-06,16.69475485493531,16.8,0.10524514506468918,percent; difference in pp
+training,day,2026-10-07,0.00518551168036506,0.0,-0.00518551168036506,percent; difference in pp
+training,hour,0,4.1873006818947855,4.96,0.7726993181052144,percent; difference in pp
+training,hour,1,4.163965879333143,3.1199999999999997,-1.0439658793331437,percent; difference in pp
+training,hour,2,4.174336902693873,4.08,-0.09433690269387274,percent; difference in pp
+training,hour,3,4.205449972776064,4.24,0.0345500272239363,percent; difference in pp
+training,hour,4,4.17174414685369,3.84,-0.3317441468536906,percent; difference in pp
+training,hour,5,4.158780367652779,3.84,-0.31878036765277873,percent; difference in pp
+training,hour,6,4.151002100132231,3.92,-0.23100210013223066,percent; difference in pp
+training,hour,7,4.192486193575151,5.52,1.3275138064248484,percent; difference in pp
+training,hour,8,4.16137312349296,3.44,-0.7213731234929601,percent; difference in pp
+training,hour,9,4.205449972776064,5.28,1.0745500272239363,percent; difference in pp
+training,hour,10,4.156187611812596,4.8,0.6438123881874036,percent; difference in pp
+training,hour,11,4.1354455650911355,3.2800000000000002,-0.8554455650911352,percent; difference in pp
+training,hour,12,4.179522414374238,3.92,-0.2595224143742385,percent; difference in pp
+training,hour,13,4.169151391013508,3.5999999999999996,-0.5691513910135084,percent; difference in pp
+training,hour,14,4.151002100132231,3.36,-0.7910021001322307,percent; difference in pp
+training,hour,15,4.11988903005004,3.36,-0.7598890300500405,percent; difference in pp
+training,hour,16,4.125074541730405,3.6799999999999997,-0.4450745417304054,percent; difference in pp
+training,hour,17,4.174336902693873,3.84,-0.33433690269387295,percent; difference in pp
+training,hour,18,4.1406310767715,5.2,1.0593689232285,percent; difference in pp
+training,hour,19,4.17174414685369,4.4799999999999995,0.3082558531463091,percent; difference in pp
+training,hour,20,4.200264461095698,4.64,0.4397355389043014,percent; difference in pp
+training,hour,21,4.169151391013508,4.8,0.6308486089864918,percent; difference in pp
+training,hour,22,4.176929658534056,4.88,0.7030703414659438,percent; difference in pp
+training,hour,23,4.158780367652779,3.92,-0.23878036765277866,percent; difference in pp
+training,cache_used,any,12.510046928880708,12.4,-0.110046928880708,percent; difference in pp
+training,premium_model,premium,70.05367004589178,70.08,0.026329954108220477,percent; difference in pp
+training,input_tokens,mean,8377.764344421686,8360.0352,-17.729144421686215,tokens
+training,input_tokens,q0.25,3883.0,3892.0,9.0,tokens
+training,input_tokens,q0.5,6846.0,6825.0,-21.0,tokens
+training,input_tokens,q0.75,11365.0,11412.25,47.25,tokens
+training,input_tokens,q0.9,16282.0,16401.800000000014,119.80000000001382,tokens
+training,input_tokens,q0.99,28212.879999999997,28207.969999999994,-4.9100000000034925,tokens
+training,input_tokens,q1,52188.0,47018.0,-5170.0,tokens
+training,output_tokens,mean,1342.7419170836683,1322.0856,-20.656317083668227,tokens
+training,output_tokens,q0.25,812.0,822.0,10.0,tokens
+training,output_tokens,q0.5,1271.0,1249.0,-22.0,tokens
+training,output_tokens,q0.75,1772.0,1754.5,-17.5,tokens
+training,output_tokens,q0.9,2209.0,2169.0,-40.0,tokens
+training,output_tokens,q0.99,3237.0,3075.91,-161.09000000000015,tokens
+training,output_tokens,q1,5064.0,4045.0,-1019.0,tokens
+training,reference_cost,per request,0.034012790271980085,0.0324919016,-0.0015208886719800876,modeled USD/request

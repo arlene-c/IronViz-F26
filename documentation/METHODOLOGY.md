@@ -1,85 +1,73 @@
-# Methodology and result status
+# Methodology and reproduction
 
-## Preserved experiments
+The project separates descriptive telemetry, a preserved historical replay, and a corrected October subset Monte Carlo study. Their populations and execution assumptions differ. The [data contract](DATA_CONTRACT.md) defines simulator inputs and outputs; the [presentation dictionary](../results/presentation/data_dictionary.md) defines chart units and joins. The completed stochastic study is documented once in [MONTE_CARLO.md](MONTE_CARLO.md).
 
-`results/canonical/` contains **pre-correction** historical outputs. Original
-six-policy CSV/Parquet files under `outputs/authoritative_policies/` are unchanged.
-The manifest records byte-identical copies and the explicitly downsampled export.
-Original experiments did not embed a generating commit.
+## Data and cost reconstruction
 
-Source: 202,650 synthetic October 2026 records; 192,847 eligible. The leading
-38,569 requests train estimates/weights; 154,278 evaluation requests span October
-7-30. Full reference cost: $5,710.576193; evaluation: $4,398.736885. Component
-costs are ceiled to micro-USD. These are modeled list-price costs, not bills;
-price effective dates and omitted fees remain limitations.
+The competition provides 202,650 synthetic October 2026 records. The cleaner excludes 5,672 HTTP 400 calls, 4,124 HTTP 429 calls and seven negative reasoning-token records, leaving 192,847 eligible requests across six operational tenants. Cached input is a subset of total input, not an extra additive token count. Reasoning tokens are not separately added to the billed components.
 
-Historical configurations: equal quotas; training-spend quotas; adaptive protected
-borrowing (rho .1, one-hour window, limit .5); linear pacing (slack .05); tuned
-threshold. Adaptive/pacing are fixed, not equally optimized. Mean reservations
-and a 1,024-token cap truncate without scarcity. Threshold tuning used realized
-training costs, unlike evaluation reservations/settlements. Roster and horizon
-were inferred retrospectively. Repaired code does not validate those old results.
+The original descriptive reconstruction uses floating USD and totals $5,710.443150. The modular accounting ceilings each uncached-input, cached-input and output component to integer micro-USD, totaling $5,710.576193. The $0.133043 difference (0.0023298%) is expected rounding, not missing demand. Exact reconciliation and the price catalog are retained in [canonical configuration](../results/canonical/configuration/). Source prices lack effective dates and are modeled assumptions, not verified invoices.
 
-At 70%, completed originals: FCFS 42,573; equal quotas 36,641; training quotas
-44,699; Adaptive 45,768; Pacing 46,217; Threshold 47,384. Equal quotas leave
-$741.272122; Adaptive leaves $78.572794. Adaptive gains overall over FCFS while
-engineering loses 1,900. At 100%, FCFS completes 48,585 and truncates 105,693.
+Descriptive model/cost shares use eligible successful requests. Tenant call/error shares use operational records after removing invalid telemetry; they include failed calls. Weekly cache/premium shares use eligible requests. The six tenant labels are operational groups, not individuals or demographic categories.
 
-Each bootstrap export has replay plus ONE resample: do not use percentile columns
-as confidence intervals. Local 12-hour blocks retain approximate calendar position;
-whole-day resampling scrambles October's trend. No routing policy is in this comparison.
+## Allocation and execution
 
-## Accounting and interpretation
+The current backend is [ironviz_f26](../ironviz_f26/). It implements FCFS; equal monetary quotas; training-spend quotas; adaptive protected borrowing; cumulative spending pacing; and a training-calibrated reservation threshold. Adaptive uses protected reserves, a trailing run-rate window and lender debits. Pacing releases budget over the configured horizon with 5% slack and rejects reservations that do not fit the current allowance. It does not queue, retry or reorder requests. Threshold is tuned for full training completions, then lower spending on ties.
 
-Cached input is a subset of input. Strict mode reserves before execution, limits
-output to reservation and selected-model cap, then immediately settles/releases.
-Soft compatibility mode may exceed reservations and global budget. Admission is
-not completion. Routed outcomes use assumed replacement lengths and unchanged
-input tokens; they are not measured quality-equivalent service.
+Strict mode reserves before execution, limits output by both the selected-model cap and the funded reservation, then immediately settles and releases surplus. A rejected request receives no execution. An admitted request can truncate. Full original completion requires delivery of all original observed output, and does not imply useful or correct answers. Mean output reservations can therefore cause truncation even when total money is ample. Quantile and cap reservations are alternative execution assumptions, not merely admission estimates.
 
-Historical cost-weighted served share was spend/reference spend. Original/routed
-subgroup cost ratios used all spending. Historical tenant_remaining was global
-budget minus tenant spend, not an entitlement. Historical exhaustion time was
-first global-fit denial, not zero balance. Original-model hindsight bounds are
-not upper bounds for cheaper routed service. Avoid those interpretations in figures.
+The routing framework additionally requires an explicit compatibility/eligibility assumption. Routed output lengths are counterfactual; input tokens are held unchanged. Original and routed completions remain separate, and cheaper substitutions are not assumed to preserve quality. Routing is disabled in the historical six-policy comparison and the corrected October study.
 
-## Current-code corrections
+Model output distributions are fit using training only and keyed by provider/model; reservation overrides include request/provider/model. Explicit rosters and horizons make adaptive/pacing decisions independent of evaluation suffixes when the budget and estimator stay fixed. Budgets normalized to realized reference cost are retrospective scenario assumptions; changing the workload can change those budgets.
 
-Schema 2 corrections are implemented and covered by targeted small regressions:
-integer ceiling arithmetic; catalog units/duplicate/value/pair validation;
-UTC normalization; cleaned/reference attribute reconciliation; configured horizon
-and explicit/training-only roster; selected-target full cap reservation; separate
-cap/reservation flags and denial causes; settled policy entitlement balances;
-aggregate reservation release; original-only reference-cost-weighted completion;
-execution-group spending ratios; distinct first denial/global-fit denial/zero-balance
-exhaustion; null incomparable routed hindsight gaps; training threshold reservations,
-settlements and completion objective; saved tau; separate replay/bootstrap summaries;
-lower-spend win direction; suppressed intervals with fewer than 20 resamples;
-and condition-specific paired diagnostic points without averaged interval endpoints.
+## Historical evidence and corrected semantics
 
-These corrections can change rankings and metric meanings. Historical tables remain
-pre-correction and provisional. **No full-data corrected run has been performed.**
-Use `python -m pytest -q` for safe tests: scenario-sweep tests are marked and excluded
-by default. They must not be enabled during submission stabilization. Tests use
-synthetic records only; no full-data command is executed. Horizon flags are required
-for timed policies; FCFS quickstart does not require a horizon.
+[results/canonical](../results/canonical/) preserves the original manifest and pre-correction CSV values. The historical split is 38,569 training requests and 154,278 evaluation requests, October 7-30. Evaluation reference cost is $4,398.736885. Six policies at 50/70/85/100% budgets produce 24 runs. Each historical bootstrap method has replay plus **one** resample; no supported uncertainty interval follows from those probes.
 
-Original files under outputs remain local, with ambiguous development artifacts
-retained rather than deleted. Historical audits were archived byte-for-byte. Raw
-CSV/cache tracking was removed; local files and shared Git history are unchanged.
-Raw CSVs already exist in upstream history, which was not rewritten.
-The machine contract is documentation/DATA_CONTRACT.md. The original specification
-and archived audits are development provenance, not current implementation claims.
+At 70%, FCFS/Quotas/TrainingQuotas/Adaptive/Pacing/Threshold complete 42,573/36,641/44,699/45,768/46,217/47,384 requests. Equal Quotas leaves $741.272122, and Adaptive leaves $78.572794. Adaptive increases aggregate completions while engineering-dev loses 1,900 relative to FCFS. At 100%, FCFS admits all evaluation requests but completes only 48,585 and truncates 105,693. Cap/reservation effects cannot be described solely as scarcity losses.
 
-## Finalization verification
+These experiments preceded repairs: threshold calibration did not match strict evaluation settlements; rosters/horizons were inferred retrospectively; and mean reservations with a 1,024-token cap truncated extensively. Current code fixes integer arithmetic/catalog validation, provider/model lookup collisions, training threshold settlements and its reject-all candidate, UTC ordering, selected-target caps, reservation release and actual quota balances. It distinguishes cap/reservation flags, denial causes and true zero-balance exhaustion. Current cost-weighted served share counts original reference costs of fully completed originals; historical versions used spend/reference spend. Cost-per-completion includes wasted truncated execution spending, is null for zero completions, and is not a marginal cost. Routed hindsight gaps are suppressed when incomparable.
 
-Safe suite: 46 passed, 3 scenario-sweep tests deselected. Editable 0.2.0 installation
-and pip dependency check passed. CLI generation/validation and one FCFS smoke run
-used 16 synthetic requests (3 training, 13 evaluation); no full-data experiment ran.
-CI repeats the safe checks; a hosted CI outcome is not claimed here. Curated byte
-hashes are protected by .gitattributes across platforms. Legacy source, pricing,
-analysis tables and visual assets remain unchanged.
+Replay and resample summaries are separate. Current summary interval fields are suppressed below 20 resamples; they remain conditional percentile summaries rather than institutional confidence intervals. Diagnostic aggregation does not average interval endpoints. Small tests verify strict calibration, lookup keys, paired streams, bootstrap structure, training boundaries, prefix invariance and denominators. These corrections do not retrospectively validate historical counts. No full-data corrected evaluation was performed.
 
-Follow-up local correctness and small Monte Carlo validation are documented in
-[VALIDATION.md](VALIDATION.md). Those exploratory
-synthetic results do not replace or validate the curated historical results.
+The earlier fictional pilot and its development logs were superseded by the October study. A unique 50-request mechanism check remains in the [archived Pacing investigation](archive/PACING_INVESTIGATION.md): it found no admission-rule mismatch and showed how current allowance filtering can favor cheaper requests. The [original specification](archive/SPEC.md) preserves initial hypotheses and design intent; it is not a current implementation guide. Other redundant audits are recoverable from Git history.
+
+## Routine verification and visualization
+
+With Python 3.11+:
+
+```bash
+python -m pip install -e .
+python -m pytest -q
+python -m ironviz_f26 --help
+python tools/build_presentation.py
+```
+
+The builder imports no simulation code and reads only committed saved evidence. It reconstructs 24 historical policy rows, 36 tenant rows, 24 historical method-probe rows, four descriptive exports, and the corrected Monte Carlo tables. It verifies matching FCFS baselines, paired seeds/demand/budgets, conservation, sampling block choices and source hashes. Tests also rebuild in a temporary fresh-checkout layout without ignored outputs or raw telemetry.
+
+The interactive builders use the presentation tables, historical canonical trajectories and descriptive summaries, with separately labeled corrected Monte Carlo panels:
+
+```bash
+python charts/make_dashboard.py results charts/dashboard_template.html OUTPUT_DASHBOARD.html
+python charts/make_story.py results charts/story_template.html OUTPUT_STORY.html
+python charts/make_static.py results/clean_requests.csv OUTPUT_DIRECTORY
+```
+
+Use a separate output path; do not overwrite current figures during routine checks. The latest story/dashboard updates from remote commit 162622c were carried forward without a Git merge; their templates and rendered HTML are unchanged from that revision. The builders received explicit UTF-8 I/O fixes for Windows. The cleaned CSV remains tracked because those active workflows need it. Descriptive summaries keep established source paths; the presentation builder exposes their chart-ready equivalents in the single handoff directory.
+
+## Optional data preparation and research reproduction
+
+Raw telemetry remains local and ignored; obtain the two competition files using the [raw-data instructions](../data/raw/README.md). To reproduce cleaned/derived inputs and descriptive summaries without simulation:
+
+```bash
+python src/ironviz_experiments.py --openai data/raw/openai_pipeline_telemetry_raw.csv --gemini data/raw/gemini_pipeline_telemetry_raw.csv --prices config/prices.csv --out outputs/reproduction_telemetry
+python tools/adapt_reference.py --clean outputs/reproduction_telemetry/clean_requests.csv --simulation outputs/reproduction_telemetry/requests_sim.csv --output-dir outputs/canonical_reference
+```
+
+The first command now stops after preparation by default. Simulation/exclusion intermediates are ignored, and their existing local copies were preserved. The legacy four-policy floating-budget implementation remains in that source file to explain the original pipeline; it requires explicit `--run-legacy-experiments` opt-in and is not the current engine. Do not use its first-observation estimator or full-month quota calibration as leakage-free policy estimates. Its old admission/routing charts, generated intermediates and redundant entry points were removed from the final narrative.
+
+Optional expensive bounded October commands are isolated in [MONTE_CARLO.md](MONTE_CARLO.md). They were not executed during consolidation. The historical sweep, full-data evaluation, original fictional pilot, historical bootstraps and routing factorial were not rerun. Frozen canonical results are read-only evidence, not targets for regeneration.
+
+## Limits
+
+One synthetic month and one selected subset do not represent real institutional outcomes. Training and prices stay fixed under resampling; task utility, answer quality, concurrency and reliable latency are absent. Rare-model estimates can be noisy. Budget percentages scale to each workload's reference cost, not a constant-dollar institutional cap. Completion gains and token-delivery gains can disagree. Conditional resampling spreads describe the chosen model, not all scientific uncertainty. See [CLEANUP.md](CLEANUP.md) for verification and evidence-based repository decisions.

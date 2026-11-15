@@ -9,7 +9,7 @@
 <style>
 :root{--bg:#f7f7f5;--card:#fff;--ink:#1c1917;--ink2:#44403c;--soft:#78716c;--line:#e7e5e4;--line2:#d6d3d1;
 --test:#c2410c;--other:#2563eb;--note:#0f4c81;
---FCFS:#1d4ed8;--Quotas:#0ea5e9;--TrainingQuotas:#7c3aed;--Adaptive:#0d9488;--Pacing:#65a30d;--Threshold:#db2777;
+--FCFS:#94a3b8;--Quotas:#93c5fd;--TrainingQuotas:#3b82f6;--Adaptive:#1e3a8a;--Pacing:#14b8a6;--Threshold:#047857;
 --p-prod:#1c1917;--p-learn:#a8a29e;--p-exp:#c2410c}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.5;font-feature-settings:"tnum" 1}
@@ -54,6 +54,10 @@ svg.ic{width:14px;height:14px;flex:none;display:inline-block;margin:0}
 .tag{font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;white-space:nowrap}
 .tag.log{background:#f5f5f4;color:#44403c;border:1px solid #e7e5e4}
 .tag.sim{background:#eff6ff;color:#1e40af;border:1px solid #dbeafe}
+.tag.pilot{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.mcside{display:flex;flex-direction:column;gap:14px;min-height:0}
+.mcside p{margin:0;font-size:15.5px;line-height:1.55;color:var(--ink2)}
+.mcside p b{color:var(--ink)}
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:var(--ink2);margin-top:6px}
 .legend span{display:flex;align-items:center;gap:6px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:3px}
@@ -152,7 +156,7 @@ function hover(e,html){e.addEventListener("mousemove",ev=>{tip.innerHTML=typeof 
 let GEN=0;function animate(dur,f){if(REDUCE){f(1);return}const my=GEN;let s=null;const g=t=>{if(my!==GEN)return;if(s===null)s=t;const p=Math.min(1,(t-s)/dur);f(p);if(p<1)requestAnimationFrame(g)};requestAnimationFrame(g)}
 const ease=x=>1-Math.pow(1-Math.max(0,Math.min(1,x)),3),seg=(p,a,b)=>Math.max(0,Math.min(1,(p-a)/(b-a)));
 function chart(par,title,kind,legend){const d=document.createElement("div");d.className="chart";
- d.innerHTML=`<p class="ct">${title}${kind?`<span class="tag ${kind}">${kind==="log"?"From the logs":"Simulated"}</span>`:""}</p>${legend?`<div class="legend">${legend}</div>`:""}`;par.appendChild(d);return d}
+ d.innerHTML=`<p class="ct">${title}${kind?`<span class="tag ${kind}">${{log:"From the logs",sim:"Simulated",pilot:"Simulated months"}[kind]}</span>`:""}</p>${legend?`<div class="legend">${legend}</div>`:""}`;par.appendChild(d);return d}
 function body(v,cols){const b=document.createElement("div");b.className="body";if(cols)b.style.gridTemplateColumns=cols;v.appendChild(b);return b}
 function takeaway(v,html){const d=document.createElement("div");d.className="take";d.innerHTML=`<b>Takeaway</b><span>${html}</span>`;v.appendChild(d)}
 const sw=(c,lab)=>`<span><i class="sw" style="background:${c}"></i>${lab}</span>`;
@@ -180,7 +184,7 @@ const CH=[
    <h3>The problem</h3>
    <p>Six teams at CMU share AI services from OpenAI and Google, and every request is billed by the number of tokens it uses. Spending is uneven: one model and two teams account for a large part of the bill. If CMU set an AI budget below what teams actually use, some requests would have to be refused. <b>We ask which rule for sharing a limited budget completes the most requests, and which teams pay the price under each rule.</b></p>
    <h3>Our approach</h3>
-   <p>We started from one month of usage logs, which record the team, model and token counts of every request. We priced each request at the providers' list prices to estimate what October cost. We then built a simulation that replays the requests from October 7 to 30 in the order they arrived. Before each request is answered, a budget rule decides whether to approve it, based on its estimated cost and the money left. We ran <b>six rules at four budget levels</b>, from 50% to 100% of the cost of serving everyone, and counted how many requests each rule completed in full and how each team fared. The first week of October was held back to set up the rules, such as each team's share, so that no rule could see the future.</p>
+   <p>We started from one month of usage logs, which record the team, model and token counts of every request. We priced each request at the providers' list prices to estimate what October cost. We then built a simulation that replays the requests from October 7 to 30 in the order they arrived. Before each request is answered, a budget rule decides whether to approve it, based on its estimated cost and the money left. We ran <b>six rules at four budget levels</b>, from 50% to 100% of the cost of serving everyone, and counted how many requests each rule completed in full and how each team fared. The first week of October was held back to set up the rules, such as each team's share, so that no rule could see the future. Finally, to check whether a ranking would hold up in a slightly different month, we ran a <b>Monte Carlo study</b>: 49 simulated months at a 70% budget, each built by resampling 12-hour blocks of October's requests.</p>
    <h3>Why a simulation</h3>
    <p>A budget rule can't be tried out on live traffic without refusing real work. Replaying the same month under every rule means each one faces exactly the same requests, so any difference in the results comes from the rule itself.</p>`;b.appendChild(L);
   const R=document.createElement("div");R.innerHTML=`<div class="kgrid">
@@ -189,7 +193,8 @@ const CH=[
    <div class="k"><div class="n">${usd(k.cost)}</div><div class="l">estimated October cost</div><div class="c">We multiplied token counts by list prices, because the logs do not record the actual bill.</div></div>
    <div class="k hl"><div class="n">${k.testCalls}% → ${k.testTokens}%</div><div class="l">testing teams' share of calls → tokens</div><div class="c">The two testing teams send ${k.testCalls}% of calls but use ${k.testTokens}% of all tokens, because their prompts are ${promptRatio().toFixed(1)} times larger.</div></div></div>
    <div class="src"><span class="tag log">From the logs</span><span>These numbers are measured directly from the October usage logs, which are synthetic data provided by the CMU IronViz competition.</span>
-    <span class="tag sim">Simulated</span><span>These numbers come from our simulation of a budget rule. They are provisional and may change as we refine the model.</span></div>`;b.appendChild(R);
+    <span class="tag sim">Simulated</span><span>These numbers come from replaying October under a budget rule. They are provisional and may change as we refine the model.</span>
+    <span class="tag pilot">Simulated months</span><span>These numbers come from 49 resampled versions of October (5,000 requests each) and show how much the results vary.</span></div>`;b.appendChild(R);
   const n=R.querySelector("[data-c]");animate(1200,p=>n.textContent=f0(k.calls*ease(p)))}},
 
 {label:"Where the money goes",title:()=>`A small share of requests drives most of the cost`,
@@ -288,12 +293,12 @@ const CH=[
    <li><span class="n">2</span><div><b>Don't lock money into equal team shares.</b><span>At a 70% budget, equal quotas complete the fewest requests and leave ${usd(C.Quotas_70.leftUsd)} unspent, because money set aside for a quiet team can't be used by a busy one.</span></div></li>
    <li><span class="n">3</span><div><b>When teams share money, check who pays.</b><span>Adaptive sharing completes ${f0(C.Adaptive_70.done-C.FCFS_70.done)} more requests than first come, first served at 70%, but engineering-dev completes ${f0(C.FCFS_70.teamsDone[eng]-C.Adaptive_70.teamsDone[eng])} fewer.</span></div></li>
    <li><span class="n">4</span><div><b>Look at the output limit before the budget.</b><span>Even with the full budget, ${rd(pctOf(full.trunc,full.n))}% of requests are cut short by the 1,024-token output limit, which matters more than any budget rule.</span></div></li></ol>
-   <p class="caveat"><b style="color:${INK}">These results are provisional.</b> Each setting was simulated once on synthetic data, so we can't yet say how much the numbers would vary. We also did not test sending requests to cheaper models. The 100% budget is ${usd(D.sim.refUsd)}, the modeled cost of serving every request from October 7 to 30.</p>`;b.appendChild(g)}},
+   <p class="caveat"><b style="color:${INK}">These results are provisional.</b> Each October setting was simulated once on synthetic data. Across 49 simulated months (see Advanced simulation), cost threshold, spend pacing and adaptive sharing beat first come, first served every time. We also did not test sending requests to cheaper models. The 100% budget is ${usd(D.sim.refUsd)}, the modeled cost of serving every request from October 7 to 30.</p>`;b.appendChild(g)}},
 
 {label:"Advanced simulation",title:()=>`A closer look at the simulation`,
- dek:()=>SIM.adv==="rules"?`This view is for readers who want more detail. Pick a rule to compare it with first come, first served team by team, and see how every request ends: completed in full, cut short by the 1,024-token output limit, or refused for lack of money.`:`Monte Carlo results will appear here.`,
+ dek:()=>SIM.adv==="rules"?`This view is for readers who want more detail. Pick a rule to compare it with first come, first served team by team, and see how every request ends: completed in full, cut short by the 1,024-token output limit, or refused for lack of money.`:`One replay of October gives one ranking, but a slightly different month might rank the rules differently. To test this, we built ${D.mc.resamples} simulated months, each about ${f0(Math.round(D.mc.n/100)*100)} requests resampled in 12-hour blocks from October, and compared every rule with first come, first served on the same requests at a ${D.mc.budget}% budget.`,
  controls:()=>`<div style="display:flex;gap:28px;align-items:flex-end"><div class="subtabs" role="group" aria-label="View"><button data-adv="rules" aria-pressed="${SIM.adv==="rules"}">Rule by rule</button><button data-adv="mc" aria-pressed="${SIM.adv==="mc"}">Monte Carlo</button></div>${SIM.adv==="rules"?budSlider():""}</div>`,
- draw:v=>{if(SIM.adv==="mc"){v.style.gridTemplateRows="1fr";const e=document.createElement("div");e.className="empty";e.textContent="Monte Carlo · in progress";v.appendChild(e);return}
+ draw:v=>{if(SIM.adv==="mc"){drawMC(v);return}
   v.style.gridTemplateRows="auto 1fr auto";const fc=cell("FCFS");
   const rc=document.createElement("div");rc.className="rules";v.appendChild(rc);
   POL.forEach(p=>{const r=cell(p),d=r.done-fc.done,bt=document.createElement("button");bt.className="rc"+(p===SIM.rule?" on":"");bt.setAttribute("aria-pressed",p===SIM.rule);
@@ -320,6 +325,34 @@ const CH=[
   animate(800,pp=>segs.forEach(([rr,wd])=>rr.setAttribute("width",Math.max(0,wd*ease(pp)))));
   const tr=cell(SIM.rule);takeaway(v,`Under ${PN[SIM.rule].toLowerCase()} at a ${bud()}% budget, ${rd(pctOf(tr.done,tr.n))}% of requests are completed in full, ${rd(pctOf(tr.trunc,tr.n))}% are cut short and ${rd(pctOf(tr.rej,tr.n))}% are refused. Most of the shortfall comes from the output limit, not from the budget rule.`)}}
 ];
+
+
+function drawMC(v){const M=D.mc,P=["Quotas","TrainingQuotas","Adaptive","Pacing","Threshold"],fc=M.pol.FCFS;
+ const b=body(v,"1.55fr 1fr");b.style.gap="44px";
+ const c=chart(b,`Change in requests completed vs. first come, first served, in ${M.resamples} simulated months`,"pilot",
+  `<span><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${SOFT}"></i>One simulated month</span><span><i class="sw" style="background:#e7e5e4"></i>Middle half</span><span><i style="display:inline-block;width:3px;height:14px;background:${INK}"></i>Median</span>`);
+ const{s,w,h}=svgIn(c);const all=P.flatMap(p=>M.pol[p].diffs),lo=Math.min(-2,Math.floor(Math.min(...all))-1),hi=Math.ceil(Math.max(...all)/2)*2;
+ const L=200,R=w-10,T=6,B=h-30,rh=(B-T)/P.length,X=x=>L+(x-lo)/(hi-lo)*(R-L);
+ for(let x=Math.ceil(lo/2)*2;x<=hi;x+=2){el(s,"line",{x1:X(x),x2:X(x),y1:T,y2:B,stroke:x===0?INK:LINE,"stroke-width":x===0?1.5:1});tx(s,X(x),h-8,(x>0?"+":"")+x+" pts",{a:"middle",fill:x===0?INK:SOFT,size:13,w:x===0?700:500})}
+ const dots=[];P.forEach((p,i)=>{const q=M.pol[p],y=T+i*rh+rh/2;
+  tx(s,L-16,y-2,PN[p],{a:"end",size:15,w:600});tx(s,L-16,y+16,`median ${q.med>0?"+":""}${q.med.toFixed(1)} pts`,{a:"end",size:13.5,fill:INK2});
+  el(s,"rect",{x:X(q.q25),y:y-rh*.32,width:Math.max(3,X(q.q75)-X(q.q25)),height:rh*.64,rx:5,fill:"#e7e5e4"});
+  let sd=7+i;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};
+  q.diffs.forEach((d,j)=>{const cc=el(s,"circle",{cx:X(d),cy:y+(rnd()-.5)*rh*.5,r:4,fill:PC[p],"fill-opacity":.85,stroke:"#fff","stroke-width":.8,opacity:0});dots.push([cc,j]);hover(cc,`<b>${PN[p]}</b>, simulated month ${j+1}<br>${d>0?"+":""}${d.toFixed(2)} pts vs. first come, first served`)});
+  el(s,"line",{x1:X(q.med),x2:X(q.med),y1:y-rh*.34,y2:y+rh*.34,stroke:INK,"stroke-width":3})});
+ animate(900,pp=>dots.forEach(([cc,j])=>cc.setAttribute("opacity",seg(pp,j/50*.6,j/50*.6+.4))));
+ const qy=T+rh/2,qq=M.pol.Quotas;note(s,X(6.2),qy-4,X(qq.q75)+8,qy-2,`a coin flip: better in ${qq.wins},\nworse in ${qq.losses}`,{c:RED,bend:.2});
+ const ty=T+4*rh+rh/2,tq=M.pol.Threshold;note(s,X(tq.med)-190,ty+2,X(tq.q25)-10,ty,`ahead in all ${tq.wins}`,{c:GREEN,bend:-.2});
+ const side=document.createElement("div");side.className="mcside";b.appendChild(side);
+ const c2=chart(side,"How often each rule beat first come, first served","pilot",sw("#15803d","Better")+sw("#d6d3d1","Tie")+sw("#b91c1c","Worse"));c2.style.height="230px";
+ const S2=svgIn(c2),s2=S2.s,w2=S2.w,h2=S2.h,L2=170,rh2=(h2-6)/P.length,X2=n=>L2+n/M.resamples*(w2-L2);
+ P.forEach((p,i)=>{const q=M.pol[p],y=i*rh2+rh2*.18,bh=rh2*.64;tx(s2,L2-12,y+bh/2+5,PN[p],{a:"end",size:14,w:600});let x0=0;
+  [[q.wins,"#15803d","better"],[q.ties,"#d6d3d1","tied"],[q.losses,"#b91c1c","worse"]].forEach(([n,col,lab])=>{if(!n)return;const r=el(s2,"rect",{x:X2(x0),y,width:X2(x0+n)-X2(x0),height:bh,fill:col});
+   if(X2(x0+n)-X2(x0)>18)tx(s2,X2(x0+n/2),y+bh/2+5,n,{a:"middle",size:13.5,w:700,fill:col==="#d6d3d1"?INK:"#fff",x:{"pointer-events":"none"}});hover(r,`<b>${PN[p]}</b>: ${lab} than first come, first served in ${n} of ${M.resamples} simulated months`);x0+=n})});
+ const t=document.createElement("div");t.style.cssText="display:flex;flex-direction:column;gap:12px";const th=M.pol.Threshold,pa=M.pol.Pacing,ad=M.pol.Adaptive;
+ t.innerHTML=`<p><b>The winners hold up.</b> Cost threshold (${th.med>0?"+":""}${th.med.toFixed(1)} pts), spend pacing (+${pa.med.toFixed(1)}) and adaptive sharing (+${ad.med.toFixed(1)}) beat first come, first served in every one of the ${M.resamples} months, and their order never changed.</p>
+  <p><b>Equal quotas is a coin flip.</b> It beat first come, first served in ${qq.wins} months and lost in ${qq.losses}, while leaving money unspent.</p>`;side.appendChild(t);
+ takeaway(v,`The ranking from the October replay survives: in ${M.resamples} simulated months, cost threshold and spend pacing always beat first come, first served, by about ${rd(pa.med)}–${rd(th.med)} points. Ranges here describe how much the result moves between months, not a formal confidence interval.`)}
 
 /* shell */
 let cur=0;const host=document.getElementById("ch"),tabs=document.getElementById("tabs");

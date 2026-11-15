@@ -1,3 +1,5 @@
 # Curated snapshots must retain source bytes across Windows/Linux checkouts.
 /results/canonical/** -text whitespace=cr-at-eol
 /results/presentation/** -text whitespace=cr-at-eol
+/results/monte_carlo/** -text whitespace=cr-at-eol
+/results/analysis_*.csv -text whitespace=cr-at-eol

@@ -1,0 +1,25 @@
+dataset,result_status,tenant,week,calls,calls_using_cache_pct,premium_model_pct,median_prompt_tokens,cost_usd,cost_per_day_usd,testing_team
+synthetic_october_telemetry,descriptive_synthetic,org-engineering-dev,Oct 1-7,7801,4.68,69.25,8116,442.04,63.15,True
+synthetic_october_telemetry,descriptive_synthetic,org-engineering-dev,Oct 8-14,7742,5.09,68.69,8037.5,426.93,60.99,True
+synthetic_october_telemetry,descriptive_synthetic,org-engineering-dev,Oct 15-21,7700,5.44,69.03,8083,429.11,61.3,True
+synthetic_october_telemetry,descriptive_synthetic,org-engineering-dev,Oct 22-30,10045,5.16,68.16,7955,544.98,60.55,True
+synthetic_october_telemetry,descriptive_synthetic,org-marketing-ai,Oct 1-7,8121,17.63,73.28,5370,360.75,51.54,False
+synthetic_october_telemetry,descriptive_synthetic,org-marketing-ai,Oct 8-14,8167,34.03,68.78,5119,347.97,49.71,False
+synthetic_october_telemetry,descriptive_synthetic,org-marketing-ai,Oct 15-21,8204,49.95,43.94,3904.5,293.04,41.86,False
+synthetic_october_telemetry,descriptive_synthetic,org-marketing-ai,Oct 22-30,10579,67.8,33.18,3576,341.85,37.98,False
+synthetic_october_telemetry,descriptive_synthetic,org-prod-core,Oct 1-7,8174,18.41,72.56,5266,352.36,50.34,False
+synthetic_october_telemetry,descriptive_synthetic,org-prod-core,Oct 8-14,8178,34.21,66.79,5031,320.63,45.8,False
+synthetic_october_telemetry,descriptive_synthetic,org-prod-core,Oct 15-21,8128,50.01,43.74,3915.5,278.82,39.83,False
+synthetic_october_telemetry,descriptive_synthetic,org-prod-core,Oct 22-30,10365,68.75,32.81,3536,314.84,34.98,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-enterprise-prod,Oct 1-7,7065,16.42,69.77,9697,114.07,16.3,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-enterprise-prod,Oct 8-14,7049,30.02,64.31,9011,101.7,14.53,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-enterprise-prod,Oct 15-21,7138,42.43,36.86,3132,57.4,8.2,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-enterprise-prod,Oct 22-30,9022,55.17,24.93,2847.5,47.28,5.25,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-r-and-d,Oct 1-7,7007,16.74,69.47,9669,112.78,16.11,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-r-and-d,Oct 8-14,7183,31.16,63.98,8832,102.42,14.63,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-r-and-d,Oct 15-21,7139,42.06,37.04,3132,57.55,8.22,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-r-and-d,Oct 22-30,9156,56.12,26.1,2872.5,50.66,5.63,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-sandbox-testing,Oct 1-7,6826,4.88,65.35,14141,145.64,20.81,True
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-sandbox-testing,Oct 8-14,6620,4.59,64.91,13987.5,141.58,20.23,True
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-sandbox-testing,Oct 15-21,6691,4.63,65.18,13993,142.48,20.35,True
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-sandbox-testing,Oct 22-30,8747,4.62,63.95,13787,183.56,20.4,True

@@ -1,4 +1,7 @@
-"""CMU IronViz Fall 2026: standardized telemetry + four budget-allocation experiments, in one script.
+"""CMU IronViz Fall 2026: telemetry preparation and descriptive analysis.
+
+Default execution performs NO simulations. Historical four-policy experiments
+require the explicit --run-legacy-experiments flag and are not current results.
 
 Requires: pandas, numpy.  Optional: numba (makes the simulation about 50x faster).
 
@@ -34,7 +37,7 @@ Policies:
                pace for the rest of the month (their quota x share of month left).
     routing    one shared pool; when spending runs ahead of a straight-line monthly pace, or a request no longer
                fits, expensive models are downgraded to cheaper_model. Answer quality is NOT modelled.
-Decisions use EXPECTED cost; the budget is charged REALIZED cost. Output tokens never inform a decision.
+Legacy experiments use EXPECTED admission cost and charge REALIZED cost. The first group estimate falls back to its current output; this historical implementation is not leakage-free or a strict reservation engine.
 """
 import argparse
 import json
@@ -311,6 +314,8 @@ def main():
     ap.add_argument("--shock-multiplier", type=int, default=3); ap.add_argument("--shock-budget", type=int, default=85)
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--strict", action="store_true", help="stop on invalid records instead of excluding them")
+    ap.add_argument("--run-legacy-experiments", action="store_true",
+                    help="EXPENSIVE: explicitly opt into the obsolete four-policy admission experiments; default prepares data only")
     a = ap.parse_args()
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     checks = []
@@ -332,6 +337,9 @@ def main():
     S[["request_id", "timestamp", "provider", "tenant", "model", "input_tokens", "cached_tokens", "output_tokens",
        "expected_output_tokens", "token_bucket", "real_cost", "expected_cost"]].to_csv(out / "requests_sim.csv", index=False)
     write_analysis(df, S, out)
+    if not a.run_legacy_experiments:
+        print(f"Prepared {len(S):,} eligible requests and descriptive summaries; no simulation executed.")
+        return
     BASE = A.real.sum()
     spend_by_team = pd.Series(A.real).groupby(A.tenant).sum().reindex(range(len(teams))).values
     shares = spend_by_team / BASE if a.quota_split == "spend" else np.full(len(teams), 1 / len(teams))

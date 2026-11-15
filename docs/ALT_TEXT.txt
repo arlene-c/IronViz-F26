@@ -13,21 +13,23 @@ Small-multiple bar charts comparing six teams on five measures. The two testing 
 05_rate_limits_daily_2D
 Line chart of daily rate-limited calls for OpenAI and Gemini across October. Both hover around 50 to 85 per day, with one spike each: Gemini on October 14 and OpenAI on October 21, mostly from the production teams.
 
-06_cost_vs_access_2D
-Scatter of simulated months at a 70% budget. Median requests served: First come, first served 65% served with 0% downgraded; Fixed team quotas 62% served with 0% downgraded; Adaptive sharing 62% served with 0% downgraded; Smart routing 100% served with 20% downgraded.
+=== FINAL DASHBOARD (figures/dashboard.html) ===
+Results: full October replay (154,278 requests, six rules x four budgets) plus 49 simulated months at a 70% budget.
 
-07_team_access_dotplot_1D
-Dot plot of median requests served per team at a 70% budget under three rules; quotas leave the two testing teams lowest while smart routing serves all teams near 100%.
+1 The problem: o1-preview is 5% of calls but 51% of cost
+Paired bars by model comparing share of calls with share of estimated cost. o1-preview: 5% of calls, 51% of cost; gpt-4o: 26% of calls, 26% of cost; gemini-1.5-pro: 25% of calls, 22% of cost; gpt-4o-mini: 22% of calls, 1% of cost; gemini-1.5-flash: 22% of calls, 0% of cost.
 
-08_quantile_dotplot_1D
-Four quantile dotplots of 20 dots each showing the spread of requests served at a 70% budget per rule.
+2 The people: four teams moved to caching and cheaper models; the testing teams did not
+Two line charts by week. Four teams raise cache use from about 17% to 55-69% of calls and cut premium-model calls from about 71% to 25-33%. The two testing teams stay near 5% cached and about 66% premium.
 
-09_budget_drain_2D
-Line chart of remaining budget through October for four rules at a 70% budget; first come, first served reaches zero first.
+3 The test: budget left from Oct 7 to Oct 30 (interactive; default Adaptive sharing at 70%)
+Line chart of budget remaining at a 70% budget, one line per rule, selected rule highlighted. Budget left on Oct 30: First come, first served 0%; Equal quotas 24%; Training-week quotas 3%; Adaptive sharing 3%; Spend pacing 0%; Cost threshold 0%.
 
-10_policy_heatmap_2D
-Heatmap of median requests served by rule and budget level. First come, first served: 100% budget 100%, 85% budget 82%, 70% budget 65%, 50% budget 45%; Fixed team quotas: 100% budget 99%, 85% budget 79%, 70% budget 62%, 50% budget 42%; Adaptive sharing: 100% budget 100%, 85% budget 79%, 70% budget 62%, 50% budget 42%; Smart routing: 100% budget 100%, 85% budget 100%, 70% budget 100%, 50% budget 100%.
+4 Who loses (default Adaptive sharing at 70%)
+Bar chart of each team's share of requests fully completed under adaptive sharing at 70%, with a tick for first come, first served. org-prod-core 36% (first come 31%); org-marketing-ai 35% (first come 31%); org-engineering-dev 20% (first come 27%); prj-ai-enterprise-prod 32% (first come 28%); prj-ai-r-and-d 32% (first come 28%); prj-ai-sandbox-testing 22% (first come 20%).
 
-11_weekly_learning_trend_2D
-Two line charts by week of October. For four teams, calls using cache rose from about 17% to 55–69% and premium-model calls fell from about 70% to 25–33%. The two testing teams stayed flat at about 5% cached and 65–69% premium.
+5 The answer: cost threshold and spend pacing hold up best as the budget shrinks
+Heatmap of the share of requests fully completed for each rule at 100%, 85%, 70% and 50% budgets. First come, first served: 31.5%, 31.5%, 27.6%, 17.4%; Equal quotas: 29.4%, 26.8%, 23.8%, 19.6%; Training-week quotas: 31.4%, 30.6%, 29.0%, 20.0%; Adaptive sharing: 31.1%, 30.4%, 29.7%, 20.5%; Spend pacing: 31.5%, 31.5%, 30.0%, 29.4%; Cost threshold: 31.5%, 31.5%, 30.7%, 31.1%.
 
+Simulated months (ranges, 70% budget)
+Median change in requests completed versus first come, first served across 49 simulated months, with the middle 90%: Equal quotas +0.3 pts (-0.6 to +0.8), better in 31 of 49; Training-week quotas +3.9 pts (+3.3 to +5.0), better in 49 of 49; Adaptive sharing +4.9 pts (+4.0 to +5.5), better in 49 of 49; Spend pacing +10.2 pts (+9.5 to +10.7), better in 49 of 49; Cost threshold +12.3 pts (+11.7 to +12.7), better in 49 of 49.

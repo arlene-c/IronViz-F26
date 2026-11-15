@@ -43,6 +43,15 @@ temp/
 
 # Generated simulation artifacts
 /outputs/
+/results/requests_sim.csv
+/results/excluded_rows.csv
+/results/expected_output.csv
+/results/checks.txt
+/results/exp2_buckets.csv
+/results/exp3_summary.csv
+/results/exp4_shock.csv
+/results/results.csv
+/results/trace.csv
 /artifacts/
 *.prof
 

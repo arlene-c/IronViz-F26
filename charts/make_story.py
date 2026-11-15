@@ -11,7 +11,8 @@ RES, TPL, OUT = sys.argv[1:4]
 team = pd.read_csv(f"{RES}/analysis_team_summary.csv").set_index("tenant")
 model = pd.read_csv(f"{RES}/analysis_cost_by_model.csv")
 week = pd.read_csv(f"{RES}/analysis_weekly_trend.csv")
-s = json.load(open(f"{RES}/settings.json"))
+with open(f"{RES}/settings.json", encoding="utf-8") as settings:
+    s = json.load(settings)
 C = pd.read_csv(f"{RES}/clean_requests.csv", usecols=["tenant", "status", "input_tokens", "output_tokens", "exclude_reason"], low_memory=False)
 ok = C[C.exclude_reason.isna()]
 
@@ -35,29 +36,52 @@ D = {"teams": TEAMS, "persona": [PERSONA[t] for t in TEAMS], "provider": tm.prov
      "strip": {t: {"pts": [int(v) for v in ok[ok.tenant == t].input_tokens.sample(110, random_state=4)],
                    "med": int(ok[ok.tenant == t].input_tokens.median())} for t in TEAMS}}
 
-# ---- simulation (curated canonical results)
-P = f"{RES}/canonical/policies"
-runs = pd.read_csv(f"{P}/run_metrics.csv")
-tenants = pd.read_csv(f"{P}/tenant_metrics.csv")
-traj = pd.read_csv(f"{P}/budget_trajectories.csv")
+# ---- simulation: results/presentation is the primary source (chart-ready, from main).
+# Budget curves and tenant rates at budgets other than 70% exist only in results/canonical;
+# they are joined on the saved run id (presentation source_run_id == canonical run_id).
+PRES, CAN = f"{RES}/presentation", f"{RES}/canonical/policies"
+pb = pd.read_csv(f"{PRES}/policy_budget_summary.csv")
+tt = pd.read_csv(f"{PRES}/tenant_tradeoffs_70pct.csv")
+tenants = pd.read_csv(f"{CAN}/tenant_metrics.csv")
+traj = pd.read_csv(f"{CAN}/budget_trajectories.csv")
 traj["day"] = (pd.to_datetime(traj.timestamp, format="ISO8601") - pd.Timestamp("2026-10-01", tz="UTC")).dt.total_seconds() / 86400 + 1
 POL = ["FCFS", "Quotas", "TrainingQuotas", "Adaptive", "Pacing", "Threshold"]
 cells = {}
 for p in POL:
     for b in [100, 85, 70, 50]:
-        r = runs[(runs.policy == p) & (runs.budget_fraction.round(2) == b / 100)]
+        r = pb[(pb.policy == p) & (pb.budget_pct == b)]
         assert len(r) == 1, (p, b)
         r = r.iloc[0]
-        t = tenants[tenants.run_id == r.run_id].set_index("tenant").loc[TEAMS]
-        tr = traj[traj.run_id == r.run_id].sort_values("day")
+        if b == 70:
+            t = tt[tt.policy == p].set_index("tenant").loc[TEAMS]
+            t_rate, t_done = t.completion_pct, t.completed_requests
+        else:
+            t = tenants[tenants.run_id == r.source_run_id].set_index("tenant").loc[TEAMS]
+            t_rate, t_done = 100 * t.completion_rate_original, t.completed_original
+        tr = traj[traj.run_id == r.source_run_id].sort_values("day")
+        assert len(tr), (p, b, "no trajectory")
         cells[f"{p}_{b}"] = {
-            "done": int(r.completed_original), "rate": round(100 * r.completion_rate_original, 2),
-            "trunc": int(r.truncated), "rej": int(r.rejected), "n": int(r.request_count),
-            "left": round(100 * r.budget_remaining_fraction, 2), "leftUsd": round(r.budget_remaining_micro_usd / 1e6, 2),
-            "teams": (100 * t.completion_rate_original).round(2).tolist(),
-            "teamsDone": t.completed_original.astype(int).tolist(),
-            "trace": [[round(d, 3), round(100 * v / r.budget_micro_usd, 2)] for d, v in zip(tr.day, tr.global_remaining_micro_usd)]}
+            "done": int(r.completed_requests), "rate": round(r.completion_pct, 2),
+            "trunc": int(r.truncated_requests), "rej": int(r.rejected_requests), "n": int(r.request_count),
+            "left": round(100 - r.budget_utilization_pct, 2), "leftUsd": round(r.unused_budget_usd, 2),
+            "teams": t_rate.round(2).tolist(), "teamsDone": t_done.astype(int).tolist(),
+            "trace": [[round(d, 3), round(100 * v / (r.budget_usd * 1e6), 2)] for d, v in zip(tr.day, tr.global_remaining_micro_usd)]}
 D["cells"] = cells
-D["sim"] = {"n": int(runs.request_count.iloc[0]), "refUsd": round(runs.reference_cost_micro_usd.iloc[0] / 1e6)}
-open(OUT, "w").write(open(TPL).read().replace("/*__DATA__*/null", json.dumps(D)))
+full = pb[(pb.policy == "FCFS") & (pb.budget_pct == 100)].iloc[0]
+D["sim"] = {"n": int(full.request_count), "refUsd": round(full.budget_usd)}
+
+# ---- corrected October Monte Carlo: 49 simulated months at a 70% budget
+MC = f"{PRES}/monte_carlo"
+pe = pd.read_csv(f"{MC}/paired_effects.csv").set_index("policy")
+ps = pd.read_csv(f"{MC}/policy_summary.csv").set_index("policy")
+rr = pd.read_csv(f"{MC}/replicate_results.csv"); res = rr[rr.replicate > 0]
+D["mc"] = {"resamples": int(pe.resamples.max()), "n": int(res.request_count.median()), "budget": 70,
+           "pol": {p: {"diffs": res[res.policy == p].sort_values("replicate").completion_difference_pp.round(3).tolist(),
+                       "replay": round(float(pe.loc[p, "replay_difference_pp"]), 3), "med": float(pe.loc[p, "median_difference_pp"]),
+                       "q25": float(pe.loc[p, "q25_difference_pp"]), "q75": float(pe.loc[p, "q75_difference_pp"]),
+                       "wins": int(pe.loc[p, "wins"]), "ties": int(pe.loc[p, "ties"]), "losses": int(pe.loc[p, "losses"]),
+                       "medRate": round(float(ps.loc[p, "median_completion_pct"]), 2), "medTrunc": round(float(ps.loc[p, "median_truncation_pct"]), 2)}
+                   for p in POL}}
+with open(TPL, encoding="utf-8") as template, open(OUT, "w", encoding="utf-8") as output:
+    output.write(template.read().replace("/*__DATA__*/null", json.dumps(D)))
 print("ok", OUT)

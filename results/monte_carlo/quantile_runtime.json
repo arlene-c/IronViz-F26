@@ -1,0 +1,13 @@
+{
+  "stage": "quantile",
+  "replicates": 11,
+  "policy_runs": 33,
+  "runtime_seconds": 17.36121190013364,
+  "peak_worker_mib": 152.3515625,
+  "output_bytes": 204976,
+  "request_count_min": 4989,
+  "request_count_max": 5022,
+  "completed": true,
+  "parent_wall_seconds": 19.142477700021118,
+  "parent_observed_peak_worker_mib": 152.3515625
+}

@@ -1,14 +1,36 @@
 {
-  "generator": "tools/build_presentation.py; pandas aggregations only, no policy execution",
-  "historical_status": "pre-correction provisional; original canonical files unchanged",
-  "pilot_status": "exploratory synthetic; 29 resamples plus replay",
+  "generator": "tools/build_presentation.py; saved-table aggregation only; no simulation imports",
+  "historical_status": "pre-correction provisional; canonical manifest and bytes unchanged",
+  "monte_carlo_status": "corrected modeled subset; synthetic telemetry; conditional resampling distributions",
   "source_sha256": {
     "results/canonical/policies/run_metrics.csv": "2a663ac92889a44d022d6317242e4b0a8c42596610b421b07badd0c11f51e8a4",
     "results/canonical/policies/tenant_metrics.csv": "6dd792ded73951b2612cc654d0a42c183807f73ae295f5fae2793b9f27f38f03",
     "results/canonical/local_bootstrap/run_metrics.csv": "8cd788dd63573215fac4cc836f6fe024ea7c06f6a90ac47b6ff2cb989464570e",
     "results/canonical/day_bootstrap/run_metrics.csv": "266b1bb74aa956f82a317aab30c273456390d170b62adfa4ec7dceaed7376e87",
-    "outputs/monte_carlo_pilot/policy_completion_rates.csv": "326f1351c4f500a2af1c3244407d623069f4729a287dd44b23d48efee124a5ec",
-    "outputs/monte_carlo_pilot/scenario_metadata.json": "b1984fcf9ec1b6160a764af43d04d9297349b8fdcf8bec0d5ead007cece2bcfa"
+    "results/analysis_cost_by_model.csv": "b8fff89f70aa42f59d0ba7cd9b4711ca731948bbe4573b154f4eb877b508a870",
+    "results/analysis_team_summary.csv": "8a7dd03e2c8e7d97ffcfd6f620df44b352d593467ea498422ed0c06b510724ea",
+    "results/analysis_weekly_trend.csv": "8b4a350271bed58676555ff12293b42f31ef2dea3d6ad8cde50d4e26f2d3cd09",
+    "results/analysis_rate_limits_daily.csv": "f107ef89f05a6776ccc5ed59da69b812c13710ecb9f21fc49f99013b61ae36ef",
+    "results/monte_carlo/block_draw_audit.csv": "70fe419a8b99e72aa248d7c020e7ab7be68908244cd0f2ac7c869c1fd4bbe0df",
+    "results/monte_carlo/cap_reservation_sanity.csv": "4620da1dbf9e916572dbf3a6538c5a482998e7d6349b45876bdccae946fd694e",
+    "results/monte_carlo/evaluation.csv": "07f8de9ef9933373e6acd44973c0ee84297daf04b97b083fcb460b75b078b467",
+    "results/monte_carlo/final_integrity.json": "5207a0a07b23347af0ce28361ae8585c051ab1d2f42f3c53fe6379dac11acc47",
+    "results/monte_carlo/main_pairing_audit.csv": "4b305fd6945d0d8e9bc186b0533fc743950a9c6d24a0b8091e8f41811e736382",
+    "results/monte_carlo/main_policy_comparisons.csv": "5d84f69e31e6260fd14be944a7adcc50aa3d8c1ab8af4b122ad0d92828f8305a",
+    "results/monte_carlo/main_runtime.json": "5b840975e47d75bb6d940646ae19cad1cd46b7b84f62ee2c1527066b42368275",
+    "results/monte_carlo/main_run_metrics.csv": "790c2a0a1dad5e6c12c8641cfc6f7db71e928b7b3bb285785deb99c342cbb791",
+    "results/monte_carlo/main_scenario_metadata.json": "123a2630e629fdeb597c0fe661bc3b1c1d5c3b1a455818d5e4439eff69bb5158",
+    "results/monte_carlo/main_tenant_metrics.csv": "f054092d2fbd8acfcd4e5ae2f63845fc790d10b355e1c0ea941f6516927a948e",
+    "results/monte_carlo/output_cap_audit.csv": "92c28fcc67d28072060636668051e384bca0e61d4d3bb8a71022ddf4124ffff3",
+    "results/monte_carlo/pilot_runtime.json": "0c5fa4959329db5d98a7ed337d83327551802bab8fffa846d1e04b69d8dcf382",
+    "results/monte_carlo/quantile_pairing_audit.csv": "416085b82d6ddedd389243e15cee01f32551e6437b001a8d4769a55482e1a9b0",
+    "results/monte_carlo/quantile_runtime.json": "6772041920cac985b4dda9715588ec7ae714f612dd9161f1a79536ff4ddd831e",
+    "results/monte_carlo/quantile_run_metrics.csv": "18f73b7728d7ee5fb44b9d11644e28b15fd9408b61969ce4e0d8497f534905d9",
+    "results/monte_carlo/quantile_scenario_metadata.json": "3475b19741fb24d9713a99308281b8c0673bdee2fe12c954e68330fbf7113fa3",
+    "results/monte_carlo/sampling_audit.csv": "34df8c038fea611732c3f658ff46ad3ec8a86e6d3246bb613f6df937babeaa58",
+    "results/monte_carlo/study_plan.json": "43b9a85141b1dcb01711be93b055e1fb7b7ee93dd87811675ae10b15fb9cecd2",
+    "results/monte_carlo/tiny_runtime.json": "42294f357eb73dbe7576a8d96ab3c3a698576138dfca2587fe466555c8ee6937",
+    "results/monte_carlo/training.csv": "d84df24ef90e35b4de1613810c7174104d967982f1e86b7862ee6dc0968c26cc"
   },
   "canonical_sha256": {
     "results/canonical/manifest.json": "fbf12d72039876cf539898b569465437a1243c4abc8f99cb7e1e05710c7e195a",
@@ -63,7 +85,7 @@
         "min_tenant_completion_pct",
         "tenant_completion_gap_pp"
       ],
-      "sha256": "01454b6b19cb10578d4986a3398a3775bc67ddf1cabbbe137dac7e508bea2c98"
+      "sha256": "759fef39c6903eb75003a91574b9a246f9c4a449a369e0f086da68cb907d91c0"
     },
     "tenant_tradeoffs_70pct.csv": {
       "rows": 36,
@@ -120,119 +142,238 @@
         "replicate",
         "workload_kind"
       ],
-      "sha256": "c14439d9196eed3dc52c14b70f1bc2638c6a45858974705f7bd507116b90901a"
+      "sha256": "7530241537caa459a385819e32145f43b71c3ec805bd4cd14543696544e59aa8"
     },
-    "monte_carlo_pilot_summary.csv": {
-      "rows": 3,
+    "descriptive_cost_by_model.csv": {
+      "rows": 5,
       "columns": [
         "dataset",
         "result_status",
-        "policy",
-        "bootstrap_method",
+        "provider",
+        "model",
+        "calls",
+        "cost_usd",
+        "call_share_pct",
+        "cost_share_pct"
+      ],
+      "sha256": "6d9b52cca76d3fd0187f1c6cd3dea83c417184925870b13e09eb8c57f986a5b1"
+    },
+    "descriptive_team_summary.csv": {
+      "rows": 6,
+      "columns": [
+        "dataset",
+        "result_status",
+        "tenant",
+        "provider",
+        "successful_calls",
+        "cost_usd",
+        "tokens",
+        "median_prompt_tokens",
+        "premium_model_pct",
+        "calls_using_cache_pct",
+        "cached_share_of_input_pct",
+        "cost_share_pct",
+        "token_share_pct",
+        "calls",
+        "bad_request_pct",
+        "rate_limited_pct",
+        "call_share_pct",
+        "testing_team"
+      ],
+      "sha256": "2a41a8c072e02c7d78e199df3b25d557b6e8627eed631d515932dd92a48ab17d"
+    },
+    "descriptive_weekly_trend.csv": {
+      "rows": 24,
+      "columns": [
+        "dataset",
+        "result_status",
+        "tenant",
+        "week",
+        "calls",
+        "calls_using_cache_pct",
+        "premium_model_pct",
+        "median_prompt_tokens",
+        "cost_usd",
+        "cost_per_day_usd",
+        "testing_team"
+      ],
+      "sha256": "3fc2ece278ccf7d982c81de8e1be6da4ac14fcd838a01bc806484db10da9d363"
+    },
+    "descriptive_rate_limits_daily.csv": {
+      "rows": 180,
+      "columns": [
+        "dataset",
+        "result_status",
+        "day",
+        "provider",
+        "tenant",
+        "rate_limited_429",
+        "bad_request_400",
+        "calls"
+      ],
+      "sha256": "6067f9ad7fc27266b8e8e6518b66bff0873f500ecf83c1893c6f8b7b2dbe5cd2"
+    },
+    "monte_carlo/policy_summary.csv": {
+      "rows": 6,
+      "columns": [
+        "dataset",
+        "result_status",
         "budget_pct",
+        "reservation_mode",
+        "policy",
         "resamples",
-        "median_completion_difference_pp",
-        "q25_completion_difference_pp",
-        "q75_completion_difference_pp",
-        "min_completion_difference_pp",
-        "max_completion_difference_pp",
-        "p025_completion_difference_pp",
-        "p975_completion_difference_pp",
+        "replay_completion_pct",
+        "median_completion_pct",
+        "mean_completion_pct",
+        "median_rejection_pct",
+        "median_truncation_pct",
+        "median_budget_utilization_pct",
+        "median_min_tenant_completion_pct",
+        "median_delivered_output_tokens",
+        "median_delivered_output_per_demand",
+        "replay_min_tenant_completion_pct",
+        "cap_exceeded_total",
+        "median_completion_q1_pct",
+        "median_completion_q2_pct",
+        "median_completion_q3_pct",
+        "median_completion_q4_pct"
+      ],
+      "sha256": "e4e93c04b3dc3a811e5459339f5a86380076556c70eb3b802c44975e9f0da214"
+    },
+    "monte_carlo/paired_effects.csv": {
+      "rows": 6,
+      "columns": [
+        "dataset",
+        "result_status",
+        "budget_pct",
+        "reservation_mode",
+        "policy",
+        "resamples",
+        "replay_difference_pp",
+        "mean_difference_pp",
+        "median_difference_pp",
+        "q25_difference_pp",
+        "q75_difference_pp",
+        "p05_difference_pp",
+        "p95_difference_pp",
+        "min_difference_pp",
+        "max_difference_pp",
         "wins",
         "ties",
         "losses",
         "win_pct",
-        "replay_completion_pct",
-        "replay_completion_difference_pp",
-        "median_completion_pct",
-        "median_min_tenant_completion_pct",
-        "median_budget_utilization_pct",
-        "strict_ranking_reversals"
+        "reversals_from_replay",
+        "median_minimum_tenant_difference_pp"
       ],
-      "sha256": "f64da53c3d591c900a69ed9b3b0c1e310044fa508db8b2a262ea981e605ff4c8"
+      "sha256": "5e8b05a9fdfc20f74548d65851711d4d0419357a8607a3cef1c48c49680991c1"
     },
-    "monte_carlo_pilot_replicates.csv": {
-      "rows": 90,
+    "monte_carlo/tenant_outcomes.csv": {
+      "rows": 36,
       "columns": [
         "dataset",
         "result_status",
-        "policy",
-        "source_run_id",
-        "bootstrap_method",
         "budget_pct",
+        "reservation_mode",
+        "tenant",
+        "policy",
+        "resamples",
+        "median_completion_pct",
+        "median_difference_pp",
+        "p05_difference_pp",
+        "p95_difference_pp",
+        "median_rejection_pct",
+        "median_truncation_pct",
+        "win_pct",
+        "replay_completion_pct",
+        "replay_difference_pp"
+      ],
+      "sha256": "4896376526c225c8f35e9112edf9af7b1952e872b9ffeda2362e05207e39dd37"
+    },
+    "monte_carlo/replicate_results.csv": {
+      "rows": 300,
+      "columns": [
+        "dataset",
+        "result_status",
+        "budget_pct",
+        "reservation_mode",
+        "source_run_id",
         "replicate",
         "workload_kind",
+        "policy",
         "request_count",
         "completed_requests",
-        "completion_pct",
         "rejected_requests",
-        "rejection_pct",
         "truncated_requests",
-        "truncation_pct",
-        "fcfs_completion_pct",
         "completion_difference_pp",
+        "minimum_tenant_difference_pp",
+        "delivered_output_tokens",
+        "completion_pct",
+        "rejection_pct",
+        "truncation_pct",
+        "budget_utilization_pct",
         "min_tenant_completion_pct",
-        "budget_utilization_pct"
+        "spend_usd",
+        "budget_usd"
       ],
-      "sha256": "3d56788077d6a8749f5af568492f39cdcf9f5c0c5a38fe12b2393d22ef336295"
-    }
-  },
-  "pilot_configuration": {
-    "seed": 20261114,
-    "training_request_count": 400,
-    "evaluation_request_count": 1600,
-    "config": {
-      "budget_fractions": [
-        0.7
-      ],
-      "replicates": 30,
-      "seed": 20261114,
-      "training_fraction": 0.2,
-      "bootstrap": true,
-      "bootstrap_method": "local_12h",
-      "bootstrap_window_days": 3.0,
-      "bootstrap_block_hours": 12,
-      "demand_imbalance": [
-        1.0
-      ],
-      "estimator_noise": [
-        0.0
-      ],
-      "routing_eligibility": [
-        0.0
-      ],
-      "reservation_multipliers": [
-        1.0
-      ],
-      "routed_output_multipliers": [
-        1.0
-      ],
-      "routing_sigma": 0.0,
-      "policies": [
-        "FCFS",
-        "Adaptive",
-        "Pacing"
-      ],
-      "trace_replicates": [],
-      "trace_policies": [],
-      "timeseries_stride": 100,
-      "strict_mode": true,
-      "output_cap": 1024,
-      "model_output_caps": {},
-      "routing_compatibility": [],
-      "reservation_mode": "mean",
-      "reservation_quantile": 0.9,
-      "data_label": "EXPLORATORY SYNTHETIC MONTE CARLO PILOT; not institutional evidence",
-      "tenant_roster": [
-        "tenant-a",
-        "tenant-b",
-        "tenant-c"
-      ],
-      "horizon_start": "2026-01-05T00:00:00Z",
-      "horizon_end": "2026-01-21T00:00:00Z"
+      "sha256": "27de0fe0bf38ac722f2318bfbf8dd0357d2d7eb2e41251e0533c7c546396b167"
     },
-    "pilot_runtime_seconds": 14.444975000340492,
-    "retimed_fixture": "100 requests/day uniformly spaced; 50 per 12-hour block; training first 4 days",
-    "synthetic_price_scaling": "fixture rates multiplied by 1000 to reduce component-rounding dominance; not real prices"
+    "monte_carlo/sampling_audit.csv": {
+      "rows": 139,
+      "columns": [
+        "dataset",
+        "result_status",
+        "budget_pct",
+        "reservation_mode",
+        "population",
+        "metric",
+        "category",
+        "source_value",
+        "subset_value",
+        "difference",
+        "unit"
+      ],
+      "sha256": "4c4c7ff9c0c6bc43655d3fe6f6d116505b7da113218321b9b221d99d5a67d535"
+    },
+    "monte_carlo/ranking_stability.csv": {
+      "rows": 15,
+      "columns": [
+        "dataset",
+        "result_status",
+        "budget_pct",
+        "reservation_mode",
+        "policy_a",
+        "policy_b",
+        "replay_a_minus_b_pp",
+        "resamples",
+        "a_wins",
+        "ties",
+        "b_wins",
+        "strict_reversals"
+      ],
+      "sha256": "d87d2379df1e43c77c011e7ca85bc4cb3f37f4350d693e701d810ea9b89c2634"
+    },
+    "monte_carlo/reservation_sensitivity.csv": {
+      "rows": 3,
+      "columns": [
+        "dataset",
+        "result_status",
+        "budget_pct",
+        "reservation_mode",
+        "policy",
+        "resamples",
+        "mean_reservation_median_completion_pct",
+        "quantile_reservation_median_completion_pct",
+        "mean_reservation_median_truncation_pct",
+        "quantile_reservation_median_truncation_pct",
+        "mean_reservation_median_rejection_pct",
+        "quantile_reservation_median_rejection_pct",
+        "mean_reservation_paired_median_pp",
+        "quantile_reservation_paired_median_pp",
+        "quantile_reservation_paired_p05_pp",
+        "quantile_reservation_paired_p95_pp",
+        "paired_sign_changes"
+      ],
+      "sha256": "e07d870e61639efa3c740e2a276fcfd0bc33a327734ba93dd6754ce518bdb504"
+    }
   }
 }

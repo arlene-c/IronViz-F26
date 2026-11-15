@@ -1,0 +1,7 @@
+dataset,result_status,tenant,provider,successful_calls,cost_usd,tokens,median_prompt_tokens,premium_model_pct,calls_using_cache_pct,cached_share_of_input_pct,cost_share_pct,token_share_pct,calls,bad_request_pct,rate_limited_pct,call_share_pct,testing_team
+synthetic_october_telemetry,descriptive_synthetic,org-engineering-dev,OpenAI,33288,1843.07,321745342,8037.5,68.74,5.09,2.7,32.28,19.19,36238,6.12,2.02,17.88,True
+synthetic_october_telemetry,descriptive_synthetic,org-marketing-ai,OpenAI,35071,1343.61,210844583,4315,53.27,44.14,22.42,23.53,12.57,36139,1.11,1.84,17.83,False
+synthetic_october_telemetry,descriptive_synthetic,org-prod-core,OpenAI,34845,1266.66,207342658,4252,52.66,44.47,22.63,22.18,12.36,36066,1.24,2.14,17.8,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-enterprise-prod,Gemini,30274,320.45,247496107,3692.5,47.37,37.27,18.8,5.61,14.76,31349,1.16,2.27,15.47,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-r-and-d,Gemini,30485,323.4,250074584,3692,47.56,37.89,19.36,5.66,14.91,31485,1.11,2.06,15.54,False
+synthetic_october_telemetry,descriptive_synthetic,prj-ai-sandbox-testing,Gemini,28884,613.26,439522885,13985.5,64.79,4.68,2.44,10.74,26.21,31366,6.03,1.89,15.48,True

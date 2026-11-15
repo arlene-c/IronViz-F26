@@ -254,7 +254,7 @@ reservation_multiplier, reservation_mode, reservation_quantile, output_cap,
 model_output_caps and routed_output_length_multiplier; they do not silently pool
 those settings. Comparison exports retain these configuration fields as well.
 
-## Local validation branch: reservation lookup keys
+## Reservation lookup keys
 
 Engine `estimated_costs` overrides are keyed by `(request_id, provider, model)`.
 Legacy `(request_id, model)` keys are accepted only for models with a unique

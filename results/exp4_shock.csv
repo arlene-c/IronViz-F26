@@ -1,9 +1,0 @@
-scenario,policy,budget_pct,others_admitted_pct_during_shock,others_admitted_pct_after_shock,spiking_tenant_admitted_pct_during_shock,all_admitted_pct,budget_exhausted_day
-no shock,fcfs,85,100.0,67.2,100.0,82.49,25.74
-no shock,quotas,85,100.0,59.09,100.0,79.26,21.85
-no shock,adaptive,85,100.0,59.09,100.0,79.26,21.85
-no shock,routing,85,100.0,100.0,100.0,100.0,
-shock,fcfs,85,100.0,53.69,100.0,76.04,23.56
-shock,quotas,85,100.0,59.09,100.0,76.61,20.39
-shock,adaptive,85,100.0,59.09,100.0,76.61,20.39
-shock,routing,85,100.0,100.0,100.0,100.0,

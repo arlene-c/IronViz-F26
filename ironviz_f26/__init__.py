@@ -1,4 +1,4 @@
-"""Phase 1 and Phase 2 simulation backend for The Cost of Scarcity."""
+"""Strict-budget simulation backend for The Cost of Scarcity."""
 
 from .adapter import InputAdapter, RequestRow
 from .engine import SimulationEngine, TraceEvent

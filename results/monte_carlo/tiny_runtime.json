@@ -1,0 +1,13 @@
+{
+  "stage": "tiny",
+  "replicates": 3,
+  "policy_runs": 9,
+  "runtime_seconds": 0.5050417999736965,
+  "peak_worker_mib": 129.1171875,
+  "output_bytes": 64152,
+  "request_count_min": 490,
+  "request_count_max": 500,
+  "completed": true,
+  "parent_wall_seconds": 2.21919919969514,
+  "parent_observed_peak_worker_mib": 4.09765625
+}
