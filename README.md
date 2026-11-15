@@ -1,5 +1,9 @@
 # The Cost of Scarcity
 
+**Why this matters:** AI costs keep growing while budgets stay fixed, so someone will have to decide which requests, and which teams, get cut off. This project tests six rules for making that decision.
+
+**For CMU Computing Services:** how should we share next semester's AI budget? See the interactive story (`figures/story.html`, live at https://cost-of-scarcity.vercel.app) and dashboard (`figures/dashboard.html`, https://cost-of-scarcity.vercel.app/dashboard).
+
 **Who keeps access to AI when the budget runs short?** This CMU Student IronViz
 Fall 2026 project examines that question through synthetic OpenAI and Gemini
 telemetry, modeled inference costs, and six allocation policies. It connects
