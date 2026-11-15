@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Cost of Scarcity: CMU AI budget dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f5f4f0;--card:#fff;--ink:#0b0b0b;--ink2:#52514e;--muted:#7a7974;--line:#e7e6e1;--axis:#c3c2b7;
+--hi:#eb6834;--ctx:#8f8e89;--FCFS:#2a78d6;--Quotas:#e87ba4;--TrainingQuotas:#8a5cd1;--Adaptive:#eda100;--Pacing:#1baf7a;--Threshold:#7a4a1e;
+--done:#3d3c39;--trunc:#c9c7bf;--rej:#eb6834}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Helvetica Neue",Arial,sans-serif;font-size:13px;line-height:1.4}
+.app{max-width:1500px;margin:0 auto;padding:14px 18px 10px;display:flex;flex-direction:column;gap:10px;min-height:100vh}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+h1{font-size:20px;font-weight:600;margin:0}
+.sub{color:var(--ink2);margin:2px 0 0}
+.hbtn{display:flex;gap:8px}
+button{font:inherit;cursor:pointer;border:1px solid var(--axis);background:var(--card);color:var(--ink);border-radius:8px;padding:6px 11px}
+button:hover{background:#efede8}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--FCFS);outline-offset:2px}
+.controls{display:flex;flex-wrap:wrap;align-items:center;gap:18px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 14px}
+.ctl{display:flex;align-items:center;gap:8px}
+.ctl>span{font-size:12px;color:var(--ink2);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.seg{display:flex;border:1px solid var(--axis);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;border-right:1px solid var(--axis);padding:6px 12px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true],.chip[aria-pressed=true]{background:var(--ink);color:#fff}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.insight{flex:1;min-width:280px;font-size:13.5px;color:var(--ink);border-left:3px solid var(--ink);padding-left:10px;margin:0}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.kpi .l{font-size:12px;color:var(--ink2)}
+.kpi .v{font-size:26px;font-weight:600;line-height:1.15;margin-top:2px}
+.kpi .d{font-size:11.5px;color:var(--muted)}
+.kpi.real{background:#fdf0ea;border-color:#f6cdb9}
+.kpi.real .v{color:#b2451a}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px 8px;display:flex;flex-direction:column;min-width:0}
+.card h2{font-size:14px;font-weight:600;margin:0}
+.card .q{font-size:12px;color:var(--ink2);margin:1px 0 4px}
+.tag{font-size:10.5px;padding:1px 6px;border-radius:5px;margin-left:6px;vertical-align:1px;font-weight:500}
+.tag.r{background:#eaf3de;color:#27500a}.tag.s{background:#e6f1fb;color:#0c447c}
+.plot{flex:1;min-height:0}
+svg{display:block;width:100%;height:100%;overflow:visible}
+svg text{font-family:inherit}
+.row2 .plot{height:236px}.row3 .plot{height:176px}
+.key{display:flex;gap:12px;font-size:11.5px;color:var(--ink2);margin:0 0 2px}
+.key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+footer{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+#tip{position:fixed;pointer-events:none;background:#1f1f1e;color:#fff;font-size:12px;padding:6px 9px;border-radius:7px;max-width:260px;opacity:0;transition:opacity .1s;z-index:20}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:30}
+.overlay.open{display:flex}
+.panel{background:#fff;border-radius:14px;padding:18px 22px;max-width:760px;width:92%;max-height:84vh;overflow:auto}
+.panel h3{margin:0 0 10px;font-size:16px}
+.panel dl{margin:0;display:grid;grid-template-columns:170px 1fr;gap:6px 14px}
+.panel dt{font-weight:600}.panel dd{margin:0;color:var(--ink2)}
+.panel table{border-collapse:collapse;width:100%;font-size:12.5px}
+.panel th,.panel td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:right}
+.panel th:first-child,.panel td:first-child{text-align:left}
+.close{float:right}
+@media (max-height:860px){.row2 .plot{height:206px}.row3 .plot{height:158px}.kpi .v{font-size:22px}.app{gap:8px;padding-top:10px}}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}header{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div>
+    <h1>The Cost of Scarcity: how should CMU share a limited AI budget?</h1>
+    <p class="sub"><span id="hN"></span> simulated requests, Oct 7–30 2026 · six budget rules for six campus teams, four budget levels</p>
+  </div>
+  <div class="hbtn"><button id="bGloss" aria-haspopup="dialog">Glossary</button><button id="bTable" aria-haspopup="dialog">Data table</button></div>
+</header>
+
+<section class="controls" aria-label="Filters">
+  <div class="ctl"><span id="lBud">Budget</span><div class="seg" role="group" aria-labelledby="lBud" id="budgets"></div></div>
+  <div class="ctl"><span id="lRule">Budget rule</span><div class="chips" role="group" aria-labelledby="lRule" id="rules"></div></div>
+  <p class="insight" id="insight" aria-live="polite"></p>
+</section>
+
+<section class="kpis" aria-label="Key numbers for the selected rule and budget">
+  <div class="kpi"><div class="l">Requests fully completed</div><div class="v" id="kDone">–</div><div class="d" id="kDoneD">–</div></div>
+  <div class="kpi"><div class="l">Budget left unspent</div><div class="v" id="kLeft">–</div><div class="d" id="kLeftD">–</div></div>
+  <div class="kpi"><div class="l">Cut short by the token cap</div><div class="v" id="kTrunc">–</div><div class="d" id="kTruncD">–</div></div>
+  <div class="kpi"><div class="l">Gap between teams</div><div class="v" id="kGap">–</div><div class="d">best- minus worst-served team</div></div>
+  <div class="kpi real"><div class="l">Testing teams' share: calls → tokens</div><div class="v" id="kTest">–</div><div class="d">real data · 2 of 6 teams</div></div>
+</section>
+
+<section class="grid row2">
+  <div class="card"><h2>Which teams get their requests done?<span class="tag s">simulation</span></h2><p class="q" id="qTeams">% of each team's requests fully completed</p><div class="plot"><svg id="cTeams" role="img"></svg></div></div>
+  <div class="card"><h2>How fast is the budget spent?<span class="tag s">simulation</span></h2><p class="q">Budget left, Oct 7–30 (sampled points; replayed October traffic)</p><div class="plot"><svg id="cDrain" role="img"></svg></div></div>
+  <div class="card"><h2>Every rule at every budget<span class="tag s">simulation</span></h2><p class="q">% of requests fully completed · click a cell to select it</p><div class="plot"><svg id="cHeat" role="img"></svg></div></div>
+</section>
+
+<section class="grid row3">
+  <div class="card"><h2>Cache and premium-model use by week<span class="tag r">real data</span></h2><p class="q">Weekly % of each team's calls · <span style="color:var(--hi);font-weight:600">testing teams</span> vs <span style="color:var(--ctx);font-weight:600">others</span></p><div class="plot"><svg id="cWeek" role="img"></svg></div></div>
+  <div class="card"><h2>Where the money goes<span class="tag r">real data</span></h2><p class="q">Share of calls vs share of estimated cost, by model</p><div class="plot"><svg id="cModel" role="img"></svg></div></div>
+  <div class="card"><h2>What happens to every request<span class="tag s">simulation</span></h2><p class="q" id="qOut">Outcome of all requests, by rule</p>
+    <div class="key"><span><i style="background:var(--done)"></i>Completed</span><span><i style="background:var(--trunc)"></i>Cut short</span><span><i style="background:var(--rej)"></i>Refused</span></div>
+    <div class="plot"><svg id="cOut" role="img"></svg></div></div>
+</section>
+
+<footer>
+  <span>Data: CMU Student IronViz Fall 2026 telemetry (synthetic). Simulation replays Oct 7–30 after a one-week training window; 100% budget = $<span id="fRef"></span>, the modeled cost of serving every request. One replay per cell, so no uncertainty ranges.</span>
+  <span>Provisional, pre-correction results. Admitted requests can still be cut short by the 1,024-token cap. Code: [GitHub link]</span>
+</footer>
+</div>
+
+<div id="tip" role="tooltip"></div>
+<div class="overlay" id="oGloss" role="dialog" aria-modal="true" aria-labelledby="gH"><div class="panel">
+  <button class="close" data-close>Close</button><h3 id="gH">Glossary</h3>
+  <dl>
+    <dt>Request / call</dt><dd>One time a program asks an AI model for an answer.</dd>
+    <dt>Token</dt><dd>A small piece of text (about ¾ of a word). AI use is measured and billed in tokens.</dd>
+    <dt>Fully completed</dt><dd>The request was admitted and finished without being cut short.</dd>
+    <dt>Cut short</dt><dd>Admitted, but the answer hit the 1,024-token output cap. This happens even with a full budget.</dd>
+    <dt>Refused</dt><dd>Not admitted because the rule judged there wasn't enough money for it.</dd>
+    <dt>Caching</dt><dd>Reusing part of a prompt the model has seen recently. Cached tokens cost less.</dd>
+    <dt>Premium model</dt><dd>The larger, more expensive models: gpt-4o, o1-preview and gemini-1.5-pro.</dd>
+    <dt>Testing teams</dt><dd>org-engineering-dev and prj-ai-sandbox-testing, the two teams that build and experiment.</dd>
+    <dt>First come, first served</dt><dd>Approve every request until the shared budget runs out.</dd>
+    <dt>Equal quotas</dt><dd>Each team gets an equal slice of the budget; no sharing.</dd>
+    <dt>Training-week quotas</dt><dd>Each team's slice follows its spending in the first (training) week; no sharing.</dd>
+    <dt>Adaptive sharing</dt><dd>Each team has a protected slice, and can borrow money other teams aren't using.</dd>
+    <dt>Spend pacing</dt><dd>Approve a request only if total spending stays near a straight-line plan for the month.</dd>
+    <dt>Cost threshold</dt><dd>Refuse any single request expected to cost more than a limit tuned on the training week.</dd>
+    <dt>Budget %</dt><dd>Share of the modeled cost of serving every request ($<span id="gCost"></span>) available to spend.</dd>
+  </dl>
+</div></div>
+<div class="overlay" id="oTable" role="dialog" aria-modal="true" aria-labelledby="tH"><div class="panel">
+  <button class="close" data-close>Close</button><h3 id="tH">Data table</h3><div id="tBody"></div>
+</div></div>
+
+<script>
+const D=/*__DATA__*/null;
+const POL=["FCFS","Quotas","TrainingQuotas","Adaptive","Pacing","Threshold"],BUD=[100,85,70,50];
+const PN={FCFS:"First come, first served",Quotas:"Equal quotas",TrainingQuotas:"Training-week quotas",Adaptive:"Adaptive sharing",Pacing:"Spend pacing",Threshold:"Cost threshold"};
+const SN={FCFS:"FCFS",Quotas:"Equal quotas",TrainingQuotas:"Training quotas",Adaptive:"Adaptive",Pacing:"Pacing",Threshold:"Threshold"};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const PC={};POL.forEach(p=>PC[p]=css("--"+p));
+const INK=css("--ink"),INK2=css("--ink2"),MUT=css("--muted"),LINE=css("--line"),HI=css("--hi"),CTX=css("--ctx");
+const OC={done:css("--done"),trunc:css("--trunc"),rej:css("--rej")};
+const BL=["#cde2fb","#b7d3f6","#9ec5f4","#86b6ef","#6da7ec","#5598e7","#3987e5","#2a78d6","#256abf","#1c5cab","#184f95"];
+const HMIN=16,HMAX=32;
+const blueI=v=>Math.max(0,Math.min(10,Math.round((v-HMIN)/(HMAX-HMIN)*10)));
+let S={budget:70,rule:"Adaptive"};
+const NS="http://www.w3.org/2000/svg";
+function el(p,t,a,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;p.appendChild(e);return e}
+function tx(p,x,y,s,o={}){return el(p,"text",Object.assign({x,y,fill:o.fill||INK,"font-size":o.size||11.5,"text-anchor":o.a||"start","font-weight":o.w||400},o.x||{}),s)}
+function box(id){const s=document.getElementById(id);s.innerHTML="";const r=s.getBoundingClientRect();const w=Math.max(260,r.width),h=Math.max(120,r.height);s.setAttribute("viewBox",`0 0 ${w} ${h}`);return{s,w,h}}
+const tip=document.getElementById("tip");
+function showTip(ev,html){tip.innerHTML=html;tip.style.opacity=1;tip.style.left=Math.min(innerWidth-270,ev.clientX+12)+"px";tip.style.top=(ev.clientY+12)+"px"}
+function hover(e,html){e.addEventListener("mousemove",ev=>showTip(ev,html));e.addEventListener("mouseleave",()=>tip.style.opacity=0)}
+const f0=v=>Math.round(v).toLocaleString(),p1=v=>v.toFixed(1)+"%",pct=(a,n)=>100*a/n;
+const usd=v=>"$"+v.toLocaleString(undefined,{maximumFractionDigits:0});
+const cell=(p=S.rule,b=S.budget)=>D.cells[p+"_"+b];
+const dayLab=d=>"Oct "+Math.min(30,Math.floor(d));
+
+/* controls */
+const bWrap=document.getElementById("budgets");
+BUD.forEach(b=>{const x=document.createElement("button");x.textContent=b+"%";x.dataset.b=b;x.onclick=()=>{S.budget=b;render()};bWrap.appendChild(x)});
+const rWrap=document.getElementById("rules");
+POL.forEach(p=>{const x=document.createElement("button");x.className="chip";x.dataset.p=p;x.innerHTML=`<span class="dot" style="background:${PC[p]}"></span>${PN[p]}`;x.onclick=()=>{S.rule=p;render()};rWrap.appendChild(x)});
+
+function kpis(){const c=cell(),f=cell("FCFS");
+ document.getElementById("kDone").textContent=p1(c.doneRate);
+ document.getElementById("kDoneD").textContent=`${f0(c.done)} of ${f0(c.n)} requests`;
+ document.getElementById("kLeft").textContent=p1(c.left);
+ document.getElementById("kLeftD").textContent=`${usd(c.leftUsd)} never spent`;
+ document.getElementById("kTrunc").textContent=p1(pct(c.trunc,c.n));
+ document.getElementById("kTruncD").textContent=`admitted but unfinished · ${p1(pct(c.rej,c.n))} refused`;
+ document.getElementById("kGap").textContent=c.gap.toFixed(1)+" pts";
+ document.getElementById("kTest").textContent=`${D.kpi.testCalls}% → ${D.kpi.testTokens}%`;
+ let msg=`At a ${S.budget}% budget, ${PN[S.rule].toLowerCase()} fully completes ${f0(c.done)} requests (${p1(c.doneRate)}).`;
+ if(S.rule!=="FCFS"){const d=c.done-f.done;
+  msg+=d===0?" Same as first come, first served.":` That's ${d>0?"+":"−"}${f0(Math.abs(d))} vs first come, first served`;
+  if(d!==0){let worst=-1,wd=0;c.teamsDone.forEach((v,i)=>{const x=v-f.teamsDone[i];if(x<wd){wd=x;worst=i}});
+   msg+=worst>=0&&wd<=-100?`, but ${D.teams[worst]} completes ${f0(-wd)} fewer.`:".";}}
+ else{const best=POL.slice(1).reduce((a,p)=>cell(p).done>cell(a).done?p:a,"Quotas");const d=cell(best).done-c.done;
+  msg+=d>0?` ${PN[best]} completes ${f0(d)} more.`:" No other rule completes more.";}
+ if(c.left>=5)msg+=` ${usd(c.leftUsd)} is left unspent.`;
+ document.getElementById("insight").textContent=msg;
+ document.getElementById("qTeams").textContent=`% of each team's requests fully completed · ${PN[S.rule]} at ${S.budget}%`;
+ document.getElementById("qOut").textContent=`Outcome of all ${f0(c.n)} requests at a ${S.budget}% budget`;}
+
+function teams(){const{s,w,h}=box("cTeams");const c=cell(),f=cell("FCFS");const L=150,R=w-44,top=16,rh=(h-28-top)/6,XM=50,X=v=>L+v/XM*(R-L);
+ [0,10,20,30,40,50].forEach(v=>{el(s,"line",{x1:X(v),x2:X(v),y1:top,y2:h-22,stroke:LINE});tx(s,X(v),h-8,v+"%",{a:"middle",fill:MUT,size:10.5})});
+ D.teams.forEach((t,i)=>{const y=top+i*rh+rh*0.18,bh=rh*0.62,v=c.teams[i],test=D.testing[i];
+  tx(s,L-8,y+bh/2+4,t,{a:"end",fill:test?HI:INK2,w:test?600:400,size:11.5});
+  const b=el(s,"rect",{x:L,y,width:Math.max(1,X(v)-L),height:bh,rx:3,fill:PC[S.rule]});
+  if(S.rule!=="FCFS"){const fx=X(f.teams[i]);el(s,"line",{x1:fx,x2:fx,y1:y-2,y2:y+bh+2,stroke:INK,"stroke-width":2})}
+  tx(s,Math.max(X(v),S.rule!=="FCFS"?X(f.teams[i]):0)+5,y+bh/2+4,v.toFixed(0)+"%",{size:11.5,w:500});
+  const dd=c.teamsDone[i]-f.teamsDone[i];
+  hover(b,`<b>${t}</b> (${D.provider[i]})<br>${p1(v)} fully completed (${f0(c.teamsDone[i])} requests)`+(S.rule!=="FCFS"?`<br>First come, first served: ${p1(f.teams[i])} · ${dd>=0?"+":"−"}${f0(Math.abs(dd))} requests`:"")+`<br>${PN[S.rule]}, ${S.budget}% budget`)});
+ tx(s,R+40,9,S.rule!=="FCFS"?"▏ = first come, first served":"",{size:10,fill:MUT,a:"end"});
+ s.setAttribute("aria-label",`Bar chart of requests fully completed per team. `+D.teams.map((t,i)=>`${t} ${c.teams[i].toFixed(0)}%`).join(", "));}
+
+function drain(){const{s,w,h}=box("cDrain");const L=36,R=w-100,T=8,B=h-22,D0=7,D1=31,X=d=>L+(d-D0)/(D1-D0)*(R-L),Y=v=>B-v/100*(B-T);
+ [0,50,100].forEach(v=>{el(s,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});tx(s,L-6,Y(v)+4,v+"%",{a:"end",fill:MUT,size:10.5})});
+ [7,14,21,28].forEach(d=>tx(s,X(d),h-6,"Oct "+d,{a:"middle",fill:MUT,size:10.5}));
+ const ends=[];
+ POL.filter(p=>p!==S.rule).concat([S.rule]).forEach(p=>{const tr=cell(p).trace,on=p===S.rule;
+  el(s,"polyline",{points:tr.map(([d,v])=>X(d)+","+Y(v)).join(" "),fill:"none",stroke:PC[p],"stroke-width":on?3:1.5,opacity:on?1:.45,"stroke-linejoin":"round"});
+  ends.push([tr[tr.length-1][1],p,on])});
+ ends.sort((a,b)=>a[0]-b[0]);let last=1e9;ends.forEach(([v,p,on])=>{let y=Y(v)+4;if(y>last-12)y=last-12;last=y;tx(s,R+6,y,SN[p],{fill:on?INK:MUT,w:on?600:400,size:10.5})});
+ const vl=el(s,"line",{x1:0,x2:0,y1:T,y2:B,stroke:INK,"stroke-dasharray":"2 3",opacity:0});
+ const hit=el(s,"rect",{x:L,y:T,width:R-L,height:B-T,fill:"transparent"});
+ const near=(tr,d)=>tr.reduce((a,b)=>Math.abs(b[0]-d)<Math.abs(a[0]-d)?b:a);
+ hit.addEventListener("mousemove",ev=>{const pt=s.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const q=pt.matrixTransform(s.getScreenCTM().inverse());const d=Math.max(D0,Math.min(D1,D0+(q.x-L)/(R-L)*(D1-D0)));
+  vl.setAttribute("x1",X(d));vl.setAttribute("x2",X(d));vl.setAttribute("opacity",.5);
+  showTip(ev,`<b>${dayLab(d)}</b> · budget left<br>`+POL.map(p=>`${p===S.rule?"<b>":""}${PN[p]}: ${near(cell(p).trace,d)[1].toFixed(0)}%${p===S.rule?"</b>":""}`).join("<br>"))});
+ hit.addEventListener("mouseleave",()=>{tip.style.opacity=0;vl.setAttribute("opacity",0)});
+ s.setAttribute("aria-label",`Line chart of budget remaining from Oct 7 to Oct 30 at a ${S.budget}% budget. Budget left at the end: `+POL.map(p=>`${PN[p]} ${cell(p).left.toFixed(0)}%`).join("; "));}
+
+function heat(){const{s,w,h}=box("cHeat");const L=150,T=18,cw=(w-L-4)/4,ch=(h-T-6)/POL.length;
+ tx(s,L-8,12,"Budget →",{a:"end",fill:MUT,size:10.5});BUD.forEach((b,j)=>tx(s,L+j*cw+cw/2,12,b+"%",{a:"middle",fill:MUT,size:10.5,w:500}));
+ POL.forEach((p,i)=>{tx(s,L-8,T+i*ch+ch/2+4,PN[p],{a:"end",fill:p===S.rule?INK:INK2,w:p===S.rule?600:400,size:11.5});
+  BUD.forEach((b,j)=>{const c=cell(p,b),v=c.doneRate,on=p===S.rule&&b===S.budget,k=blueI(v);
+   const r=el(s,"rect",{x:L+j*cw+2,y:T+i*ch+2,width:cw-4,height:ch-4,rx:4,fill:BL[k],stroke:on?INK:"none","stroke-width":on?2.5:0,tabindex:0,role:"button","aria-label":`${PN[p]} at ${b}% budget: ${v.toFixed(1)}% fully completed`,style:"cursor:pointer"});
+   tx(s,L+j*cw+cw/2,T+i*ch+ch/2+5,v.toFixed(1)+"%",{a:"middle",fill:k>=7?"#fff":"#0d366b",w:600,size:13,x:{"pointer-events":"none"}});
+   const go=()=>{S.rule=p;S.budget=b;render()};r.addEventListener("click",go);r.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}});
+   hover(r,`<b>${PN[p]}</b>, ${b}% budget<br>${f0(c.done)} fully completed (${p1(v)})<br>${f0(c.trunc)} cut short · ${f0(c.rej)} refused<br>${p1(c.left)} of budget left unspent`)})});
+ s.setAttribute("aria-label","Heatmap of requests fully completed for each rule and budget. "+POL.map(p=>PN[p]+": "+BUD.map(b=>cell(p,b).doneRate.toFixed(1)+"%").join(", ")).join("; "));}
+
+function week(){const{s,w,h}=box("cWeek");const gap=18,pw=(w-gap)/2,T=16,B=h-20,nW=D.weeks.length;
+ [["cache","Calls using cache (%)"],["prem","Calls to premium models (%)"]].forEach(([k,lab],m)=>{const L=m*(pw+gap)+26,R=m*(pw+gap)+pw-4,X=i=>L+i/(nW-1)*(R-L),Y=v=>B-v/80*(B-T);
+  tx(s,L-26,10,lab,{w:600,size:11});
+  [0,40,80].forEach(v=>{el(s,"line",{x1:L,x2:R,y1:Y(v),y2:Y(v),stroke:LINE});tx(s,L-4,Y(v)+4,v,{a:"end",fill:MUT,size:10})});
+  D.weeks.forEach((t,i)=>tx(s,X(i),h-5,"Wk "+(i+1),{a:"middle",fill:MUT,size:10}));
+  D.teams.map((t,i)=>[t,i]).sort((a,b)=>D.testing[a[1]]-D.testing[b[1]]).forEach(([t,i])=>{const v=D.weekly[t][k],test=D.testing[i];
+   el(s,"polyline",{points:v.map((y,j)=>X(j)+","+Y(y)).join(" "),fill:"none",stroke:test?HI:CTX,"stroke-width":test?2.6:1.6});
+   v.forEach((y,j)=>{const c=el(s,"circle",{cx:X(j),cy:Y(y),r:test?3.2:2.4,fill:test?HI:CTX});hover(c,`<b>${t}</b><br>${D.weeks[j]}: ${y.toFixed(0)}% ${k==="cache"?"using cache":"to premium models"}`)})})});
+ s.setAttribute("aria-label","Two line charts by week. Four teams' cache use rises and premium-model use falls over October; the two testing teams stay near 5% cache use and about 65 to 69% premium.");}
+
+function models(){const{s,w,h}=box("cModel");const ms=D.models.slice().sort((a,b)=>b[2]-a[2]);const L=112,R=w-40,T=4,rh=(h-T-20)/ms.length,X=v=>L+v/60*(R-L);
+ [0,20,40,60].forEach(v=>{el(s,"line",{x1:X(v),x2:X(v),y1:T,y2:h-18,stroke:LINE});tx(s,X(v),h-5,v+"%",{a:"middle",fill:MUT,size:10})});
+ ms.forEach(([m,calls,cost],i)=>{const y=T+i*rh,bh=rh*0.32,o1=m==="o1-preview";
+  tx(s,L-8,y+rh*0.45,m,{a:"end",fill:o1?INK:INK2,w:o1?600:400,size:11});
+  const a=el(s,"rect",{x:L,y:y+rh*0.12,width:Math.max(1,X(calls)-L),height:bh,rx:2,fill:"#c9c7bf"});
+  const b=el(s,"rect",{x:L,y:y+rh*0.12+bh+2,width:Math.max(1,X(cost)-L),height:bh,rx:2,fill:o1?HI:"#52514e"});
+  tx(s,X(calls)+4,y+rh*0.12+bh-1,calls.toFixed(0)+"% calls",{size:10,fill:MUT});
+  tx(s,X(cost)+4,y+rh*0.12+2*bh+1,cost.toFixed(0)+"% cost",{size:10,fill:o1?"#b2451a":INK,w:o1?600:400});
+  [a,b].forEach(r=>hover(r,`<b>${m}</b><br>${calls.toFixed(1)}% of calls<br>${cost.toFixed(1)}% of estimated cost`))});
+ s.setAttribute("aria-label","Paired bars by model comparing share of calls and share of cost. "+ms.map(([m,c,k])=>`${m}: ${c.toFixed(0)}% of calls, ${k.toFixed(0)}% of cost`).join("; "));}
+
+function outcomes(){const{s,w,h}=box("cOut");const L=112,R=w-6,T=2,rh=(h-T-16)/POL.length,X=v=>L+v/100*(R-L);
+ [0,50,100].forEach(v=>tx(s,X(v),h-3,v+"%",{a:v===0?"start":v===100?"end":"middle",fill:MUT,size:10}));
+ POL.forEach((p,i)=>{const c=cell(p),y=T+i*rh+rh*0.15,bh=rh*0.7,on=p===S.rule;
+  tx(s,L-8,y+bh/2+4,PN[p],{a:"end",fill:on?INK:INK2,w:on?600:400,size:11});
+  let x0=0;[["done",c.done,"completed"],["trunc",c.trunc,"cut short"],["rej",c.rej,"refused"]].forEach(([k,v,lab])=>{const pv=pct(v,c.n);
+   const r=el(s,"rect",{x:X(x0),y,width:Math.max(0,X(x0+pv)-X(x0)),height:bh,fill:OC[k],opacity:on?1:.55,style:"cursor:pointer"});
+   if(pv>=9)tx(s,X(x0+pv/2),y+bh/2+4,pv.toFixed(0)+"%",{a:"middle",size:10,fill:k==="done"?"#fff":INK,w:500,x:{"pointer-events":"none"}});
+   hover(r,`<b>${PN[p]}</b>, ${S.budget}% budget<br>${f0(v)} ${lab} (${p1(pv)})`);r.onclick=()=>{S.rule=p;render()};x0+=pv});
+  if(on)el(s,"rect",{x:L-1,y:y-1,width:R-L+2,height:bh+2,fill:"none",stroke:INK,"stroke-width":1.5,rx:2})});
+ s.setAttribute("aria-label",`Stacked bars of request outcomes at a ${S.budget}% budget. `+POL.map(p=>{const c=cell(p);return `${PN[p]}: ${pct(c.done,c.n).toFixed(0)}% completed, ${pct(c.trunc,c.n).toFixed(0)}% cut short, ${pct(c.rej,c.n).toFixed(0)}% refused`}).join("; "));}
+
+function table(){const c=cell();let h=`<p><b>${PN[S.rule]}, ${S.budget}% budget</b>: ${f0(c.done)} fully completed (${p1(c.doneRate)}), ${f0(c.trunc)} cut short, ${f0(c.rej)} refused, ${usd(c.leftUsd)} (${p1(c.left)}) left unspent.</p><table><tr><th>Team</th><th>Provider</th><th>Fully completed</th><th>%</th></tr>`;
+ D.teams.forEach((t,i)=>h+=`<tr><td>${t}</td><td>${D.provider[i]}</td><td>${f0(c.teamsDone[i])}</td><td>${p1(c.teams[i])}</td></tr>`);
+ h+=`</table><p style="margin-top:14px"><b>All rules and budgets</b> (requests fully completed)</p><table><tr><th>Rule</th>${BUD.map(b=>`<th>${b}%</th>`).join("")}</tr>`;
+ POL.forEach(p=>h+=`<tr><td>${PN[p]}</td>${BUD.map(b=>`<td>${f0(cell(p,b).done)}</td>`).join("")}</tr>`);
+ document.getElementById("tBody").innerHTML=h+"</table>";}
+
+function render(){document.querySelectorAll("#budgets button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.b===S.budget));
+ document.querySelectorAll("#rules button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.p===S.rule));
+ kpis();teams();drain();heat();week();models();outcomes();table();}
+
+document.getElementById("hN").textContent=f0(D.evalN);
+document.getElementById("gCost").textContent=D.refUsd.toLocaleString(undefined,{maximumFractionDigits:0});
+document.getElementById("fRef").textContent=D.refUsd.toLocaleString(undefined,{maximumFractionDigits:0});
+const open=id=>{const o=document.getElementById(id);o.classList.add("open");o.querySelector("[data-close]").focus()};
+document.getElementById("bGloss").onclick=()=>open("oGloss");document.getElementById("bTable").onclick=()=>open("oTable");
+document.querySelectorAll(".overlay").forEach(o=>{o.addEventListener("click",e=>{if(e.target===o||e.target.hasAttribute("data-close"))o.classList.remove("open")})});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(o=>o.classList.remove("open"))});
+let rt;addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(render,120)});
+render();
+</script>
+</body>
+</html>
